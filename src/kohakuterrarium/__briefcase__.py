@@ -1,4 +1,8 @@
-"""Briefcase desktop app entry point."""
+"""Briefcase desktop app entry point.
+
+Briefcase runs this module as the app startup. It launches the
+KohakuTerrarium desktop app (FastAPI server + pywebview window).
+"""
 
 
 def main():
@@ -6,3 +10,7 @@ def main():
     from kohakuterrarium.serving.web import run_desktop_app
 
     run_desktop_app()
+
+
+if __name__ == "__main__":
+    main()

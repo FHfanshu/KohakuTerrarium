@@ -231,6 +231,13 @@ def main() -> int:
 
     args = parser.parse_args()
 
+    # No command given: launch desktop app (used by Briefcase and double-click)
+    if not args.command:
+        from kohakuterrarium.serving.web import run_desktop_app
+
+        run_desktop_app()
+        return 0
+
     if args.command == "run":
         # Resolve @package references in agent_path
         agent_path = args.agent_path
