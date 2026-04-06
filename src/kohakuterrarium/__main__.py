@@ -33,6 +33,7 @@ from kohakuterrarium.terrarium.cli import (
     add_terrarium_subparser,
     handle_terrarium_command,
 )
+from kohakuterrarium.serving.web import run_desktop_app
 from kohakuterrarium.utils.logging import set_level
 
 
@@ -233,8 +234,6 @@ def main() -> int:
 
     # No command given: launch desktop app (used by Briefcase and double-click)
     if not args.command:
-        from kohakuterrarium.serving.web import run_desktop_app
-
         run_desktop_app()
         return 0
 
