@@ -62,6 +62,11 @@ class ReadTool(BaseTool):
 
         # PDF files: return text + rendered page images
         if file_path.suffix.lower() == ".pdf":
+            if args.get("offset") or args.get("limit"):
+                return ToolResult(
+                    error="PDF files do not support offset/limit. "
+                    'Use the pages= argument instead, e.g. pages="1-5".'
+                )
             pages = args.get("pages", None)
             return await self._read_pdf(file_path, path, pages)
 
@@ -157,56 +162,6 @@ class ReadTool(BaseTool):
             logger.error("Read failed", error=str(e))
             return ToolResult(error=str(e))
 
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        return """# read
-
-Read file contents with optional line range.
-
-## Supported file types
-
-- **Text files**: source code, config, markdown, etc. (returned with line numbers)
-- **Images**: png, jpg, gif, webp, svg, bmp, tiff, heif, avif (returned as visual input)
-- **PDFs**: returned as extracted text + rendered page images (requires pymupdf)
-- **Binary files**: other binary formats are rejected with a helpful message
-
-## SAFETY
-
-- You MUST read files before writing or editing them. The write and edit tools
-  will error if you haven't read the file first.
-- Lines longer than 2000 characters are truncated.
-- Total output is capped at 200KB. Use offset/limit for large files.
-- Images are capped at 20MB.
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| path | string | Path to file (required) |
-| offset | integer | Line to start from (0-based, default: 0, text files only) |
-| limit | integer | Max lines to read (default: all, text files only) |
-| pages | string | Page range for PDFs: "1-5", "3", "10-20" (default: all, max 20) |
-
-## Behavior
-
-- **Text files**: returns contents with line numbers (`     1→content`).
-  Use offset/limit for specific ranges.
-- **Images**: returns the image for visual inspection. The model can see
-  and describe the image content.
-- **PDFs**: returns extracted text per page + rendered page images.
-  For large PDFs, you MUST specify a page range (max 20 pages per read).
-  Text is extracted with positional sorting. Page images are rendered
-  at 150 DPI for visual inspection by multimodal models.
-
-## TIPS
-
-- Use `glob` first to find files by pattern, then `read` to examine them.
-- Use `grep` to locate relevant lines, then `read` with offset/limit to
-  examine context.
-- For large files, read in chunks with offset/limit.
-- For images, just `read(path="screenshot.png")` to see the content.
-- For PDFs, use `read(path="doc.pdf", pages="1-5")` to read specific pages.
-"""
-
     async def _read_pdf(
         self, file_path: Path, original_path: str, pages: str | None
     ) -> ToolResult:
@@ -242,8 +197,9 @@ Read file contents with optional line range.
             doc.close()
             return ToolResult(
                 error=f"This PDF has {total_pages} pages. Reading all at once "
-                f"will be very large. Please specify a page range, e.g. "
-                f'pages="1-{warn_threshold}" or pages="1-{total_pages}" '
+                f"will be very large. Please specify a page range with the "
+                f"pages= argument (NOT offset/limit — those are for text files only). "
+                f'Example: pages="1-{warn_threshold}" or pages="1-{total_pages}" '
                 f"if you really want all pages."
             )
 

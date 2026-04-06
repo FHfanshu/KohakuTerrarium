@@ -125,29 +125,3 @@ class JsonReadTool(BaseTool):
         )
 
         return ToolResult(output=output, exit_code=0)
-
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        return """# json_read
-
-Read and query JSON files with simple path expressions.
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| path | string | Path to JSON file (required) |
-| query | string | Dot-path query (default: "." for entire file) |
-
-## Query Syntax
-
-- `.` - entire document
-- `.key` - top-level key
-- `.key.nested` - nested key
-- `.array[0]` - array index
-- `.array[0].field` - nested in array element
-
-## Output
-
-Returns the queried value formatted as JSON (objects/arrays) or plain text (primitives).
-Output is truncated to 50KB if larger.
-"""

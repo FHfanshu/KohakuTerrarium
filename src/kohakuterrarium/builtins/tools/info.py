@@ -101,27 +101,3 @@ class InfoTool(BaseTool):
         if tool and isinstance(tool, BaseTool) and tool.require_manual_read:
             tool._manual_read = True
             logger.debug("Manual read unlocked", tool_name=name)
-
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        return """# info
-
-Get full documentation for any tool or sub-agent.
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| name | string | Name of the tool or sub-agent to look up |
-
-## Behavior
-
-- Checks builtin tool docs first, then builtin sub-agent docs.
-- Falls back to agent-local docs in prompts/tools/ or prompts/subagents/.
-- Returns an error if no documentation is found for the given name.
-
-## Notes
-
-Use this when you need to understand a tool's full parameter set
-or learn about edge cases. The tool list in your system prompt shows
-one-line descriptions; this gives you the complete reference.
-"""

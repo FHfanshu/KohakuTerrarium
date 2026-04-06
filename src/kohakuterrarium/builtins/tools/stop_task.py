@@ -80,25 +80,3 @@ class StopTaskTool(BaseTool):
             )
 
         return ToolResult(error=f"Task not found: {job_id}", exit_code=1)
-
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        return """# stop_task
-
-Cancel a running background tool or sub-agent.
-
-## Arguments
-
-- `job_id` (required): The job ID to cancel. Use the `jobs` command to list running jobs.
-
-## Behavior
-
-- Cancels the asyncio task associated with the job
-- The job status changes to CANCELLED
-- If the job is already done, reports its current status
-- Does not affect direct (blocking) tools, only background tasks
-
-## Use cases
-
-- Cancel a long-running sub-agent (e.g., explore taking too long)
-- Cancel a background tool (e.g., terrarium_observe you no longer need)
-"""

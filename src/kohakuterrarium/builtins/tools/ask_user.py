@@ -53,27 +53,3 @@ class AskUserTool(BaseTool):
             return ToolResult(error="No input available (stdin closed)")
         except Exception as e:
             return ToolResult(error=f"Failed to get user input: {e}")
-
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        return """# ask_user
-
-Ask the user a question and wait for their response. For human-in-the-loop
-patterns: approval workflows, clarification, interactive agents.
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| question | string | Question to ask the user (required) |
-
-## Behavior
-
-- Prints the question to stderr and reads the response from stdin.
-- Returns the user's text response, or "(no response)" if empty.
-- Blocks until the user responds but does not block other tools.
-
-## Limitations
-
-- CLI-only: reads from stdin, writes question to stderr.
-- Will hang if stdin is not available (non-interactive mode).
-"""

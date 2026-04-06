@@ -54,23 +54,3 @@ class ListTriggersTool(BaseTool):
             )
 
         return ToolResult(output="\n".join(lines), exit_code=0)
-
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        return """# list_triggers
-
-List all active triggers on this agent.
-
-## Arguments
-
-None.
-
-## Output
-
-Shows each trigger's ID, type, status, and creation time.
-
-## Notes
-
-Triggers are set up by tools like terrarium_observe, or by the
-terrarium runtime for channel communication. Use this to see
-what the agent is currently listening for.
-"""

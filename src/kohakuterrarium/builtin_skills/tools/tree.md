@@ -1,13 +1,29 @@
 ---
 name: tree
-description: List directory structure as a tree
+description: List directory structure as a tree with frontmatter summaries
 category: builtin
 tags: [file, directory, navigation]
 ---
 
 # tree
 
-Display directory structure as a visual tree.
+List directory structure with frontmatter summaries.
+
+## Arguments
+
+| Arg | Type | Description |
+|-----|------|-------------|
+| path | string | Directory to list (default: cwd) |
+| depth | integer | Max recursion depth (default: 3) |
+| hidden | boolean | Show hidden files (default: false) |
+
+## Frontmatter Extraction
+
+For markdown files, extracts and displays inline summaries from YAML frontmatter:
+- `summary`: Brief description (preferred)
+- `title`: File title (fallback)
+- `description`: Description (fallback)
+- `protected`: Shows [protected] marker
 
 ## WHEN TO USE
 
@@ -15,6 +31,7 @@ Display directory structure as a visual tree.
 - Understanding folder organization
 - Finding files before reading them
 - Getting overview of a directory
+- Discovering memory structure (markdown files with frontmatter)
 
 ## WHEN NOT TO USE
 
@@ -22,54 +39,30 @@ Display directory structure as a visual tree.
 - Finding files by pattern (use glob)
 - Reading file contents (use read)
 
-## HOW TO USE
+## Output
 
-```xml
-<tree>path/to/directory</tree>
-```
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| path | body | Directory path to list (required) |
-| max_depth | attribute | Maximum depth to traverse (optional) |
-
-## Examples
-
-```xml
-<!-- List current directory -->
-<tree>.</tree>
-
-<!-- List specific folder -->
-<tree>src/kohakuterrarium</tree>
-
-<!-- List with depth limit -->
-<tree max_depth="2">.</tree>
-
-<!-- List memory folder -->
-<tree>./memory</tree>
-```
-
-## Output Format
+Tree-formatted directory listing with connectors. Directories are listed
+before files. Markdown files show extracted frontmatter summaries inline.
 
 ```
-./memory
-├── character.md
-├── context.md
-├── facts.md
-├── preferences.md
-└── rules.md
+project/
+├── src/
+│   ├── main.py
+│   └── utils.py
+├── memory/
+│   ├── character.md - Agent persona definition
+│   └── rules.md [protected] - Immutable behavior rules
+└── README.md
 ```
 
 ## LIMITATIONS
 
-- Large directories may be truncated
-- Hidden files may be included/excluded based on config
+- Large directories may produce very long output
+- Hidden files excluded by default (use hidden=true to include)
 - Symbolic links handled per platform
 
 ## TIPS
 
 - Use before `read` to discover file paths
 - Combine with `glob` for pattern matching
-- Use `max_depth` for large directories
+- Use `depth` to limit output for large directories

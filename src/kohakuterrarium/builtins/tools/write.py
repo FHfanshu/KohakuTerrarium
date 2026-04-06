@@ -107,36 +107,3 @@ class WriteTool(BaseTool):
         except Exception as e:
             logger.error("Write failed", error=str(e))
             return ToolResult(error=str(e))
-
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        return """# write
-
-Write content to a file. Creates the file if it doesn't exist.
-Creates parent directories automatically.
-
-## SAFETY
-
-- You MUST read an existing file before writing to it. The tool will error
-  if you haven't.
-- For partial changes to existing files, prefer the `edit` tool (it sends
-  only the diff, not the whole file).
-- New files (file does not exist) can be written without reading first.
-- If the file was modified since your last read, you must re-read it.
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| path | string | Path to file (required) |
-| content | string | Content to write |
-
-## Behavior
-
-- Overwrites the file if it already exists.
-- Creates parent directories if they don't exist.
-- Content is written exactly as provided (UTF-8 encoding).
-
-## Output
-
-Returns confirmation with file path, line count, and byte count.
-"""

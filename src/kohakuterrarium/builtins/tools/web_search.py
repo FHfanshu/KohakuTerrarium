@@ -88,32 +88,6 @@ class WebSearchTool(BaseTool):
         logger.info("Web search complete", query=query[:50], results=len(results))
         return ToolResult(output="\n".join(lines), exit_code=0)
 
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        return """# web_search
-
-Search the web and return results with titles, URLs, and snippets.
-Uses DuckDuckGo (no API key required).
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| query | string | Search query (required) |
-| max_results | int | Max results to return (default: 10) |
-| region | string | Region code (optional, e.g., "us-en") |
-
-## Example
-
-```
-web_search(query="python asyncio tutorial")
-web_search(query="KohakuTerrarium github", max_results=5)
-```
-
-## Output
-
-Structured list with title, URL, and snippet for each result.
-"""
-
 
 async def _search_ddg(query: str, max_results: int, region: str) -> list[dict]:
     """Run DuckDuckGo search (sync library, run in executor)."""

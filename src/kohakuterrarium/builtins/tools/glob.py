@@ -106,36 +106,3 @@ class GlobTool(BaseTool):
         )
 
         return ToolResult(output=output or "(no matches)", exit_code=0)
-
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        return """# glob
-
-Find files by glob pattern, sorted by modification time (newest first).
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| pattern | string | Glob pattern (required) |
-| path | string | Base directory (default: cwd) |
-| limit | integer | Max results (default: 100) |
-
-## Patterns
-
-- `*` : matches any characters except /
-- `**` : matches any characters including / (recursive)
-- `?` : matches single character
-- `[abc]` : matches a, b, or c
-
-## Output
-
-Returns list of matching file paths relative to the base directory,
-sorted by modification time (newest first). Shows total count when
-results are truncated by the limit.
-
-## TIPS
-
-- Use `**/*.ext` for recursive search by extension.
-- Combine with `read` to examine found files.
-- Use specific patterns to narrow results in large codebases.
-"""

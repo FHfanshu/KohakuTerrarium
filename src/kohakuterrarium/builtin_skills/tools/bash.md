@@ -20,18 +20,34 @@ Do NOT use bash for operations that have dedicated tools:
 
 Using dedicated tools gives structured output and enables safety guards.
 
+## Arguments
+
+| Arg | Type | Description |
+|-----|------|-------------|
+| command | string | Shell command to execute (required) |
+
 ## Git Safety
 
-- Prefer new commits over amending existing ones
-- Never skip hooks (--no-verify) unless explicitly asked
-- Before destructive operations (reset --hard, push --force), confirm with the user
-- Never force push to main/master
+- Prefer new commits over amending existing ones.
+- Never skip hooks (--no-verify) unless explicitly asked.
+- Before destructive operations (reset --hard, push --force), confirm with
+  the user.
+- Never force push to main/master.
 
 ## Multiple Commands
 
-- Independent commands: run them separately (parallel execution)
-- Dependent commands: chain with `&&`
-- Sequential (failure OK): chain with `;`
+- Independent commands: run them separately (parallel execution).
+- Dependent commands: chain with `&&`.
+- Sequential (failure OK): chain with `;`.
+
+## Behavior
+
+- On Windows, commands run in PowerShell (pwsh preferred, falls back to
+  powershell).
+- On Unix/Linux/Mac, commands run in bash (falls back to sh).
+- stdout and stderr are combined in the output.
+- Commands have a configurable timeout; killed on timeout.
+- Large outputs may be truncated to the configured max size.
 
 ## WHEN TO USE
 
@@ -40,40 +56,12 @@ Using dedicated tools gives structured output and enables safety guards.
 - Running build/test commands
 - Package management operations
 
-## HOW TO USE
+## Output
 
-```
-tool call: bash(
-command here
-)
-```
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| command | body | Shell command to execute (required) |
-
-## Examples
-
-```
-tool call: bash(
-git status
-)
-```
-
-```
-tool call: bash(
-pytest tests/ -v
-)
-```
-
-## Output Format
-
-Returns stdout and stderr combined. Exit code is included in result.
+Returns combined stdout/stderr. Exit code is included in the result metadata.
 
 ## LIMITATIONS
 
-- Commands have timeout (default: 30 seconds)
+- Commands have timeout (default: 60 seconds)
 - Large outputs may be truncated
 - Platform-dependent (PowerShell on Windows, bash on Unix)

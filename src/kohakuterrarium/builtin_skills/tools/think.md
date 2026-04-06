@@ -7,8 +7,18 @@ tags: [reasoning, planning]
 
 # think
 
-Record a reasoning step. The tool does nothing - its value is that
-your thought is preserved in context and won't be lost to compaction.
+Explicit reasoning/thinking step. The tool itself does nothing --
+its value is that the thought is preserved in conversation context
+and won't be lost to context compaction.
+
+Use this to externalize multi-step reasoning, plan before acting,
+or record decisions that should survive context compaction.
+
+## Arguments
+
+| Arg | Type | Description |
+|-----|------|-------------|
+| thought | string | Your reasoning (required) |
 
 ## WHEN TO USE
 
@@ -17,34 +27,7 @@ your thought is preserved in context and won't be lost to compaction.
 - To record analysis or decisions
 - When reasoning through tradeoffs
 
-## HOW TO USE
-
-```
-tool call: think(
-your reasoning here
-)
-```
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| thought | content | Your reasoning text |
-
-## Examples
-
-```
-tool call: think(
-The user wants to refactor the auth module.
-Steps:
-1. Find all auth-related files
-2. Identify the current pattern
-3. Design the new pattern
-4. Implement changes
-)
-```
-
-## Output Format
+## Output
 
 Returns "Noted." (fixed response).
 

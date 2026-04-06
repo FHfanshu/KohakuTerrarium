@@ -7,102 +7,43 @@ tags: [communication, multi-agent]
 
 # send_message
 
-Send a message to a named channel. Used for agent-to-agent communication, allowing agents to coordinate and exchange information through named channels.
-
-## WHEN TO USE
-
-- Sending a message to another agent
-- Coordinating work between multiple agents
-- Delivering results from a sub-agent to a parent agent
-- Broadcasting status updates or notifications to all subscribers
-- Replying to a specific message in a conversation thread
-
-## HOW TO USE
-
-```
-tool call: send_message(
-  channel: channel_name
-Message content here.
-)
-```
-
-Or with optional metadata and threading:
-
-```
-tool call: send_message(
-  channel: channel_name
-  metadata: {"priority": "high"}
-  reply_to: msg_abc123def456
-Message content here.
-)
-```
+Send a message to a named channel. This is how you deliver results to
+other team members in a terrarium. Other creatures CANNOT see your direct
+text output -- you MUST use send_message to communicate with them.
 
 ## Arguments
 
 | Arg | Type | Description |
 |-----|------|-------------|
-| channel | @@arg | Channel name to send to (required) |
-| message | content | Message body (required) |
-| metadata | @@arg | Optional JSON object with extra info |
-| channel_type | @@arg | Channel type: "queue" (default) or "broadcast" |
-| reply_to | @@arg | Optional message ID to reply to (for threading) |
+| channel | string | Channel name to send to (required) |
+| message | string | Message content (required) |
+| metadata | string | Optional JSON metadata object |
+| channel_type | string | Channel type: "queue" (default) or "broadcast" |
+| reply_to | string | Optional message ID to reply to (for threading) |
+
+## When to Use
+
+- **After completing work**: send your results to the designated output channel
+- **For coordination**: send status updates to broadcast channels (e.g. team_chat)
+- **To reach a specific creature**: send to their direct channel (channel name = creature name)
+
+## Important
+
+- Your text output is visible only to the observer/user, NOT to other creatures.
+- If your workflow requires delivering results to another creature, you MUST
+  call send_message. Just outputting text does nothing for the team.
+- Queue channels deliver to one recipient. Broadcast channels deliver to all.
 
 ## Channel Types
 
-- **queue** (default): Point-to-point. One consumer receives each message. Use for direct agent-to-agent communication via SubAgentChannel.
-- **broadcast**: All subscribers receive every message. Use for status updates, events, or notifications via AgentChannel.
+- **queue** (default): Point-to-point. One consumer receives each message.
+  Use for direct agent-to-agent communication via SubAgentChannel.
+- **broadcast**: All subscribers receive every message. Use for status updates,
+  events, or notifications via AgentChannel.
 
-## Examples
+## Output
 
-Send a task to another agent:
-```
-tool call: send_message(
-  channel: inbox_agent_b
-Please research the authentication module and report your findings.
-)
-```
-
-Send results with metadata:
-```
-tool call: send_message(
-  channel: results
-  metadata: {"priority": "high", "source": "code_review"}
-Analysis complete. Found 3 issues in the auth module.
-)
-```
-
-Broadcast to all listeners:
-```
-tool call: send_message(
-  channel: status_updates
-  channel_type: broadcast
-Build completed successfully. All tests passing.
-)
-```
-
-Reply to a previous message:
-```
-tool call: send_message(
-  channel: inbox_agent_b
-  reply_to: msg_abc123def456
-Here are the results you requested.
-)
-```
-
-Notify a monitoring channel:
-```
-tool call: send_message(
-  channel: alerts
-  metadata: {"severity": "warning"}
-Memory usage exceeded 80% threshold.
-)
-```
-
-## Output Format
-
-```
-Message sent to channel 'channel_name' (id: msg_abc123def456)
-```
+Returns confirmation with channel name and message ID.
 
 ## LIMITATIONS
 

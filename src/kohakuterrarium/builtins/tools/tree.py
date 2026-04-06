@@ -205,30 +205,3 @@ class TreeTool(BaseTool):
         except Exception as e:
             logger.error("Tree failed", error=str(e))
             return ToolResult(error=str(e))
-
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        return """# tree
-
-List directory structure with frontmatter summaries.
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| path | string | Directory to list (default: cwd) |
-| depth | integer | Max recursion depth (default: 3) |
-| hidden | boolean | Show hidden files (default: false) |
-
-## Frontmatter Extraction
-
-For markdown files, extracts and displays inline summaries from YAML frontmatter:
-- `summary`: Brief description (preferred)
-- `title`: File title (fallback)
-- `description`: Description (fallback)
-- `protected`: Shows [protected] marker
-
-## Output
-
-Tree-formatted directory listing with connectors. Directories are listed
-before files. Markdown files show extracted frontmatter summaries inline.
-"""

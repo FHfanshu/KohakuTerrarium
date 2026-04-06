@@ -7,7 +7,13 @@ tags: [code, execution, interpreter]
 
 # python
 
-Execute Python code in a subprocess and return output.
+Execute Python code and return output.
+
+## Arguments
+
+| Arg | Type | Description |
+|-----|------|-------------|
+| code | string | Python code to execute (required) |
 
 ## WHEN TO USE
 
@@ -16,49 +22,21 @@ Execute Python code in a subprocess and return output.
 - Checking Python environment/packages
 - Complex string/data processing
 
-## HOW TO USE
+## Behavior
 
-```xml
-<python>code here</python>
-```
+- Code runs in a separate subprocess using the current Python interpreter.
+- Has access to all installed packages in the environment.
+- stdout and stderr are captured and returned.
+- Configurable timeout; killed on timeout.
 
-## Arguments
+## Output
 
-| Arg | Type | Description |
-|-----|------|-------------|
-| code | body | Python code to execute (required) |
-
-## Examples
-
-```xml
-<!-- Simple computation -->
-<python>
-result = sum(range(100))
-print(f"Sum: {result}")
-</python>
-
-<!-- Check packages -->
-<python>
-import sys
-print(f"Python {sys.version}")
-</python>
-
-<!-- Data processing -->
-<python>
-import json
-data = {"name": "test", "values": [1, 2, 3]}
-print(json.dumps(data, indent=2))
-</python>
-```
-
-## Output Format
-
-Returns stdout output from the Python process.
+Returns combined stdout/stderr. Exit code is included in the result metadata.
 
 ## LIMITATIONS
 
-- Runs in isolated subprocess (no state persistence)
-- Timeout applies (default: 30 seconds)
+- Runs in isolated subprocess (no state persistence between calls)
+- Timeout applies (default: 60 seconds)
 - Only packages installed in environment are available
 
 ## TIPS

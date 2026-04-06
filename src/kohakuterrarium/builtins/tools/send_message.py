@@ -147,33 +147,3 @@ class SendMessageTool(BaseTool):
             ),
             exit_code=0,
         )
-
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        return """# send_message
-
-Send a message to a named channel. This is how you deliver results to
-other team members in a terrarium. Other creatures CANNOT see your direct
-text output -- you MUST use send_message to communicate with them.
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| channel | string | Channel name (required) |
-| message | string | Message content (required) |
-| metadata | string | Optional JSON metadata object |
-| reply_to | string | Optional message ID for threading |
-
-## When to Use
-
-- **After completing work**: send your results to the designated output channel
-- **For coordination**: send status updates to broadcast channels (e.g. team_chat)
-- **To reach a specific creature**: send to their direct channel (channel name = creature name)
-
-## Important
-
-- Your text output is visible only to the observer/user, NOT to other creatures.
-- If your workflow requires delivering results to another creature, you MUST
-  call send_message. Just outputting text does nothing for the team.
-- Queue channels deliver to one recipient. Broadcast channels deliver to all.
-"""

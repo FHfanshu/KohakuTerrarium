@@ -81,30 +81,3 @@ class ScratchpadTool(BaseTool):
                 return ToolResult(
                     error=f"Unknown action: {action}. Use: get, set, delete, list, clear"
                 )
-
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        return """# scratchpad
-
-Read/write session-scoped working memory. Data persists within the session
-but is cleared on restart. Use for plans, tracking progress, notes.
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| action | string | get, set, delete, list, or clear |
-| key | string | Key name (required for get/set/delete) |
-| value | string | Value to store (required for set) |
-
-## Actions
-
-- **set**: Store a value under the given key. Overwrites if key exists.
-- **get**: Retrieve the value for a key. Returns "not found" if missing.
-- **delete**: Remove a key and its value.
-- **list**: Show all stored keys.
-- **clear**: Remove all keys and values.
-
-## Output
-
-Returns the value for get, confirmation for set/delete/clear, key list for list.
-"""

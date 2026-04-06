@@ -162,57 +162,6 @@ class BashTool(BaseTool):
             logger.error("Command execution failed", error=str(e))
             return ToolResult(error=str(e))
 
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        """Full documentation for bash tool."""
-        return """# bash
-
-Execute shell commands and return output.
-
-## IMPORTANT: Prefer Dedicated Tools
-
-Do NOT use bash for operations that have dedicated tools:
-- File reading: use `read` (NOT `cat`, `head`, `tail`)
-- File editing: use `edit` (NOT `sed`, `awk`)
-- File writing: use `write` (NOT `echo >`, `cat <<EOF`)
-- File finding: use `glob` (NOT `find`, `ls`)
-- Content search: use `grep` (NOT `grep`, `rg` via bash)
-
-Using dedicated tools gives structured output and enables safety guards.
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| command | string | Shell command to execute (required) |
-
-## Git Safety
-
-- Prefer new commits over amending existing ones.
-- Never skip hooks (--no-verify) unless explicitly asked.
-- Before destructive operations (reset --hard, push --force), confirm with
-  the user.
-- Never force push to main/master.
-
-## Multiple Commands
-
-- Independent commands: run them separately (parallel execution).
-- Dependent commands: chain with `&&`.
-- Sequential (failure OK): chain with `;`.
-
-## Behavior
-
-- On Windows, commands run in PowerShell (pwsh preferred, falls back to
-  powershell).
-- On Unix/Linux/Mac, commands run in bash (falls back to sh).
-- stdout and stderr are combined in the output.
-- Commands have a configurable timeout; killed on timeout.
-- Large outputs may be truncated to the configured max size.
-
-## Output
-
-Returns combined stdout/stderr. Exit code is included in the result metadata.
-"""
-
 
 @register_builtin("python")
 class PythonTool(BaseTool):
@@ -280,26 +229,3 @@ class PythonTool(BaseTool):
         except Exception as e:
             logger.error("Python execution failed", error=str(e))
             return ToolResult(error=str(e))
-
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        return """# python
-
-Execute Python code and return output.
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| code | string | Python code to execute (required) |
-
-## Behavior
-
-- Code runs in a separate subprocess using the current Python interpreter.
-- Has access to all installed packages in the environment.
-- stdout and stderr are captured and returned.
-- Configurable timeout; killed on timeout.
-
-## Output
-
-Returns combined stdout/stderr. Exit code is included in the result metadata.
-"""

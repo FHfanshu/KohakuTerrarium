@@ -133,29 +133,3 @@ class JsonWriteTool(BaseTool):
             output=f"Updated {path} at '{query}'",
             exit_code=0,
         )
-
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        return """# json_write
-
-Modify JSON files at specific paths.
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| path | string | Path to JSON file (required) |
-| query | string | Dot-path to modify (default: "." for entire file) |
-| value | string | JSON value to set (required) |
-
-## Behavior
-
-- If the file does not exist, creates it with an empty object as the base.
-- Creates intermediate parent directories if needed.
-- The value is parsed as JSON first; if invalid JSON, treated as a plain string.
-- Use query "." to replace the entire file contents.
-- Intermediate keys are auto-created as objects when setting nested paths.
-
-## Output
-
-Confirmation that the file was updated at the specified path.
-"""

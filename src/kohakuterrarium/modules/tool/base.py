@@ -12,6 +12,7 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
+from kohakuterrarium.builtin_skills import get_builtin_tool_doc
 from kohakuterrarium.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -237,25 +238,16 @@ class BaseTool:
         """
         Get full documentation for the info tool.
 
-        Override to provide detailed docs. Use tool_format to generate
-        format-appropriate examples (or omit examples in native mode).
+        Reads from builtin_skills/tools/{name}.md if available,
+        otherwise returns a minimal default.
 
         Args:
             tool_format: "native", "bracket", "xml", or custom
         """
-        return f"""# {self.tool_name}
-
-{self.description}
-
-## Execution Mode
-{self.execution_mode.value}
-
-## Arguments
-(No specific arguments documented)
-
-## Output
-Tool output as text.
-"""
+        doc = get_builtin_tool_doc(self.tool_name)
+        if doc:
+            return doc
+        return f"# {self.tool_name}\n\n{self.description}\n"
 
 
 @dataclass

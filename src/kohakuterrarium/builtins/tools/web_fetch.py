@@ -109,36 +109,6 @@ class WebFetchTool(BaseTool):
 
         return ToolResult(error=f"Failed to fetch {url}. All backends failed.")
 
-    def get_full_documentation(self, tool_format: str = "native") -> str:
-        backends = []
-        if _HAS_CRAWL4AI:
-            backends.append("crawl4ai (JS rendering, anti-bot)")
-        if _HAS_TRAFILATURA:
-            backends.append("trafilatura (content extraction)")
-        backends.append("jina reader (API)")
-        backends.append("httpx (basic)")
-
-        return f"""# web_fetch
-
-Fetch a web page and return its content in clean, readable format.
-
-## Arguments
-
-| Arg | Type | Description |
-|-----|------|-------------|
-| url | string | URL to fetch (required) |
-
-## Available backends (in priority order)
-
-{chr(10).join(f"- {b}" for b in backends)}
-
-## Example
-
-```
-web_fetch(url="https://docs.python.org/3/library/asyncio.html")
-```
-"""
-
 
 class _SkipBackend(Exception):
     """Raised when a backend is not available."""
