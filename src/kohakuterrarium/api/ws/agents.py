@@ -3,6 +3,9 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from kohakuterrarium.api.deps import get_manager
+from kohakuterrarium.utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -37,4 +40,5 @@ async def agent_chat(websocket: WebSocket, agent_id: str):
     except WebSocketDisconnect:
         pass
     except Exception:
+        logger.debug("WebSocket close error", exc_info=True)
         await websocket.close()

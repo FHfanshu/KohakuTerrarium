@@ -14,7 +14,7 @@ Rich UI payloads:
 from abc import abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Protocol, runtime_checkable
+from typing import Any, Callable, ClassVar, Protocol, runtime_checkable
 
 
 class CommandLayer(Enum):
@@ -186,7 +186,7 @@ class UserCommand(Protocol):
 class BaseUserCommand:
     """Base class with error handling."""
 
-    aliases: list[str] = []
+    aliases: ClassVar[list[str]] = []
 
     async def execute(
         self, args: str, context: UserCommandContext

@@ -119,7 +119,11 @@ def _mount_spa(app: FastAPI, static_dir: Path) -> None:
     async def spa_fallback(full_path: str):
         # Serve actual files (favicon.ico, robots.txt, etc.)
         file_path = static_dir / full_path
-        if full_path and file_path.is_file() and ".." not in full_path:
+        if (
+            full_path
+            and file_path.is_file()
+            and file_path.resolve().is_relative_to(static_dir.resolve())
+        ):
             return FileResponse(str(file_path))
         # Everything else → index.html (Vue Router handles client-side routing)
         return FileResponse(str(index_html))

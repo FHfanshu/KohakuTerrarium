@@ -4,6 +4,7 @@ Web search tool: search the web and return structured results.
 Uses duckduckgo-search (optional dep, no API key needed).
 """
 
+import asyncio
 from typing import Any
 
 from kohakuterrarium.builtins.tools.registry import register_builtin
@@ -116,12 +117,6 @@ Structured list with title, URL, and snippet for each result.
 
 async def _search_ddg(query: str, max_results: int, region: str) -> list[dict]:
     """Run DuckDuckGo search (sync library, run in executor)."""
-    import asyncio
-
-    if _DDG_MODULE == "ddgs":
-        from ddgs import DDGS
-    else:
-        from duckduckgo_search import DDGS
 
     def _do_search():
         kwargs: dict[str, Any] = {"max_results": max_results}

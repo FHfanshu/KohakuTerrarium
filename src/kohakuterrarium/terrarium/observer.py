@@ -163,7 +163,7 @@ class ChannelObserver:
             try:
                 cb(observed)
             except Exception:
-                logger.exception("Observer callback error")
+                logger.debug("Observer callback error", exc_info=True)
 
 
 def _to_observed(channel_name: str, msg: ChannelMessage) -> ObservedMessage:

@@ -9,16 +9,13 @@ Usage:
 
 import asyncio
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from kohakuterrarium.builtin_skills import (
     get_builtin_subagent_doc,
     get_builtin_tool_doc,
 )
 from kohakuterrarium.commands.base import BaseCommand, CommandResult, parse_command_args
-
-if TYPE_CHECKING:
-    pass
 
 
 class ReadCommand(BaseCommand):

@@ -15,6 +15,7 @@ Design:
 import asyncio
 import time
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 from kohakuterrarium.llm.message import create_message
@@ -340,7 +341,7 @@ class CompactManager:
         # Update metadata
         conversation._metadata.message_count = len(conversation._messages)
         conversation._metadata.total_chars = conversation.get_context_length()
-        conversation._metadata.updated_at = __import__("datetime").datetime.now()
+        conversation._metadata.updated_at = datetime.now()
 
     async def cancel(self) -> None:
         """Cancel any running compaction."""

@@ -4,6 +4,7 @@ import asyncio
 from typing import Any
 
 from kohakuterrarium.builtins.tui.session import TUISession
+from kohakuterrarium.builtins.tui.widgets import ChatInput
 from kohakuterrarium.core.events import TriggerEvent, create_user_input_event
 from kohakuterrarium.core.session import get_session
 from kohakuterrarium.modules.input.base import BaseInputModule
@@ -124,8 +125,6 @@ class TUIInput(BaseInputModule):
         hint_names = getattr(self, "_command_hint_names", [])
         if hint_names and self._tui._app:
             try:
-                from kohakuterrarium.builtins.tui.widgets import ChatInput
-
                 inp = self._tui._app.query_one("#input-box", ChatInput)
                 inp.command_names = hint_names
             except Exception:

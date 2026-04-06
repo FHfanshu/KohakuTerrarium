@@ -9,6 +9,8 @@ from kohakuterrarium.modules.tool.base import (
     ToolContext,
     ToolResult,
 )
+from kohakuterrarium.session.embedding import create_embedder
+from kohakuterrarium.session.memory import SessionMemory
 from kohakuterrarium.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -107,9 +109,6 @@ class SearchMemoryTool(BaseTool):
         store = agent.session_store
 
         # Load embedding config from session state or agent config
-        from kohakuterrarium.session.embedding import create_embedder
-        from kohakuterrarium.session.memory import SessionMemory
-
         embed_config = self._load_embed_config(store, agent)
         try:
             embedder = create_embedder(embed_config)

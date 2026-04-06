@@ -4,7 +4,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from kohakuterrarium.llm.profiles import (
+    PROVIDER_KEY_MAP,
     LLMProfile,
+    _is_available,
     delete_profile,
     get_api_key,
     get_default_model,
@@ -52,8 +54,6 @@ def get_keys():
     """List stored API keys (masked) + availability status."""
     masked = list_api_keys()
     # Add provider list with status
-    from kohakuterrarium.llm.profiles import PROVIDER_KEY_MAP, _is_available
-
     providers = []
     for provider, env_var in PROVIDER_KEY_MAP.items():
         providers.append(

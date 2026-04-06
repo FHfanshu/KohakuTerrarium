@@ -1,5 +1,7 @@
 """Config discovery routes - scan directories for available creature/terrarium configs."""
 
+import os
+import sys
 from pathlib import Path
 
 import yaml
@@ -151,9 +153,6 @@ def list_terrarium_configs():
 @router.get("/server-info")
 def server_info():
     """Return server environment info (cwd, platform, etc.)."""
-    import os
-    import sys
-
     return {
         "cwd": os.getcwd(),
         "platform": sys.platform,
