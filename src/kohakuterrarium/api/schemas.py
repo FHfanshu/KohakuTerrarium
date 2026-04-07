@@ -8,6 +8,7 @@ class TerrariumCreate(BaseModel):
 
     config_path: str
     llm: str | None = None  # LLM profile override for all creatures
+    pwd: str | None = None  # Working directory (default: server cwd)
 
 
 class TerrariumStatus(BaseModel):
@@ -56,6 +57,7 @@ class AgentCreate(BaseModel):
 
     config_path: str
     llm: str | None = None  # LLM profile override
+    pwd: str | None = None  # Working directory (default: server cwd)
 
 
 class ModelSwitch(BaseModel):

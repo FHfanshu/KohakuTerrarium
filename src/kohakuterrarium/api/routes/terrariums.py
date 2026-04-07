@@ -13,7 +13,7 @@ router = APIRouter()
 async def create_terrarium(req: TerrariumCreate, manager=Depends(get_manager)):
     """Create and start a terrarium from a config path."""
     try:
-        tid = await manager.terrarium_create(config_path=req.config_path)
+        tid = await manager.terrarium_create(config_path=req.config_path, pwd=req.pwd)
         return {"terrarium_id": tid, "status": "running"}
     except Exception as e:
         raise HTTPException(400, str(e))

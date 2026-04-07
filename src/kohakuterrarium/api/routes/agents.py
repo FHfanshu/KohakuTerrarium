@@ -18,7 +18,7 @@ async def create_agent(req: AgentCreate, manager=Depends(get_manager)):
     """Create and start a standalone agent."""
     try:
         agent_id = await manager.agent_create(
-            config_path=req.config_path, llm_override=req.llm
+            config_path=req.config_path, llm_override=req.llm, pwd=req.pwd
         )
         return {"agent_id": agent_id, "status": "running"}
     except Exception as e:

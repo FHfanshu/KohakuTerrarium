@@ -58,13 +58,13 @@ export const useInstancesStore = defineStore("instances", {
     },
 
     /** Create a new instance */
-    async create(type, configPath) {
+    async create(type, configPath, pwd) {
       if (type === "terrarium") {
-        const { terrarium_id } = await terrariumAPI.create(configPath);
+        const { terrarium_id } = await terrariumAPI.create(configPath, pwd);
         await this.fetchAll();
         return terrarium_id;
       } else {
-        const { agent_id } = await agentAPI.create(configPath);
+        const { agent_id } = await agentAPI.create(configPath, pwd);
         await this.fetchAll();
         return agent_id;
       }

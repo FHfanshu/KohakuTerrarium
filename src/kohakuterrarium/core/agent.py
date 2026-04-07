@@ -48,6 +48,7 @@ class Agent(AgentInitMixin, AgentHandlersMixin):
         session: Session | None = None,
         environment: Environment | None = None,
         llm_override: str | None = None,
+        pwd: str | None = None,
     ) -> Agent:
         """
         Create agent from config directory path.
@@ -59,6 +60,7 @@ class Agent(AgentInitMixin, AgentHandlersMixin):
             session: Explicit session (creature-private state)
             environment: Shared environment (inter-creature state)
             llm_override: Override LLM profile name (from --llm CLI flag)
+            pwd: Explicit working directory (overrides process cwd)
 
         Returns:
             Configured Agent instance
@@ -71,6 +73,7 @@ class Agent(AgentInitMixin, AgentHandlersMixin):
             session=session,
             environment=environment,
             llm_override=llm_override,
+            pwd=pwd,
         )
 
     def __init__(
@@ -82,6 +85,7 @@ class Agent(AgentInitMixin, AgentHandlersMixin):
         session: Session | None = None,
         environment: Environment | None = None,
         llm_override: str | None = None,
+        pwd: str | None = None,
     ):
         """
         Initialize agent from config.
@@ -104,6 +108,9 @@ class Agent(AgentInitMixin, AgentHandlersMixin):
 
         # LLM profile override (from --llm CLI flag)
         self._llm_override = llm_override
+
+        # Explicit working directory (from web API pwd field)
+        self._explicit_pwd = pwd
 
         # Session persistence (set externally via attach_session_store)
         self.session_store: Any = None

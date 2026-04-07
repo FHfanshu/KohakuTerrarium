@@ -97,9 +97,13 @@ class AgentInitMixin:
             if isinstance(self.config.tool_format, str)
             else "bracket"
         )
-        # Working dir = where the user ran kt, NOT the agent config folder.
+        # Working dir: explicit pwd from API/config > process cwd.
         # agent_path is for resolving config-relative paths (prompts, custom tools).
-        self.executor._working_dir = Path.cwd()
+        explicit_pwd = getattr(self, "_explicit_pwd", None)
+        if explicit_pwd:
+            self.executor._working_dir = Path(explicit_pwd).resolve()
+        else:
+            self.executor._working_dir = Path.cwd()
         if hasattr(self.config, "agent_path") and self.config.agent_path:
             memory_config = getattr(self.config, "memory", None)
             if isinstance(memory_config, dict) and memory_config.get("path"):

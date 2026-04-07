@@ -69,13 +69,14 @@ class KohakuManager:
         config_path: str | None = None,
         config: AgentConfig | None = None,
         llm_override: str | None = None,
+        pwd: str | None = None,
     ) -> str:
         """Create and start a standalone agent. Returns agent_id."""
         if config_path:
             if is_package_ref(config_path):
                 config_path = str(resolve_package_path(config_path))
             session = await AgentSession.from_path(
-                config_path, llm_override=llm_override
+                config_path, llm_override=llm_override, pwd=pwd
             )
         elif config:
             session = await AgentSession.from_config(config)
@@ -92,7 +93,7 @@ class KohakuManager:
                     session_id=session.agent_id,
                     config_type="agent",
                     config_path=config_path or "",
-                    pwd=os.getcwd(),
+                    pwd=pwd or os.getcwd(),
                     agents=[session.agent.config.name],
                 )
                 session.agent.attach_session_store(store)
@@ -271,6 +272,7 @@ class KohakuManager:
         self,
         config_path: str | None = None,
         config: TerrariumConfig | None = None,
+        pwd: str | None = None,
     ) -> str:
         """Create and start a terrarium. Returns terrarium_id."""
         if config_path:
@@ -296,7 +298,7 @@ class KohakuManager:
                     session_id=terrarium_id,
                     config_type="terrarium",
                     config_path=config_path or "",
-                    pwd=os.getcwd(),
+                    pwd=pwd or os.getcwd(),
                     agents=[c.name for c in cfg.creatures]
                     + (["root"] if cfg.root else []),
                     terrarium_name=cfg.name,
