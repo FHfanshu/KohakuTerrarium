@@ -158,7 +158,8 @@ def _scan_all_configs() -> list[dict]:
                 if child.is_dir():
                     _add_terrarium(child, source="local")
 
-    return results
+    # Filter out entries with empty names (broken configs)
+    return [r for r in results if r.get("name")]
 
 
 # ---------------------------------------------------------------------------

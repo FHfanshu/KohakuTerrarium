@@ -270,12 +270,25 @@ export const settingsAPI = {
     const { data } = await api.post("/settings/default-model", { name });
     return data;
   },
+  // MCP server management
+  async listMCP() {
+    const { data } = await api.get("/settings/mcp");
+    return data;
+  },
+  async addMCP(server) {
+    const { data } = await api.post("/settings/mcp", server);
+    return data;
+  },
+  async removeMCP(name) {
+    const { data } = await api.delete(`/settings/mcp/${name}`);
+    return data;
+  },
 };
 
 /** Registry browser */
 export const registryAPI = {
   async listLocal() {
-    const { data } = await api.get("/registry/");
+    const { data } = await api.get("/registry");
     return data;
   },
   async listRemote() {

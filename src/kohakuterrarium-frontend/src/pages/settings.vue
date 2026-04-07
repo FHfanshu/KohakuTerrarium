@@ -148,6 +148,81 @@
             </div>
           </div>
         </el-tab-pane>
+        <!-- MCP Servers tab -->
+        <el-tab-pane label="MCP Servers" name="mcp">
+          <div class="flex flex-col gap-3 max-w-2xl">
+            <p class="text-xs text-warm-400 mb-2">
+              MCP servers provide external tools to agents via the Model Context Protocol.
+              Agents access them through mcp_list / mcp_call tools.
+            </p>
+
+            <!-- Existing servers -->
+            <div
+              v-for="srv in mcpServers"
+              :key="srv.name"
+              class="card p-4"
+            >
+              <div class="flex items-center gap-2 mb-2">
+                <span class="font-medium text-warm-700 dark:text-warm-300">{{ srv.name }}</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-sapphire/15 text-sapphire dark:text-sapphire-light font-mono">
+                  {{ srv.transport }}
+                </span>
+                <div class="flex-1" />
+                <el-popconfirm title="Remove this MCP server?" @confirm="removeMCPServer(srv.name)">
+                  <template #reference>
+                    <el-button size="small" type="danger" plain>Remove</el-button>
+                  </template>
+                </el-popconfirm>
+              </div>
+              <div class="text-[11px] text-warm-400 font-mono">
+                <span v-if="srv.command">{{ srv.command }} {{ (srv.args || []).join(' ') }}</span>
+                <span v-if="srv.url">{{ srv.url }}</span>
+              </div>
+            </div>
+
+            <div v-if="mcpServers.length === 0" class="text-warm-400 text-sm py-4 text-center">
+              No MCP servers configured
+            </div>
+
+            <!-- Add form -->
+            <div class="card p-4 border-l-3 border-l-sapphire dark:border-l-sapphire-light">
+              <div class="font-medium text-warm-700 dark:text-warm-300 mb-3">Add MCP Server</div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[11px] text-warm-400 mb-1 block">Name *</label>
+                  <el-input v-model="mcpForm.name" size="small" placeholder="my-server" />
+                </div>
+                <div>
+                  <label class="text-[11px] text-warm-400 mb-1 block">Transport</label>
+                  <el-select v-model="mcpForm.transport" size="small" class="w-full">
+                    <el-option value="stdio" label="stdio (subprocess)" />
+                    <el-option value="http" label="HTTP/SSE (remote)" />
+                  </el-select>
+                </div>
+                <div v-if="mcpForm.transport === 'stdio'">
+                  <label class="text-[11px] text-warm-400 mb-1 block">Command *</label>
+                  <el-input v-model="mcpForm.command" size="small" placeholder="npx" />
+                </div>
+                <div v-if="mcpForm.transport === 'stdio'">
+                  <label class="text-[11px] text-warm-400 mb-1 block">Args (space-separated)</label>
+                  <el-input v-model="mcpForm.argsStr" size="small" placeholder="-y @modelcontextprotocol/server-filesystem ./" />
+                </div>
+                <div v-if="mcpForm.transport === 'http'" class="col-span-2">
+                  <label class="text-[11px] text-warm-400 mb-1 block">URL *</label>
+                  <el-input v-model="mcpForm.url" size="small" placeholder="https://mcp.example.com/api" />
+                </div>
+              </div>
+              <div class="flex gap-2 mt-3">
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="addMCPServer"
+                  :disabled="!mcpForm.name || (mcpForm.transport === 'stdio' ? !mcpForm.command : !mcpForm.url)"
+                >Add Server</el-button>
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </div>
   </div>
@@ -244,8 +319,58 @@ async function deleteProfile(name) {
   }
 }
 
+// ── MCP Servers ──
+const mcpServers = ref([]);
+const mcpForm = reactive({
+  name: "",
+  transport: "stdio",
+  command: "",
+  argsStr: "",
+  url: "",
+});
+
+async function loadMCP() {
+  try {
+    const data = await settingsAPI.listMCP();
+    mcpServers.value = data.servers || [];
+  } catch { /* ignore */ }
+}
+
+async function addMCPServer() {
+  if (!mcpForm.name) return;
+  try {
+    const payload = {
+      name: mcpForm.name,
+      transport: mcpForm.transport,
+      command: mcpForm.command,
+      args: mcpForm.argsStr ? mcpForm.argsStr.split(/\s+/) : [],
+      url: mcpForm.url,
+    };
+    await settingsAPI.addMCP(payload);
+    ElMessage.success(`MCP server "${mcpForm.name}" added`);
+    mcpForm.name = "";
+    mcpForm.command = "";
+    mcpForm.argsStr = "";
+    mcpForm.url = "";
+    await loadMCP();
+  } catch (err) {
+    ElMessage.error(err.response?.data?.detail || "Failed to add MCP server");
+  }
+}
+
+async function removeMCPServer(name) {
+  try {
+    await settingsAPI.removeMCP(name);
+    ElMessage.success(`MCP server "${name}" removed`);
+    await loadMCP();
+  } catch (err) {
+    ElMessage.error(err.response?.data?.detail || "Failed to remove");
+  }
+}
+
 onMounted(() => {
   loadKeys();
   loadProfiles();
+  loadMCP();
 });
 </script>

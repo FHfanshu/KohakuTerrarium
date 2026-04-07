@@ -173,3 +173,75 @@ async def set_default(req: DefaultModelRequest):
 async def get_all_models():
     """List all available models (presets + user profiles) with status."""
     return list_all()
+
+
+# ── MCP server configs (global, saved in ~/.kohakuterrarium/mcp_servers.yaml) ──
+
+
+class MCPServerRequest(BaseModel):
+    name: str
+    transport: str = "stdio"
+    command: str = ""
+    args: list[str] = []
+    env: dict[str, str] = {}
+    url: str = ""
+
+
+@router.get("/mcp")
+async def list_mcp_servers():
+    """List globally configured MCP servers."""
+    servers = _load_mcp_config()
+    return {"servers": servers}
+
+
+@router.post("/mcp")
+async def add_mcp_server(req: MCPServerRequest):
+    """Add or update a global MCP server config."""
+    if not req.name:
+        raise HTTPException(400, "Name is required")
+    servers = _load_mcp_config()
+    # Replace if exists, add if new
+    servers = [s for s in servers if s.get("name") != req.name]
+    servers.append(req.model_dump())
+    _save_mcp_config(servers)
+    return {"status": "saved", "name": req.name}
+
+
+@router.delete("/mcp/{name}")
+async def remove_mcp_server(name: str):
+    """Remove a global MCP server config."""
+    servers = _load_mcp_config()
+    new_servers = [s for s in servers if s.get("name") != name]
+    if len(new_servers) == len(servers):
+        raise HTTPException(404, f"MCP server not found: {name}")
+    _save_mcp_config(new_servers)
+    return {"status": "removed", "name": name}
+
+
+def _mcp_config_path():
+    from pathlib import Path
+
+    return Path.home() / ".kohakuterrarium" / "mcp_servers.yaml"
+
+
+def _load_mcp_config() -> list[dict]:
+    import yaml
+
+    path = _mcp_config_path()
+    if not path.exists():
+        return []
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+            return data.get("servers", []) if isinstance(data, dict) else []
+    except Exception:
+        return []
+
+
+def _save_mcp_config(servers: list[dict]) -> None:
+    import yaml
+
+    path = _mcp_config_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        yaml.dump({"servers": servers}, f, default_flow_style=False, sort_keys=False)
