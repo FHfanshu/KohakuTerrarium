@@ -141,6 +141,7 @@ class SessionOutput(OutputModule):
         "compact_complete": "_handle_compact_complete",
         "processing_complete": "_handle_processing_complete",
         "processing_error": "_handle_processing_error",
+        "context_cleared": "_handle_context_cleared",
     }
 
     def _record_activity(
@@ -297,6 +298,12 @@ class SessionOutput(OutputModule):
                 "detail": metadata.get("detail", detail),
                 "job_id": metadata.get("job_id", ""),
             },
+        )
+
+    def _handle_context_cleared(self, name: str, detail: str, metadata: dict) -> None:
+        self._record(
+            "context_cleared",
+            {"messages_cleared": metadata.get("messages_cleared", 0)},
         )
 
     def _handle_processing_error(self, name: str, detail: str, metadata: dict) -> None:

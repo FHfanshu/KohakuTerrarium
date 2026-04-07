@@ -7,6 +7,48 @@
     {{ message.content }}
   </div>
 
+  <!-- Context cleared banner -->
+  <div
+    v-else-if="message.role === 'clear'"
+    class="flex items-center gap-3 py-2"
+  >
+    <div class="flex-1 border-t border-warm-300 dark:border-warm-600 border-dashed" />
+    <span class="text-xs text-warm-400 dark:text-warm-500 shrink-0">
+      Context Cleared{{ message.messagesCleared ? ` — ${message.messagesCleared} messages` : '' }}
+    </span>
+    <div class="flex-1 border-t border-warm-300 dark:border-warm-600 border-dashed" />
+  </div>
+
+  <!-- Context compacted (accordion) -->
+  <div
+    v-else-if="message.role === 'compact'"
+    class="rounded-lg bg-iolite/6 dark:bg-iolite/8 border border-iolite/15 dark:border-iolite/20 overflow-hidden"
+  >
+    <div
+      class="flex items-center gap-2 py-1.5 px-3 cursor-pointer select-none"
+      @click="toggleTool('compact_' + message.id)"
+    >
+      <span class="text-iolite dark:text-iolite-light text-xs font-medium">
+        Context Compacted (round {{ message.round || '?' }})
+      </span>
+      <span v-if="message.messagesCompacted" class="text-[10px] text-warm-400">
+        {{ message.messagesCompacted }} messages summarized
+      </span>
+      <span class="flex-1" />
+      <span
+        v-if="message.summary"
+        class="i-carbon-chevron-down text-warm-400 text-[10px] transition-transform"
+        :class="{ 'rotate-180': expandedTools['compact_' + message.id] }"
+      />
+    </div>
+    <div
+      v-if="expandedTools['compact_' + message.id] && message.summary"
+      class="px-3 py-2 border-t border-iolite/10 dark:border-iolite/15 text-xs max-h-48 overflow-y-auto"
+    >
+      <MarkdownRenderer :content="message.summary" />
+    </div>
+  </div>
+
   <!-- Processing error -->
   <div
     v-else-if="message.role === 'error'"

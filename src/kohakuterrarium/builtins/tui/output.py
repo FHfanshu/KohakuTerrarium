@@ -151,6 +151,13 @@ class TUIOutput(BaseOutputModule):
                 self._handle_session_info(metadata)
             case "job_cancelled":
                 self._handle_job_cancelled(t, metadata)
+            case "context_cleared":
+                msgs_cleared = metadata.get("messages_cleared", 0)
+                self._tui.add_system_notice(
+                    f"Context cleared ({msgs_cleared} messages removed)",
+                    command="Clear",
+                    target=t,
+                )
             case "processing_error":
                 error_type = metadata.get("error_type", "Error")
                 error_msg = metadata.get("error", rest)

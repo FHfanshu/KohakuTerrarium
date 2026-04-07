@@ -140,6 +140,21 @@
             @keydown="onInputKeydown"
             @input="autoResize"
           />
+          <!-- Compact/Clear actions -->
+          <button
+            class="w-7 h-7 flex items-center justify-center rounded-md transition-colors shrink-0 text-warm-400 hover:text-iolite dark:hover:text-iolite-light hover:bg-iolite/10"
+            title="Compact context"
+            @click="triggerCompact"
+          >
+            <span class="i-carbon-compress text-xs" />
+          </button>
+          <button
+            class="w-7 h-7 flex items-center justify-center rounded-md transition-colors shrink-0 text-warm-400 hover:text-coral hover:bg-coral/10"
+            title="Clear context"
+            @click="triggerClear"
+          >
+            <span class="i-carbon-clean text-xs" />
+          </button>
           <button
             v-if="chat.processing || chat.hasRunningJobs"
             class="w-8 h-8 flex items-center justify-center rounded-lg transition-all shrink-0 mb-0.5 bg-coral/90 text-white hover:bg-coral shadow-sm shadow-coral/20"
@@ -285,6 +300,33 @@ function send() {
     if (inputEl.value) inputEl.value.style.height = "auto";
     scrollToBottom();
   });
+}
+
+async function triggerCompact() {
+  try {
+    const tab = chat.activeTab;
+    if (chat._instanceType === "terrarium") {
+      await terrariumAPI.executeCreatureCommand(chat._instanceId, tab || "root", "compact");
+    } else {
+      await agentAPI.executeCommand(chat._instanceId, "compact");
+    }
+  } catch (err) {
+    console.error("Compact failed:", err);
+  }
+}
+
+async function triggerClear() {
+  if (!confirm("Clear conversation context? Chat history will be preserved in the session.")) return;
+  try {
+    const tab = chat.activeTab;
+    if (chat._instanceType === "terrarium") {
+      await terrariumAPI.executeCreatureCommand(chat._instanceId, tab || "root", "clear", "--force");
+    } else {
+      await agentAPI.executeCommand(chat._instanceId, "clear", "--force");
+    }
+  } catch (err) {
+    console.error("Clear failed:", err);
+  }
 }
 
 async function stopTask(jobId, jobName) {

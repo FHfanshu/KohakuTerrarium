@@ -244,6 +244,13 @@ function _replayEvents(messages, events) {
         });
       } else if (at === "token_usage" || at === "processing_complete") {
         // skip
+      } else if (at === "context_cleared") {
+        cur = null;
+        result.push({
+          id: "clear_" + result.length, role: "clear",
+          messagesCleared: evt.messages_cleared || 0,
+          timestamp: "",
+        });
       } else if (at === "processing_error") {
         cur = null;
         result.push({
@@ -341,6 +348,13 @@ function _replayEvents(messages, events) {
         id: "err_" + result.length, role: "error",
         errorType: evt.error_type || "Error",
         content: evt.error || "",
+        timestamp: "",
+      });
+    } else if (t === "context_cleared") {
+      cur = null;
+      result.push({
+        id: "clear_" + result.length, role: "clear",
+        messagesCleared: evt.messages_cleared || 0,
         timestamp: "",
       });
     } else if (t === "token_usage" || t === "processing_complete" || t === "compact_start") {
@@ -735,6 +749,16 @@ export const useChatStore = defineStore("chat", {
           round: data.round || 0,
           summary: data.summary || "",
           messagesCompacted: data.messages_compacted || 0,
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      if (at === "context_cleared") {
+        msgs.push({
+          id: "clear_" + Date.now(),
+          role: "clear",
+          messagesCleared: data.messages_cleared || 0,
           timestamp: new Date().toISOString(),
         });
         return;

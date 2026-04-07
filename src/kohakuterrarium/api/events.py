@@ -138,6 +138,7 @@ class StreamOutput(OutputModule):
                 "compact_threshold",
                 "error_type",
                 "error",
+                "messages_cleared",
                 "background",
                 "subagent",
                 "tool",
