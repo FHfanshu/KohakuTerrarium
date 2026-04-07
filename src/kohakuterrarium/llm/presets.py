@@ -182,7 +182,7 @@ PRESETS: dict[str, dict[str, Any]] = {
         "api_key_env": "OPENROUTER_API_KEY",
         "max_context": 1000000,
         "extra_body": {
-            "reasoning": {"enabled": True},
+            "reasoning": {"effort": "high"},  # 4.5 uses effort (not adaptive)
             "cache_control": {"type": "ephemeral"},
         },
     },
