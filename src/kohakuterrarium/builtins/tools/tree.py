@@ -2,9 +2,11 @@
 Tree tool - list files with frontmatter summaries.
 
 Shows directory structure and extracts summary from YAML frontmatter.
+Respects .gitignore by default and limits output to avoid flooding context.
 """
 
 import re
+from fnmatch import fnmatch
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +24,19 @@ logger = get_logger(__name__)
 
 # Regex to extract YAML frontmatter
 FRONTMATTER_PATTERN = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
+
+# Common directories to always skip (even without .gitignore)
+_ALWAYS_SKIP = {
+    ".git",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    "node_modules",
+    ".tox",
+    ".eggs",
+    "*.egg-info",
+}
 
 
 def parse_frontmatter(content: str) -> dict[str, Any]:
@@ -70,74 +85,163 @@ def parse_frontmatter(content: str) -> dict[str, Any]:
     return frontmatter
 
 
-async def build_tree(
-    path: Path,
-    prefix: str = "",
-    max_depth: int = 3,
-    current_depth: int = 0,
-    show_hidden: bool = False,
-) -> list[str]:
-    """
-    Build tree output with frontmatter summaries.
-
-    Returns list of formatted lines.
-    """
-    if current_depth >= max_depth:
-        return []
-
-    lines = []
-
+def _parse_gitignore(gitignore_path: Path) -> list[str]:
+    """Read a .gitignore file and return non-empty, non-comment patterns."""
     try:
-        entries = sorted(path.iterdir(), key=lambda p: (p.is_file(), p.name.lower()))
-    except PermissionError:
-        return [f"{prefix}(permission denied)"]
+        text = gitignore_path.read_text(encoding="utf-8", errors="ignore")
+    except (OSError, PermissionError):
+        return []
+    patterns = []
+    for line in text.splitlines():
+        line = line.strip()
+        if line and not line.startswith("#"):
+            patterns.append(line)
+    return patterns
 
-    # Filter hidden files
-    if not show_hidden:
-        entries = [e for e in entries if not e.name.startswith(".")]
 
-    for i, entry in enumerate(entries):
-        is_last = i == len(entries) - 1
-        connector = "└── " if is_last else "├── "
-        child_prefix = prefix + ("    " if is_last else "│   ")
+def _is_ignored(
+    name: str,
+    is_dir: bool,
+    patterns: list[str],
+) -> bool:
+    """Check if a file/dir name matches any gitignore-style pattern.
 
-        if entry.is_dir():
-            lines.append(f"{prefix}{connector}{entry.name}/")
-            # Recurse into directory
-            child_lines = await build_tree(
-                entry,
-                child_prefix,
-                max_depth,
-                current_depth + 1,
-                show_hidden,
+    Simplified matching: works on the entry name (not full relative path).
+    Handles trailing ``/`` (dir-only patterns) and leading ``!`` (negation
+    is NOT supported — negated patterns are skipped for simplicity).
+    """
+    for pat in patterns:
+        if pat.startswith("!"):
+            continue  # negation not supported in simplified matcher
+
+        # Dir-only pattern
+        if pat.endswith("/"):
+            if is_dir and fnmatch(name, pat.rstrip("/")):
+                return True
+            continue
+
+        if fnmatch(name, pat):
+            return True
+
+    return False
+
+
+class _TreeBuilder:
+    """Stateful tree builder with line limit and gitignore support."""
+
+    def __init__(
+        self,
+        root: Path,
+        max_depth: int,
+        limit: int,
+        show_hidden: bool,
+        follow_gitignore: bool,
+    ):
+        self.root = root
+        self.max_depth = max_depth
+        self.limit = limit
+        self.show_hidden = show_hidden
+        self.follow_gitignore = follow_gitignore
+        self.lines: list[str] = []
+        self.truncated = False
+        self.total_skipped = 0
+        # Collect gitignore patterns per directory (inherited + local)
+        self._ignore_stack: list[list[str]] = [list(_ALWAYS_SKIP)]
+        self.ignored_dirs: list[str] = []
+
+    def _current_patterns(self) -> list[str]:
+        """Flat list of all active ignore patterns."""
+        result: list[str] = []
+        for patterns in self._ignore_stack:
+            result.extend(patterns)
+        return result
+
+    def _add_line(self, line: str) -> bool:
+        """Append a line. Returns False if limit reached."""
+        if self.limit > 0 and len(self.lines) >= self.limit:
+            self.truncated = True
+            return False
+        self.lines.append(line)
+        return True
+
+    async def build(
+        self,
+        path: Path,
+        prefix: str = "",
+        depth: int = 0,
+    ) -> None:
+        if depth >= self.max_depth or self.truncated:
+            return
+
+        # Load .gitignore at this level
+        local_patterns: list[str] = []
+        if self.follow_gitignore:
+            gi = path / ".gitignore"
+            if gi.is_file():
+                local_patterns = _parse_gitignore(gi)
+        self._ignore_stack.append(local_patterns)
+
+        try:
+            entries = sorted(
+                path.iterdir(), key=lambda p: (p.is_file(), p.name.lower())
             )
-            lines.extend(child_lines)
-        else:
-            # For markdown files, try to get frontmatter summary
-            summary = ""
-            if entry.suffix in (".md", ".markdown"):
-                try:
-                    async with aiofiles.open(
-                        entry, encoding="utf-8", errors="ignore"
-                    ) as f:
-                        content = await f.read()
-                    fm = parse_frontmatter(content)
-                    if fm.get("summary"):
-                        summary = f" - {fm['summary']}"
-                    elif fm.get("title"):
-                        summary = f" - {fm['title']}"
-                    elif fm.get("description"):
-                        summary = f" - {fm['description']}"
+        except PermissionError:
+            self._add_line(f"{prefix}(permission denied)")
+            self._ignore_stack.pop()
+            return
 
-                    # Show protected status
-                    if fm.get("protected"):
-                        summary = f" [protected]{summary}"
-                except Exception:
-                    pass
+        # Filter hidden
+        if not self.show_hidden:
+            entries = [e for e in entries if not e.name.startswith(".")]
 
-            lines.append(f"{prefix}{connector}{entry.name}{summary}")
+        # Filter by gitignore patterns
+        if self.follow_gitignore:
+            patterns = self._current_patterns()
+            filtered = []
+            for e in entries:
+                if _is_ignored(e.name, e.is_dir(), patterns):
+                    if e.is_dir():
+                        self.ignored_dirs.append(e.name)
+                    self.total_skipped += 1
+                else:
+                    filtered.append(e)
+            entries = filtered
 
-    return lines
+        for i, entry in enumerate(entries):
+            if self.truncated:
+                break
+            is_last = i == len(entries) - 1
+            connector = "\u2514\u2500\u2500 " if is_last else "\u251c\u2500\u2500 "
+            child_prefix = prefix + ("    " if is_last else "\u2502   ")
+
+            if entry.is_dir():
+                if not self._add_line(f"{prefix}{connector}{entry.name}/"):
+                    break
+                await self.build(entry, child_prefix, depth + 1)
+            else:
+                summary = ""
+                if entry.suffix in (".md", ".markdown"):
+                    try:
+                        async with aiofiles.open(
+                            entry, encoding="utf-8", errors="ignore"
+                        ) as f:
+                            content = await f.read()
+                        fm = parse_frontmatter(content)
+                        if fm.get("summary"):
+                            summary = f" - {fm['summary']}"
+                        elif fm.get("title"):
+                            summary = f" - {fm['title']}"
+                        elif fm.get("description"):
+                            summary = f" - {fm['description']}"
+                        if fm.get("protected"):
+                            summary = f" [protected]{summary}"
+                    except Exception:
+                        pass
+
+                if not self._add_line(f"{prefix}{connector}{entry.name}{summary}"):
+                    break
+
+        self._ignore_stack.pop()
 
 
 @register_builtin("tree")
@@ -145,7 +249,7 @@ class TreeTool(BaseTool):
     """
     Tool for listing directory structure with frontmatter summaries.
 
-    Useful for discovering memory structure and understanding file contents.
+    Respects .gitignore and limits output to avoid flooding context.
     """
 
     needs_context = True
@@ -156,17 +260,35 @@ class TreeTool(BaseTool):
 
     @property
     def description(self) -> str:
-        return "List files in tree format with summaries from frontmatter"
+        return (
+            "List files in tree format (respects .gitignore, max 100 lines by default)"
+        )
 
     @property
     def execution_mode(self) -> ExecutionMode:
         return ExecutionMode.DIRECT
 
+    def get_parameters_schema(self) -> dict:
+        return {
+            "type": "object",
+            "properties": {
+                "path": {"type": "string", "description": "Directory path"},
+                "depth": {"type": "integer", "description": "Max depth (default 3)"},
+                "limit": {
+                    "type": "integer",
+                    "description": "Max output lines (default 100, 0 = unlimited)",
+                },
+                "gitignore": {
+                    "type": "boolean",
+                    "description": "Follow .gitignore rules (default true)",
+                },
+            },
+        }
+
     async def _execute(self, args: dict[str, Any], **kwargs: Any) -> ToolResult:
         """List directory tree with frontmatter summaries."""
         context = kwargs.get("context")
 
-        # Get path (body content or path attribute)
         path_str = args.get("path") or args.get("_body", ".").strip() or "."
         path = Path(path_str).expanduser().resolve()
 
@@ -182,22 +304,51 @@ class TreeTool(BaseTool):
         if not path.is_dir():
             return ToolResult(error=f"Not a directory: {path_str}")
 
-        # Options
         max_depth = int(args.get("depth", 3))
-        show_hidden = args.get("hidden", "false").lower() in ("true", "yes", "1")
+        limit = int(args.get("limit", 100))
+        show_hidden = str(args.get("hidden", "false")).lower() in ("true", "yes", "1")
+        follow_gitignore = str(args.get("gitignore", "true")).lower() not in (
+            "false",
+            "no",
+            "0",
+        )
 
         try:
-            lines = [f"{path.name}/"]
-            tree_lines = await build_tree(path, "", max_depth, 0, show_hidden)
-            lines.extend(tree_lines)
+            builder = _TreeBuilder(
+                root=path,
+                max_depth=max_depth,
+                limit=limit,
+                show_hidden=show_hidden,
+                follow_gitignore=follow_gitignore,
+            )
+            builder._add_line(f"{path.name}/")
+            await builder.build(path)
 
-            output = "\n".join(lines)
+            output = "\n".join(builder.lines)
+
+            # Append footer with useful info
+            footer_parts: list[str] = []
+            if builder.truncated:
+                footer_parts.append(
+                    f"... (output limited to {limit} lines, "
+                    f"use limit=N or path=subdir to see more)"
+                )
+            if builder.total_skipped > 0:
+                ignored_preview = ", ".join(sorted(set(builder.ignored_dirs))[:5])
+                footer_parts.append(
+                    f"({builder.total_skipped} entries ignored by .gitignore"
+                    + (f": {ignored_preview}..." if ignored_preview else "")
+                    + ", use gitignore=false to show all)"
+                )
+            if footer_parts:
+                output += "\n" + "\n".join(footer_parts)
 
             logger.debug(
                 "Tree listing",
                 path=str(path),
                 depth=max_depth,
-                lines=len(lines),
+                lines=len(builder.lines),
+                skipped=builder.total_skipped,
             )
 
             return ToolResult(output=output, exit_code=0)

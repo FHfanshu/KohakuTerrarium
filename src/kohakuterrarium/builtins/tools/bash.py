@@ -1,7 +1,8 @@
 """
-Bash command execution tool.
+Shell command execution tool.
 
-Executes shell commands and returns output.
+Executes commands via a specified shell (bash, zsh, sh, etc.).
+On all platforms, prefers bash (git bash available on Windows).
 """
 
 import asyncio
@@ -21,41 +22,44 @@ from kohakuterrarium.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
+# Shell type → (executable, args-before-command)
+# The command string is appended after these args.
+_SHELL_SPECS: dict[str, tuple[str, list[str]]] = {
+    "bash": ("bash", ["-c"]),
+    "zsh": ("zsh", ["-c"]),
+    "sh": ("sh", ["-c"]),
+    "fish": ("fish", ["-c"]),
+    "pwsh": ("pwsh", ["-NoProfile", "-NonInteractive", "-Command"]),
+    "powershell": (
+        "powershell",
+        ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command"],
+    ),
+}
+
+_AVAILABLE_SHELLS: list[str] | None = None
+
+
+def _get_available_shells() -> list[str]:
+    """Return shell types whose executable is on PATH (cached)."""
+    global _AVAILABLE_SHELLS
+    if _AVAILABLE_SHELLS is None:
+        _AVAILABLE_SHELLS = [
+            name for name, (exe, _) in _SHELL_SPECS.items() if shutil.which(exe)
+        ]
+    return _AVAILABLE_SHELLS
+
 
 @register_builtin("bash")
-class BashTool(BaseTool):
+class ShellTool(BaseTool):
     """
-    Tool for executing bash/shell commands.
+    Tool for executing shell commands.
 
-    On Windows, uses PowerShell Core (pwsh) or Windows PowerShell.
-    On Unix, uses bash or sh.
+    Supports multiple shell types via the ``type`` parameter.
+    Defaults to bash on all platforms (git bash on Windows).
     """
 
     def __init__(self, config: ToolConfig | None = None):
         super().__init__(config)
-        self._shell = self._detect_shell()
-
-    def _detect_shell(self) -> list[str]:
-        """Detect the appropriate shell for the platform."""
-        if sys.platform == "win32":
-            # Prefer PowerShell Core (pwsh) over Windows PowerShell
-            if shutil.which("pwsh"):
-                return ["pwsh", "-NoProfile", "-NonInteractive", "-Command"]
-            else:
-                return [
-                    "powershell",
-                    "-NoProfile",
-                    "-NonInteractive",
-                    "-ExecutionPolicy",
-                    "Bypass",
-                    "-Command",
-                ]
-        else:
-            # Use bash on Unix, fallback to sh
-            if shutil.which("bash"):
-                return ["bash", "-c"]
-            else:
-                return ["sh", "-c"]
 
     @property
     def tool_name(self) -> str:
@@ -68,6 +72,25 @@ class BashTool(BaseTool):
     @property
     def execution_mode(self) -> ExecutionMode:
         return ExecutionMode.DIRECT
+
+    def get_parameters_schema(self) -> dict:
+        return {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "string",
+                    "description": "Shell command to execute",
+                },
+                "type": {
+                    "type": "string",
+                    "description": (
+                        "Shell type (default: bash). "
+                        "Options: bash, zsh, sh, fish, pwsh, powershell"
+                    ),
+                },
+            },
+            "required": ["command"],
+        }
 
     async def _execute(self, args: dict[str, Any]) -> ToolResult:
         """Execute the command."""
@@ -93,10 +116,31 @@ class BashTool(BaseTool):
                 "Just stop your response."
             )
 
-        logger.debug("Executing command", command=command[:100])
+        # Resolve shell type
+        shell_type = args.get("type", "bash").lower().strip()
+        if shell_type not in _SHELL_SPECS:
+            available = _get_available_shells()
+            return ToolResult(
+                error=f"Unknown shell type: {shell_type}. "
+                f"Available: {', '.join(available) or 'none found'}"
+            )
 
-        # Build the full command
-        full_command = self._shell + [command]
+        exe, prefix_args = _SHELL_SPECS[shell_type]
+        if not shutil.which(exe):
+            available = _get_available_shells()
+            return ToolResult(
+                error=(
+                    f"Shell '{shell_type}' ({exe}) not found on PATH. "
+                    f"Available shells: {', '.join(available) or 'none found'}. "
+                    f'Try: bash(type="{available[0]}", ...)'
+                    if available
+                    else f"No shells found on PATH."
+                )
+            )
+
+        full_command = [exe, *prefix_args, command]
+
+        logger.debug("Executing command", shell=shell_type, command=command[:100])
 
         # Set up environment
         env = os.environ.copy()
@@ -107,7 +151,6 @@ class BashTool(BaseTool):
         cwd = self.config.working_dir or os.getcwd()
 
         try:
-            # Create subprocess
             process = await asyncio.create_subprocess_exec(
                 *full_command,
                 stdout=asyncio.subprocess.PIPE,
@@ -116,7 +159,6 @@ class BashTool(BaseTool):
                 env=env,
             )
 
-            # Wait for completion with timeout
             try:
                 stdout, _ = await asyncio.wait_for(
                     process.communicate(),
@@ -130,13 +172,15 @@ class BashTool(BaseTool):
                     exit_code=-1,
                 )
 
-            # Decode output
             output = stdout.decode("utf-8", errors="replace") if stdout else ""
 
             # Truncate if needed
             if self.config.max_output > 0 and len(output) > self.config.max_output:
                 output = output[: self.config.max_output]
-                output += f"\n... (truncated, {len(stdout) - self.config.max_output} bytes omitted)"
+                output += (
+                    f"\n... (truncated, "
+                    f"{len(stdout) - self.config.max_output} bytes omitted)"
+                )
 
             exit_code = process.returncode or 0
 
@@ -155,12 +199,16 @@ class BashTool(BaseTool):
             )
 
         except FileNotFoundError:
-            return ToolResult(error=f"Shell not found: {self._shell[0]}")
+            return ToolResult(error=f"Shell not found: {exe}")
         except PermissionError:
             return ToolResult(error="Permission denied")
         except Exception as e:
             logger.error("Command execution failed", error=str(e))
             return ToolResult(error=str(e))
+
+
+# Backward-compatible alias
+BashTool = ShellTool
 
 
 @register_builtin("python")
@@ -191,7 +239,6 @@ class PythonTool(BaseTool):
 
         logger.debug("Executing Python code", code_length=len(code))
 
-        # Use current Python interpreter
         python_cmd = [sys.executable, "-c", code]
 
         try:

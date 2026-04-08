@@ -454,14 +454,14 @@ The default `general` creature ships with 21 built-in tools:
 
 | Tool | Description |
 |------|-------------|
-| `bash` | Execute shell commands when no dedicated structured tool is a better fit |
+| `bash` | Execute shell commands via bash on all platforms (supports type= for other shells) |
 | `python` | Execute Python code and return its output |
 | `read` | Read file contents safely before editing |
 | `write` | Create or overwrite files |
 | `edit` | Modify files via search/replace or unified diff |
 | `glob` | Find files by glob pattern |
 | `grep` | Search file contents with regex patterns |
-| `tree` | Show directory structure as a tree |
+| `tree` | Show directory structure as a tree (respects .gitignore, line-limited) |
 | `think` | Record an explicit reasoning step that stays in context |
 | `scratchpad` | Read and write session-scoped working memory |
 | `search_memory` | Search session history with keyword or semantic matching |

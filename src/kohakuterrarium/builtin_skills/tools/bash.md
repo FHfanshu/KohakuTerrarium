@@ -25,6 +25,14 @@ Using dedicated tools gives structured output and enables safety guards.
 | Arg | Type | Description |
 |-----|------|-------------|
 | command | string | Shell command to execute (required) |
+| type | string | Shell type: bash, zsh, sh, fish, pwsh, powershell (default: bash) |
+
+## Shell Type
+
+By default, all commands run in **bash** on every platform (including
+Windows, via git bash). If bash is not available, the tool will report
+which shells are installed so you can choose an alternative with
+`type="..."`.
 
 ## Git Safety
 
@@ -42,9 +50,8 @@ Using dedicated tools gives structured output and enables safety guards.
 
 ## Behavior
 
-- On Windows, commands run in PowerShell (pwsh preferred, falls back to
-  powershell).
-- On Unix/Linux/Mac, commands run in bash (falls back to sh).
+- Commands run in bash on all platforms (git bash on Windows).
+- Use `type` parameter to switch shell if bash is unavailable.
 - stdout and stderr are combined in the output.
 - Commands have a configurable timeout; killed on timeout.
 - Large outputs may be truncated to the configured max size.
@@ -64,4 +71,4 @@ Returns combined stdout/stderr. Exit code is included in the result metadata.
 
 - Commands have timeout (default: 60 seconds)
 - Large outputs may be truncated
-- Platform-dependent (PowerShell on Windows, bash on Unix)
+- Shell availability varies by platform (bash via git bash on Windows)

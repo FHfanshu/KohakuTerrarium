@@ -110,11 +110,50 @@ def run_web_server(
 
 
 def run_desktop_app(port: int = 8001) -> None:
-    """Launch the web UI in a native pywebview window.
+    """Launch the desktop app as a detached process and return immediately.
 
-    Starts FastAPI + static files on 127.0.0.1 in a daemon thread,
-    then opens a native OS webview window pointing at it.
+    The caller's terminal is released right away. The child process
+    runs the server + pywebview window independently.
+
+    On Windows, uses ``pythonw.exe`` (the windowless Python interpreter)
+    so no console window is created.  On Unix, starts a new session so
+    the child survives terminal close.
+
+    Stderr is redirected to ``~/.kohakuterrarium/app.log`` for debugging.
     """
+    import subprocess
+
+    # Always use sys.executable — it's the Python that's running kt right now,
+    # guaranteed to have the correct env (works with uv, micromamba, venv, etc.)
+    cmd = [sys.executable, "-m", "kohakuterrarium.serving.web", "--port", str(port)]
+
+    # Redirect stderr to a log file so crashes aren't silent
+    log_dir = Path.home() / ".kohakuterrarium"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = open(log_dir / "app.log", "w")  # noqa: SIM115
+
+    kwargs: dict[str, object] = {
+        "stdin": subprocess.DEVNULL,
+        "stdout": log_file,
+        "stderr": log_file,
+    }
+
+    if sys.platform == "win32":
+        # CREATE_NO_WINDOW prevents python.exe from spawning a console.
+        # The child process runs independently — Popen is non-blocking and
+        # the child survives after the parent (kt app) exits.
+        kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
+    else:
+        # Unix: new session so the child survives terminal close
+        kwargs["start_new_session"] = True
+
+    subprocess.Popen(cmd, **kwargs)
+    print(f"KohakuTerrarium desktop app launched (port {port})")
+    print(f"  Log: {log_dir / 'app.log'}")
+
+
+def _run_desktop_app_blocking(port: int = 8001) -> None:
+    """Actually run the desktop app (blocking). Called by the child process."""
     try:
         import webview
     except ImportError:
@@ -166,3 +205,12 @@ def run_desktop_app(port: int = 8001) -> None:
         background_color="#1a1a2e",
     )
     webview.start()
+
+
+if __name__ == "__main__":
+    import argparse as _ap
+
+    _parser = _ap.ArgumentParser()
+    _parser.add_argument("--port", type=int, default=8001)
+    _args = _parser.parse_args()
+    _run_desktop_app_blocking(port=_args.port)

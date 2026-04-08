@@ -18,6 +18,10 @@ _BUILTIN_SCHEMAS: dict[str, dict] = {
         "type": "object",
         "properties": {
             "command": {"type": "string", "description": "Shell command to execute"},
+            "type": {
+                "type": "string",
+                "description": "Shell type (default: bash). Options: bash, zsh, sh, fish, pwsh",
+            },
         },
         "required": ["command"],
     },
@@ -89,7 +93,15 @@ _BUILTIN_SCHEMAS: dict[str, dict] = {
         "type": "object",
         "properties": {
             "path": {"type": "string", "description": "Directory path"},
-            "depth": {"type": "integer", "description": "Max depth (optional)"},
+            "depth": {"type": "integer", "description": "Max depth (default 3)"},
+            "limit": {
+                "type": "integer",
+                "description": "Max output lines (default 100, 0 = unlimited)",
+            },
+            "gitignore": {
+                "type": "boolean",
+                "description": "Follow .gitignore rules (default true)",
+            },
         },
     },
     "think": {

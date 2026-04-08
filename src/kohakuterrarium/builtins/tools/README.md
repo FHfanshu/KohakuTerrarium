@@ -11,13 +11,13 @@ re-exports the public API from `builtins.tool_catalog`.
 |------|-------------|
 | `__init__.py` | Imports all tools (triggers registration), re-exports catalog API |
 | `registry.py` | Backward-compatible re-exports from `builtins.tool_catalog` |
-| `bash.py` | `BashTool` (shell commands) and `PythonTool` (Python subprocess) |
+| `bash.py` | `ShellTool` (shell commands, bash on all platforms) and `PythonTool` (Python subprocess) |
 | `read.py` | `ReadTool`: read file contents with optional line range |
 | `write.py` | `WriteTool`: create or overwrite files |
 | `edit.py` | `EditTool`: edit files using unified diff format |
 | `glob.py` | `GlobTool`: find files by glob pattern |
 | `grep.py` | `GrepTool`: search file contents with regex and type filtering |
-| `tree.py` | `TreeTool`: list directory structure with frontmatter summaries |
+| `tree.py` | `TreeTool`: list directory structure (.gitignore-aware, line-limited) |
 | `think.py` | `ThinkTool`: no-op tool for explicit LLM reasoning |
 | `scratchpad_tool.py` | `ScratchpadTool`: session-scoped key-value working memory |
 | `ask_user.py` | `AskUserTool`: request human input mid-execution |

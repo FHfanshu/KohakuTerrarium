@@ -97,7 +97,7 @@ desktop = [
     "pywebview>=6.0",
 ]
 all = [
-    "KohakuTerrarium[api,dev,web,browser,pdf,mcp,embeddings,embeddings-light]",
+    "KohakuTerrarium[api,dev,web,browser,pdf,mcp,desktop,embeddings,embeddings-light]",
 ]
 
 [tool.setuptools]

@@ -308,7 +308,7 @@ class TestModuleLoader:
             module_type="package",
         )
         assert tool_class is not None
-        assert tool_class.__name__ == "BashTool"
+        assert tool_class.__name__ in ("ShellTool", "BashTool")
 
     def test_load_builtin_tool_instance(self):
         """Test loading a builtin tool instance."""
