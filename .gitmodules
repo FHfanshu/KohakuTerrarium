@@ -1,3 +1,6 @@
 [submodule "kohaku-creatures"]
 	path = kohaku-creatures
 	url = https://github.com/Kohaku-Lab/kohaku-creatures.git
+[submodule "kohaku-extensions"]
+	path = kohaku-extensions
+	url = https://github.com/Kohaku-Lab/kohaku-extensions.git

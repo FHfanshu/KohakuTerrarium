@@ -73,6 +73,34 @@ async def promote_task(agent_id: str, job_id: str, manager=Depends(get_manager))
         raise HTTPException(404, str(e))
 
 
+@router.get("/{agent_id}/plugins")
+async def list_plugins(agent_id: str, manager=Depends(get_manager)):
+    """List plugins and their enabled/disabled status."""
+    session = manager._agents.get(agent_id)
+    if not session:
+        raise HTTPException(404, f"Agent {agent_id} not found")
+    if not session.agent.plugins:
+        return []
+    return session.agent.plugins.list_plugins()
+
+
+@router.post("/{agent_id}/plugins/{plugin_name}/toggle")
+async def toggle_plugin(agent_id: str, plugin_name: str, manager=Depends(get_manager)):
+    """Enable or disable a plugin at runtime."""
+    session = manager._agents.get(agent_id)
+    if not session:
+        raise HTTPException(404, f"Agent {agent_id} not found")
+    if not session.agent.plugins:
+        raise HTTPException(404, "No plugins loaded")
+    mgr = session.agent.plugins
+    if mgr.is_enabled(plugin_name):
+        mgr.disable(plugin_name)
+        return {"name": plugin_name, "enabled": False}
+    else:
+        mgr.enable(plugin_name)
+        return {"name": plugin_name, "enabled": True}
+
+
 @router.get("/{agent_id}/jobs")
 async def agent_jobs(agent_id: str, manager=Depends(get_manager)):
     """List running background jobs for an agent."""

@@ -26,6 +26,7 @@ class PluginManager:
 
     def __init__(self) -> None:
         self._plugins: list[BasePlugin] = []
+        self._disabled: set[str] = set()  # plugin names that are disabled
 
     def __bool__(self) -> bool:
         """Falsy when empty — allows ``if self.plugins:`` guards."""
@@ -43,6 +44,48 @@ class PluginManager:
             plugin_name=getattr(plugin, "name", "?"),
             priority=getattr(plugin, "priority", 50),
         )
+
+    def enable(self, name: str) -> bool:
+        """Enable a previously disabled plugin. Returns True if found."""
+        if name in self._disabled:
+            self._disabled.discard(name)
+            logger.info("Plugin enabled", plugin_name=name)
+            return True
+        return any(getattr(p, "name", "") == name for p in self._plugins)
+
+    def disable(self, name: str) -> bool:
+        """Disable a plugin by name. Returns True if found."""
+        for p in self._plugins:
+            if getattr(p, "name", "") == name:
+                self._disabled.add(name)
+                logger.info("Plugin disabled", plugin_name=name)
+                return True
+        return False
+
+    def is_enabled(self, name: str) -> bool:
+        """Check if a plugin is enabled."""
+        return name not in self._disabled and any(
+            getattr(p, "name", "") == name for p in self._plugins
+        )
+
+    def list_plugins(self) -> list[dict[str, Any]]:
+        """List all plugins with their status."""
+        return [
+            {
+                "name": getattr(p, "name", "?"),
+                "priority": getattr(p, "priority", 50),
+                "enabled": getattr(p, "name", "") not in self._disabled,
+            }
+            for p in self._plugins
+        ]
+
+    def _active_plugins(self) -> list[BasePlugin]:
+        """Return only enabled plugins."""
+        if not self._disabled:
+            return self._plugins
+        return [
+            p for p in self._plugins if getattr(p, "name", "") not in self._disabled
+        ]
 
     async def load_all(self, context: PluginContext) -> None:
         """Call on_load for all plugins."""
@@ -84,7 +127,7 @@ class PluginManager:
         if not self._plugins:
             return
 
-        for plugin in self._plugins:
+        for plugin in self._active_plugins():
             method = getattr(plugin, hook_name, None)
             if method is None:
                 continue
@@ -108,7 +151,7 @@ class PluginManager:
         if not self._plugins:
             return value
 
-        for plugin in self._plugins:
+        for plugin in self._active_plugins():
             method = getattr(plugin, hook_name, None)
             if method is None:
                 continue

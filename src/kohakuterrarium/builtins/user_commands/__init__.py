@@ -43,6 +43,7 @@ from kohakuterrarium.builtins.user_commands.compact import CompactCommand
 from kohakuterrarium.builtins.user_commands.exit import ExitCommand
 from kohakuterrarium.builtins.user_commands.help import HelpCommand
 from kohakuterrarium.builtins.user_commands.model import ModelCommand
+from kohakuterrarium.builtins.user_commands.plugin import PluginCommand
 from kohakuterrarium.builtins.user_commands.status import StatusCommand
 
 __all__ = [
@@ -54,5 +55,6 @@ __all__ = [
     "ExitCommand",
     "HelpCommand",
     "ModelCommand",
+    "PluginCommand",
     "StatusCommand",
 ]

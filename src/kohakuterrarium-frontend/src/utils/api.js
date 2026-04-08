@@ -202,6 +202,18 @@ export const agentAPI = {
     return data;
   },
 
+  /** List plugins with enabled/disabled status */
+  async listPlugins(id) {
+    const { data } = await api.get(`/agents/${id}/plugins`);
+    return data;
+  },
+
+  /** Toggle a plugin's enabled state */
+  async togglePlugin(id, pluginName) {
+    const { data } = await api.post(`/agents/${id}/plugins/${pluginName}/toggle`);
+    return data;
+  },
+
   /** Switch the model for a running agent */
   async switchModel(id, model) {
     const { data } = await api.post(`/agents/${id}/model`, { model });
