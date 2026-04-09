@@ -2,6 +2,7 @@
 
 import asyncio
 
+from kohakuterrarium.cli.run import _resolve_session, _run_agent_rich_cli
 from kohakuterrarium.session.resume import (
     detect_session_type,
     resume_agent,
@@ -9,8 +10,6 @@ from kohakuterrarium.session.resume import (
 )
 from kohakuterrarium.terrarium.cli import run_terrarium_with_tui
 from kohakuterrarium.utils.logging import set_level
-
-from kohakuterrarium.cli.run import _resolve_session
 
 
 def resume_cli(
@@ -44,7 +43,14 @@ def resume_cli(
             agent, store = resume_agent(
                 path, pwd_override, io_mode=io_mode, llm_override=llm_override
             )
-            asyncio.run(agent.run())
+            # ``cli`` mode uses RichCLIApp.run() as the main loop, not
+            # agent.run(). Without this dispatch, resume in CLI mode
+            # blocks forever showing nothing because the agent is started
+            # but no input/output frontend is actually running.
+            if io_mode == "cli":
+                asyncio.run(_run_agent_rich_cli(agent))
+            else:
+                asyncio.run(agent.run())
         return 0
     except KeyboardInterrupt:
         print("\nInterrupted")

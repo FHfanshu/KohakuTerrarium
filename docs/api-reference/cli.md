@@ -134,7 +134,7 @@ Paths starting with `@` are resolved as package references (e.g., `@kohaku-creat
 
 | Flag | Values | Default | Description |
 |------|--------|---------|-------------|
-| `--mode` | `cli`, `tui` | `tui` | Input/output mode |
+| `--mode` | `cli`, `plain`, `tui` | `cli` if stdout is a TTY, else `plain` | Input/output mode — see [Interactive Modes](#interactive-modes) |
 | `--llm` | profile name | (from config) | Override LLM profile (e.g., `gpt-5.4`, `claude-sonnet-4`) |
 | `--session` | path | auto | Session file path; auto-generates in `~/.kohakuterrarium/sessions/` |
 | `--no-session` | flag | off | Disable session persistence entirely |
@@ -145,11 +145,14 @@ Paths starting with `@` are resolved as package references (e.g., `@kohaku-creat
 **Examples:**
 
 ```bash
-# Run a local agent (TUI mode, session auto-saved)
+# Run a local agent (auto-picks rich CLI on a TTY, plain otherwise)
 kt run examples/agent-apps/swe_agent
 
-# Run a package agent with CLI mode
-kt run @kohaku-creatures/creatures/swe --mode cli
+# Run a package agent in the full-screen Textual TUI
+kt run @kohaku-creatures/creatures/swe --mode tui
+
+# Run in dumb stdout mode (for CI / piping)
+kt run @kohaku-creatures/creatures/swe --mode plain
 
 # Override the LLM profile
 kt run @kohaku-creatures/creatures/swe --llm gemini
@@ -160,6 +163,44 @@ kt run examples/agent-apps/swe_agent --no-session
 # Run with debug logging
 kt run examples/agent-apps/swe_agent --log-level DEBUG
 ```
+
+## Interactive Modes
+
+The `--mode` flag picks the input/output frontend.
+
+### `cli` — Rich inline CLI (default on a TTY)
+
+A `prompt_toolkit` `Application` with a fixed layout: a bordered input box (auto-sizes to its content), a live status region above it (streaming assistant message + running tool panels + sub-agent progress), and a one-line footer (token usage, model name, key hints). Finished content is committed to **real terminal scrollback**, so you can mouse-scroll up and copy anything from earlier in the session just like in Claude Code or Codex.
+
+**Key bindings:**
+
+| Key | Action |
+|-----|--------|
+| `Enter` | Submit message |
+| `Shift+Enter` / `Ctrl+Enter` | Insert newline. Requires a terminal that emits `modifyOtherKeys=2` or CSI-u (Windows Terminal, xterm, kitty, foot, alacritty with progressive enhancement). The CLI enables both protocols automatically on start. |
+| `Alt+Enter` / `Ctrl+J` | Insert newline. Works in every PTY — the universal fallback. |
+| `Esc` | Interrupt the current agent turn (cancel running tools, stop streaming, keep the session alive) |
+| `Ctrl+B` | Promote the latest running **direct** tool or sub-agent to background — the agent loop returns a placeholder immediately and the task keeps running |
+| `Ctrl+X` | Cancel the latest **backgrounded** tool or sub-agent |
+| `Ctrl+C` | Clear the input buffer if non-empty, else interrupt |
+| `Ctrl+L` | Clear the terminal |
+| `Ctrl+D` | Exit the session |
+| `/` | Open the slash-command popup (tab-completes from the builtin command registry) |
+
+**Sub-agent panels** render as cards:
+
+- **Direct sub-agent** — one card with `header → tool list → output preview → footer (turns · tools · in↑ out↓ tokens)`. The tool list shows each nested tool as it's called, in the order it ran.
+- **Background sub-agent** — two cards. An inline notice (`⏳ dispatched agent_name in background`) commits to scrollback the moment it's dispatched. When it finishes, the full result panel commits below.
+
+**Session resume (`kt resume <name> --mode cli`)** replays the recorded events into real terminal scrollback before the live loop starts: user messages, assistant turns (rendered as markdown when appropriate), sub-agent panels (with full tool lists), bg dispatch notices, and compaction notices — everything uses the exact same render path as live streaming, so the history visually matches what you saw when the session was originally running.
+
+### `tui` — Full-screen Textual TUI
+
+An alt-screen Textual app with a tabbed chat view (one tab per agent / channel in terrarium mode), a right-side running-jobs panel with **click-to-cancel** and **click-to-promote** (`[→bg]` appears on the right of a direct job's line after it's been running for a second), and compact summary / token-usage widgets. Best for multi-agent terrariums or when you want a dashboard-style view. Alt-screen means the transcript **does not** persist in your terminal's scrollback — exit returns you to the pre-launch screen.
+
+### `plain` — Dumb stdout/stdin
+
+Forward-only print output, line-based stdin. No live region, no input box, no re-rendering. Auto-selected when stdout is not a TTY (piping, CI, log capture). Also useful when you want to grep the output in real time or you're running in a terminal that doesn't support ANSI cursor movement.
 
 ## Running Terrariums
 

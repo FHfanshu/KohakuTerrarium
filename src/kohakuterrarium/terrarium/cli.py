@@ -6,8 +6,11 @@ import sys
 from pathlib import Path
 from uuid import uuid4
 
+from kohakuterrarium.builtins.cli_rich.app import RichCLIApp
+from kohakuterrarium.builtins.cli_rich.output import RichCLIOutput
 from kohakuterrarium.builtins.tui.output import TUIOutput
 from kohakuterrarium.builtins.tui.session import TUISession
+from kohakuterrarium.builtins.tui.widgets import ChatInput
 from kohakuterrarium.builtins.user_commands import (
     get_builtin_user_command,
     list_builtin_user_commands,
@@ -119,9 +122,10 @@ async def run_terrarium_with_tui(runtime: TerrariumRuntime) -> None:
         creature_out._default_target = name
         handle.agent.output_router.default_output = creature_out
 
-    # Wire Escape interrupt and click-to-cancel
+    # Wire Escape interrupt, click-to-cancel, click-to-promote.
     if tui._app:
         tui._app.on_interrupt = root.interrupt
+        tui._app.on_promote_job = root._promote_handle
     tui.on_cancel_job = root._cancel_job
 
     # Start TUI app
@@ -224,8 +228,6 @@ async def run_terrarium_with_tui(runtime: TerrariumRuntime) -> None:
     # Set command hints on the ChatInput widget
     if tui._app:
         try:
-            from kohakuterrarium.builtins.tui.widgets import ChatInput
-
             inp = tui._app.query_one("#input-box", ChatInput)
             inp.command_names = list(_commands.keys())
         except Exception:
@@ -303,13 +305,68 @@ async def run_terrarium_with_tui(runtime: TerrariumRuntime) -> None:
         tui.stop()
 
 
+async def run_terrarium_with_rich_cli(runtime: TerrariumRuntime) -> None:
+    """Run a terrarium with the rich single-agent CLI.
+
+    Mounts the root agent if present; otherwise auto-picks the first
+    creature and prints a warning. Other creatures keep running in the
+    background but their output is not surfaced to the user.
+    """
+    runtime_task = asyncio.create_task(runtime.run())
+
+    try:
+        # Wait for runtime to be fully started
+        for _ in range(20):
+            await asyncio.sleep(0.25)
+            if runtime.is_running:
+                break
+
+        # Pick the agent: root preferred, else first creature
+        target_agent = runtime.root_agent
+        target_label = "root"
+        if target_agent is None:
+            creatures = list(runtime.creatures.values())
+            if not creatures:
+                runtime_task.cancel()
+                raise RuntimeError("Terrarium has no creatures to mount")
+            handle = creatures[0]
+            target_agent = handle.agent
+            target_label = handle.name
+            print(
+                f"\nWarning: terrarium has no root agent. "
+                f"Auto-mounting first creature '{target_label}' for rich CLI mode.\n"
+                f"(Use --mode tui for the full multi-tab terrarium UI.)\n"
+            )
+
+        # Wire the rich CLI output to the chosen agent
+        app = RichCLIApp(target_agent)
+        rich_output = RichCLIOutput(app)
+        target_agent.output_router.default_output = rich_output
+
+        # Restore session events for the chosen agent
+        session_store = runtime.session_store
+        if session_store:
+            events = session_store.get_events(target_label)
+            if events:
+                await rich_output.on_resume(events)
+
+        await app.run()
+    finally:
+        runtime_task.cancel()
+        try:
+            await runtime_task
+        except (asyncio.CancelledError, Exception):
+            pass
+        await runtime.stop()
+
+
 async def run_terrarium_with_cli(
     runtime: TerrariumRuntime,
     *,
     observe: list[str] | None = None,
     no_observe: bool = False,
 ) -> None:
-    """Run a terrarium with a headless stdin/stdout CLI."""
+    """Run a terrarium with a headless stdin/stdout CLI (plain mode)."""
     runtime_task = asyncio.create_task(runtime.run())
     observer = None
 
@@ -441,9 +498,12 @@ def add_terrarium_subparser(subparsers: argparse._SubParsersAction) -> None:
     )
     run_p.add_argument(
         "--mode",
-        choices=["cli", "tui"],
+        choices=["cli", "plain", "tui"],
         default="tui",
-        help="Input/output mode",
+        help=(
+            "Input/output mode. tui=full multi-tab, cli=rich single-creature "
+            "(auto-picks root or first creature), plain=dumb stdout"
+        ),
     )
 
     # terrarium info <path>
@@ -525,8 +585,10 @@ def _run_terrarium_cli(args: argparse.Namespace) -> int:
             ],
         )
 
-    # When root agent is configured, launch terrarium in selected mode
-    if config.root:
+    # When root agent is configured, launch terrarium in selected mode.
+    # Also enter the interactive path for --mode cli even without root,
+    # since rich CLI auto-picks the first creature.
+    if config.root or args.mode == "cli":
         print()
 
         async def _run_with_mode() -> None:
@@ -535,6 +597,8 @@ def _run_terrarium_cli(args: argparse.Namespace) -> int:
             if store:
                 runtime._pending_session_store = store
             if args.mode == "cli":
+                await run_terrarium_with_rich_cli(runtime)
+            elif args.mode == "plain":
                 await run_terrarium_with_cli(
                     runtime,
                     observe=args.observe,

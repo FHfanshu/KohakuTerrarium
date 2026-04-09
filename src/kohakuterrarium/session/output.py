@@ -209,6 +209,7 @@ class SessionOutput(OutputModule):
                 "name": name,
                 "task": metadata.get("task", detail),
                 "job_id": metadata.get("job_id", ""),
+                "background": bool(metadata.get("background", False)),
             },
         )
 

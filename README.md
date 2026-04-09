@@ -7,7 +7,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+">
   <img src="https://img.shields.io/badge/license-KohakuTerrarium--1.0-green" alt="License">
-  <img src="https://img.shields.io/badge/version-1.0.0b5-orange" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.0.0b6-orange" alt="Version">
 </p>
 
 ---
@@ -568,8 +568,8 @@ The HTTP API and web dashboard are application layers built on top of the servin
 
 | Command | Description |
 |---------|-------------|
-| `kt run <path> [--llm profile] [--mode cli\|tui]` | Run a single creature / agent |
-| `kt terrarium run <path>` | Run a multi-agent terrarium with TUI |
+| `kt run <path> [--llm profile] [--mode cli\|plain\|tui]` | Run a single creature / agent |
+| `kt terrarium run <path> [--mode cli\|plain\|tui]` | Run a multi-agent terrarium |
 | `kt terrarium info <path>` | Show terrarium config details |
 | `kt resume [session] [--last]` | Resume a session (interactive picker if no arg) |
 | `kt login <provider>` | Authenticate (codex, openrouter, openai, anthropic, gemini, mimo) |
@@ -587,6 +587,30 @@ The HTTP API and web dashboard are application layers built on top of the servin
 | `kt app [--port PORT]` | Launch native desktop app (pywebview) |
 | `kt extension list` | Show installed extension modules |
 | `kt extension info <name>` | Show package extension details |
+
+### Interactive modes (`--mode`)
+
+| Mode   | What it is | When to use |
+|--------|------------|-------------|
+| `cli`  | **Rich inline CLI** — prompt_toolkit `Application` with a bordered input box, live status region, scrollback-friendly commits (the committed content lives in real terminal scrollback, you can mouse-scroll up). Default when stdout is a TTY. | Most interactive use — feels like Claude Code / Codex. |
+| `tui`  | Full-screen Textual app with tabs, tool panels, sub-agent widgets. Alt-screen. | Multi-agent terrariums, dashboard-style workflows, click-to-cancel/promote. |
+| `plain`| Dumb stdout/stdin pipeline, no live region, no input box. | CI / log capture / piping into other tools. Also auto-selected when stdout is not a TTY. |
+
+**Key bindings in rich CLI mode:**
+
+| Key | Action |
+|-----|--------|
+| `Enter` | Submit message |
+| `Shift+Enter` / `Ctrl+Enter` / `Alt+Enter` / `Ctrl+J` | Insert newline (first two require modern terminal; Alt+Enter and Ctrl+J work everywhere) |
+| `Esc` | Interrupt the current agent turn |
+| `Ctrl+B` | Promote the latest running direct tool/sub-agent to background |
+| `Ctrl+X` | Cancel the latest backgrounded tool/sub-agent |
+| `Ctrl+C` | Clear input buffer (or interrupt if buffer is empty) |
+| `Ctrl+L` | Clear scrollback |
+| `Ctrl+D` | Exit the session |
+| `/` | Open slash-command popup (tab-complete from builtin commands) |
+
+`kt resume <session> --mode cli` replays the session's recorded events (user messages, assistant turns, sub-agent panels with their tool lists, bg dispatch notices) into real terminal scrollback before entering the live loop, so the history is there to mouse-scroll up through.
 
 ## Project Structure
 

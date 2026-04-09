@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """
 Non-destructive channel message observer.
 

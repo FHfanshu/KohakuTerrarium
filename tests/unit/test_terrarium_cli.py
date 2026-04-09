@@ -40,7 +40,9 @@ sys.modules.setdefault(
 )
 sys.modules.setdefault(
     "kohakuvault",
-    types.SimpleNamespace(KVault=_DummyVault, TextVault=_DummyVault),
+    types.SimpleNamespace(
+        KVault=_DummyVault, TextVault=_DummyVault, VectorKVault=_DummyVault
+    ),
 )
 
 from kohakuterrarium.terrarium import cli as terrarium_cli
@@ -110,19 +112,10 @@ async def test_cli_output_prints_with_speaker_prefix(capsys):
     assert capsys.readouterr().out == "[alpha] ready\n[alpha] streamed\n"
 
 
-def test_run_root_cli_mode_dispatches_to_cli_runner(monkeypatch, tmp_path):
-    config = _make_config(with_root=True)
-    config_path = tmp_path / "terrarium.yaml"
-    config_path.write_text("terrarium: {}\n", encoding="utf-8")
-    args = _make_args(str(config_path), mode="cli")
-
-    calls: dict[str, object] = {}
-
-    class DummyRuntime:
-        def __init__(self, config_obj, llm_override=None):
-            self.config = config_obj
-            self.llm_override = llm_override
-            self._pending_session_store = None
+def _patch_runners(monkeypatch, calls: dict, *, dummy_runtime):
+    async def fake_rich_cli_runner(runtime):
+        calls["runner"] = "rich_cli"
+        calls["runtime"] = runtime
 
     async def fake_cli_runner(runtime, *, observe, no_observe):
         calls["runner"] = "cli"
@@ -134,10 +127,47 @@ def test_run_root_cli_mode_dispatches_to_cli_runner(monkeypatch, tmp_path):
         calls["runner"] = "tui"
         calls["runtime"] = runtime
 
-    monkeypatch.setattr(terrarium_cli, "load_terrarium_config", lambda _: config)
-    monkeypatch.setattr(terrarium_cli, "TerrariumRuntime", DummyRuntime)
+    monkeypatch.setattr(terrarium_cli, "TerrariumRuntime", dummy_runtime)
+    monkeypatch.setattr(
+        terrarium_cli, "run_terrarium_with_rich_cli", fake_rich_cli_runner
+    )
     monkeypatch.setattr(terrarium_cli, "run_terrarium_with_cli", fake_cli_runner)
     monkeypatch.setattr(terrarium_cli, "run_terrarium_with_tui", fake_tui_runner)
+
+
+class _DummyRuntime:
+    def __init__(self, config_obj, llm_override=None):
+        self.config = config_obj
+        self.llm_override = llm_override
+        self._pending_session_store = None
+
+
+def test_run_root_cli_mode_dispatches_to_rich_cli_runner(monkeypatch, tmp_path):
+    config = _make_config(with_root=True)
+    config_path = tmp_path / "terrarium.yaml"
+    config_path.write_text("terrarium: {}\n", encoding="utf-8")
+    args = _make_args(str(config_path), mode="cli")
+
+    calls: dict[str, object] = {}
+    monkeypatch.setattr(terrarium_cli, "load_terrarium_config", lambda _: config)
+    _patch_runners(monkeypatch, calls, dummy_runtime=_DummyRuntime)
+
+    rc = terrarium_cli._run_terrarium_cli(args)
+
+    assert rc == 0
+    assert calls["runner"] == "rich_cli"
+    assert calls["runtime"].llm_override == "gpt-5.4"
+
+
+def test_run_root_plain_mode_dispatches_to_headless_runner(monkeypatch, tmp_path):
+    config = _make_config(with_root=True)
+    config_path = tmp_path / "terrarium.yaml"
+    config_path.write_text("terrarium: {}\n", encoding="utf-8")
+    args = _make_args(str(config_path), mode="plain")
+
+    calls: dict[str, object] = {}
+    monkeypatch.setattr(terrarium_cli, "load_terrarium_config", lambda _: config)
+    _patch_runners(monkeypatch, calls, dummy_runtime=_DummyRuntime)
 
     rc = terrarium_cli._run_terrarium_cli(args)
 
@@ -155,28 +185,28 @@ def test_run_root_tui_mode_dispatches_to_tui_runner(monkeypatch, tmp_path):
     args = _make_args(str(config_path), mode="tui")
 
     calls: dict[str, object] = {}
-
-    class DummyRuntime:
-        def __init__(self, config_obj, llm_override=None):
-            self.config = config_obj
-            self.llm_override = llm_override
-            self._pending_session_store = None
-
-    async def fake_cli_runner(runtime, *, observe, no_observe):
-        calls["runner"] = "cli"
-        calls["runtime"] = runtime
-
-    async def fake_tui_runner(runtime):
-        calls["runner"] = "tui"
-        calls["runtime"] = runtime
-
     monkeypatch.setattr(terrarium_cli, "load_terrarium_config", lambda _: config)
-    monkeypatch.setattr(terrarium_cli, "TerrariumRuntime", DummyRuntime)
-    monkeypatch.setattr(terrarium_cli, "run_terrarium_with_cli", fake_cli_runner)
-    monkeypatch.setattr(terrarium_cli, "run_terrarium_with_tui", fake_tui_runner)
+    _patch_runners(monkeypatch, calls, dummy_runtime=_DummyRuntime)
 
     rc = terrarium_cli._run_terrarium_cli(args)
 
     assert rc == 0
     assert calls["runner"] == "tui"
     assert calls["runtime"].llm_override == "gpt-5.4"
+
+
+def test_run_no_root_cli_mode_dispatches_to_rich_cli_runner(monkeypatch, tmp_path):
+    """Without root, --mode cli should still launch rich CLI (auto-pick first creature)."""
+    config = _make_config(with_root=False)
+    config_path = tmp_path / "terrarium.yaml"
+    config_path.write_text("terrarium: {}\n", encoding="utf-8")
+    args = _make_args(str(config_path), mode="cli")
+
+    calls: dict[str, object] = {}
+    monkeypatch.setattr(terrarium_cli, "load_terrarium_config", lambda _: config)
+    _patch_runners(monkeypatch, calls, dummy_runtime=_DummyRuntime)
+
+    rc = terrarium_cli._run_terrarium_cli(args)
+
+    assert rc == 0
+    assert calls["runner"] == "rich_cli"

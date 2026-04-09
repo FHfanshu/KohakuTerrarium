@@ -9,6 +9,8 @@ import os
 from pathlib import Path
 from typing import Any
 
+from kohakuterrarium.builtins.cli_rich.input import RichCLIInput
+from kohakuterrarium.builtins.cli_rich.output import RichCLIOutput
 from kohakuterrarium.builtins.inputs import create_builtin_input
 from kohakuterrarium.builtins.outputs import create_builtin_output
 from kohakuterrarium.core.agent import Agent
@@ -21,7 +23,7 @@ from kohakuterrarium.utils.logging import get_logger
 logger = get_logger(__name__)
 
 # Valid IO modes and their module types
-IO_MODES = ("cli", "tui")
+IO_MODES = ("cli", "plain", "tui")
 
 
 def _create_io_modules(
@@ -30,9 +32,17 @@ def _create_io_modules(
     """Create input and output modules for a given IO mode.
 
     Returns (input_module, output_module).
+
+    Note: ``cli`` mode (the rich prompt_toolkit-based CLI) returns stub
+    modules here. The actual main loop is driven by ``RichCLIApp`` in
+    ``cli/run.py``, which constructs its own input/output and replaces
+    these stubs after the agent is built. We still return the stubs so
+    the agent's bootstrap contract is satisfied.
     """
     match mode:
         case "cli":
+            return RichCLIInput(), RichCLIOutput(app=None)
+        case "plain":
             return create_builtin_input("cli", {}), create_builtin_output("stdout", {})
         case "tui":
             return create_builtin_input("tui", {}), create_builtin_output("tui", {})

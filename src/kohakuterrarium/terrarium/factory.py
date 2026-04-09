@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """
 Creature and root agent construction.
 

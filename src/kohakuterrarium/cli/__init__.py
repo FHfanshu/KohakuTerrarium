@@ -64,9 +64,12 @@ def main() -> int:
     )
     run_parser.add_argument(
         "--mode",
-        choices=["cli", "tui"],
+        choices=["cli", "plain", "tui"],
         default=None,
-        help="Input/output mode (overrides config input/output; omit to use config)",
+        help=(
+            "Input/output mode. cli=rich inline (default if TTY), "
+            "plain=dumb stdout/stdin, tui=full-screen Textual app"
+        ),
     )
 
     # List command
@@ -105,7 +108,7 @@ def main() -> int:
     )
     resume_parser.add_argument(
         "--mode",
-        choices=["cli", "tui"],
+        choices=["cli", "plain", "tui"],
         default="tui",
         help="Input/output mode (default: tui)",
     )

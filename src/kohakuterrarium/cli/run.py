@@ -1,14 +1,51 @@
 """CLI run command — launch an agent from a config folder."""
 
 import asyncio
+import sys
 from pathlib import Path
 from uuid import uuid4
 
+from kohakuterrarium.builtins.cli_rich.app import RichCLIApp
+from kohakuterrarium.builtins.cli_rich.input import RichCLIInput
+from kohakuterrarium.builtins.cli_rich.output import RichCLIOutput
 from kohakuterrarium.core.agent import Agent
+from kohakuterrarium.session.resume import _create_io_modules
 from kohakuterrarium.session.store import SessionStore
 from kohakuterrarium.utils.logging import set_level
 
 _SESSION_DIR = Path.home() / ".kohakuterrarium" / "sessions"
+
+
+async def _run_agent_rich_cli(agent: Agent) -> None:
+    """Run an agent under the rich CLI (prompt_toolkit Application).
+
+    The main loop is driven by RichCLIApp, not agent.run(). We start
+    the agent's modules manually, replay any pending resume events into
+    real terminal scrollback, then enter the rich CLI loop.
+    """
+    app = RichCLIApp(agent)
+    # Replace the agent's default output with one wired to the rich CLI app
+    rich_output = RichCLIOutput(app)
+    agent.output_router.default_output = rich_output
+
+    await agent.start()
+
+    # Resume: replay session history to scrollback. Normally agent.run()
+    # would do this, but we own the main loop so we have to do it
+    # ourselves. Has to happen BEFORE app.run_async() so the writes go
+    # to real terminal scrollback (not into prompt_toolkit's screen).
+    pending = getattr(agent, "_pending_resume_events", None)
+    if pending:
+        try:
+            app.replay_session(pending)
+        except Exception:
+            pass
+        agent._pending_resume_events = None
+
+    try:
+        await app.run()
+    finally:
+        await agent.stop()
 
 
 def run_agent_cli(
@@ -36,15 +73,20 @@ def run_agent_cli(
             print(f"Error: No config.yaml found in {agent_path}")
             return 1
 
+    # Resolve mode: default to "cli" (rich) if interactive, else "plain"
+    resolved_mode = io_mode or ("cli" if sys.stdout.isatty() else "plain")
+    use_rich_cli = resolved_mode == "cli"
+
     store = None
     session_file = None
     try:
         # Create IO module overrides if mode specified
         io_kwargs: dict = {}
-        if io_mode:
-            from kohakuterrarium.session.resume import _create_io_modules
-
-            inp, out = _create_io_modules(io_mode)
+        if use_rich_cli:
+            io_kwargs["input_module"] = RichCLIInput()
+            io_kwargs["output_module"] = RichCLIOutput(app=None)
+        else:
+            inp, out = _create_io_modules(resolved_mode)
             io_kwargs["input_module"] = inp
             io_kwargs["output_module"] = out
 
@@ -71,7 +113,10 @@ def run_agent_cli(
             )
             agent.attach_session_store(store)
 
-        asyncio.run(agent.run())
+        if use_rich_cli:
+            asyncio.run(_run_agent_rich_cli(agent))
+        else:
+            asyncio.run(agent.run())
         return 0
     except KeyboardInterrupt:
         print("\nInterrupted")
