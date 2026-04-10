@@ -14,7 +14,7 @@
       <span class="i-carbon-chevron-down text-[9px] opacity-50" />
     </button>
     <template #dropdown>
-      <el-dropdown-menu>
+      <el-dropdown-menu class="model-switcher-dropdown">
         <div
           v-if="loading"
           class="px-4 py-2 text-[11px] text-warm-400"
@@ -95,3 +95,11 @@ async function onPick(modelName) {
   }
 }
 </script>
+
+<style>
+/* Constrain the model dropdown so it scrolls rather than pushing the layout */
+.model-switcher-dropdown {
+  max-height: 360px;
+  overflow-y: auto;
+}
+</style>

@@ -1,44 +1,8 @@
 <template>
-  <div v-if="instance" class="flex flex-col h-full bg-warm-50 dark:bg-warm-900">
-    <!-- Header -->
-    <div class="flex items-center gap-3 px-4 py-2 border-b border-warm-200 dark:border-warm-700 bg-white dark:bg-warm-800">
-      <StatusDot :status="instance.status" />
-      <span class="font-medium text-warm-700 dark:text-warm-300">{{
-        instance.config_name
-      }}</span>
-      <span
-        v-if="chat.sessionInfo.model || instance?.model"
-        class="px-2 py-0.5 rounded-md text-[11px] font-mono bg-iolite/10 dark:bg-iolite/15 text-iolite dark:text-iolite-light"
-      >{{ chat.sessionInfo.model || instance?.model }}</span>
-      <span class="text-xs text-warm-400 font-mono truncate">{{
-        instance.pwd
-      }}</span>
-      <div class="flex-1" />
-      <el-tooltip content="Open in Editor" placement="bottom">
-        <button
-          class="nav-item !w-7 !h-7 text-iolite hover:!text-iolite-shadow"
-          @click="router.push(`/editor/${route.params.id}`)"
-        >
-          <div class="i-carbon-code text-sm" />
-        </button>
-      </el-tooltip>
-      <el-tooltip content="Stop instance" placement="bottom">
-        <button
-          class="nav-item !w-7 !h-7 text-coral hover:!text-coral-shadow"
-          @click="showStopConfirm = true"
-        >
-          <div class="i-carbon-stop-filled text-sm" />
-        </button>
-      </el-tooltip>
-    </div>
+  <div v-if="instance" class="h-full overflow-hidden">
+    <WorkspaceShell :instance-id="route.params.id" />
 
-    <!-- Zoned body via WorkspaceShell + legacy-instance preset. Visual
-         output matches the old nested-SplitPane layout pixel-for-pixel. -->
-    <div class="flex-1 overflow-hidden">
-      <WorkspaceShell :instance-id="route.params.id" />
-    </div>
-
-    <!-- Stop confirmation dialog -->
+    <!-- Stop confirmation dialog (triggered from the status bar or nav) -->
     <el-dialog
       v-model="showStopConfirm"
       title="Stop Instance"
@@ -65,7 +29,6 @@
 <script setup>
 import { computed, onMounted, provide, ref, watch } from "vue";
 
-import StatusDot from "@/components/common/StatusDot.vue";
 import WorkspaceShell from "@/components/layout/WorkspaceShell.vue";
 import { useChatStore } from "@/stores/chat";
 import { useInstancesStore } from "@/stores/instances";
@@ -82,13 +45,21 @@ const showStopConfirm = ref(false);
 const stopping = ref(false);
 
 // Runtime prop map for panels mounted inside the shell's zones.
-// Keys are panel ids (matching layoutPanels.js registrations).
 const panelProps = computed(() => ({
   chat: { instance: instance.value },
   "status-dashboard": {
     instance: instance.value,
     onOpenTab: handleOpenTab,
   },
+  activity: { instance: instance.value },
+  state: { instance: instance.value },
+  creatures: { instance: instance.value },
+  files: {
+    root: instance.value?.pwd || "",
+    onSelect: (path) => {},
+  },
+  settings: { instance: instance.value },
+  debug: { instance: instance.value },
 }));
 provide("panelProps", panelProps);
 
@@ -111,11 +82,6 @@ async function loadInstance() {
   }
 }
 
-/**
- * Choose the preset for this instance:
- *   1. remembered preset (per-instance localStorage)
- *   2. terrarium → multi-creature; creature → chat-focus
- */
 function applyPresetForInstance() {
   const id = route.params.id;
   if (!id) return;

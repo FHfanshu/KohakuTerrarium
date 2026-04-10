@@ -1,34 +1,23 @@
 <template>
   <div
-    class="status-bar flex items-center gap-3 px-3 h-6 text-[10px] font-mono bg-warm-100 dark:bg-warm-950 border-t border-warm-200 dark:border-warm-700 text-warm-500"
+    class="status-bar flex items-center gap-2 px-3 h-6 text-[10px] font-mono bg-warm-100 dark:bg-warm-950 border-t border-warm-200 dark:border-warm-700 text-warm-500 overflow-hidden shrink-0"
   >
-    <!-- Instance name -->
-    <button
-      class="status-seg flex items-center gap-1.5 hover:text-warm-700 dark:hover:text-warm-300 transition-colors"
-      :title="instance?.config_name || ''"
-    >
+    <!-- Instance name + status -->
+    <div class="status-seg flex items-center gap-1.5 shrink-0">
       <StatusDot v-if="instance" :status="instance.status" class="scale-75" />
       <span class="truncate max-w-40">{{ instance?.config_name || '—' }}</span>
-    </button>
-
-    <div class="seg-sep" />
-
-    <!-- Model quick switcher (functional dropdown) -->
-    <ModelSwitcher />
-
-    <div class="seg-sep" />
-
-    <!-- Agent name -->
-    <div class="status-seg flex items-center gap-1">
-      <span class="i-carbon-bot text-[11px]" />
-      <span class="truncate max-w-32">{{ agentName || '—' }}</span>
     </div>
+
+    <div class="seg-sep" />
+
+    <!-- Model quick switcher -->
+    <ModelSwitcher />
 
     <div class="seg-sep" />
 
     <!-- Session id (click to copy) -->
     <button
-      class="status-seg flex items-center gap-1 hover:text-warm-700 dark:hover:text-warm-300 transition-colors"
+      class="status-seg flex items-center gap-1 hover:text-warm-700 dark:hover:text-warm-300 transition-colors shrink-0"
       :title="sessionId || ''"
       @click="copySession"
     >
@@ -37,21 +26,21 @@
     </button>
 
     <!-- Spacer -->
-    <div class="flex-1" />
+    <div class="flex-1 min-w-0" />
 
     <!-- Running jobs count -->
     <div
-      class="status-seg flex items-center gap-1"
+      class="status-seg flex items-center gap-1 shrink-0"
       :class="jobCount ? 'text-amber' : ''"
     >
       <span class="i-carbon-pulse text-[11px]" />
-      <span>{{ jobCount }} job<span v-if="jobCount !== 1">s</span></span>
+      <span>{{ jobCount }}</span>
     </div>
 
     <div class="seg-sep" />
 
     <!-- Runtime -->
-    <div class="status-seg flex items-center gap-1">
+    <div class="status-seg flex items-center gap-1 shrink-0">
       <span class="i-carbon-time text-[11px]" />
       <span>{{ runtimeStr }}</span>
     </div>
@@ -70,10 +59,6 @@ const instances = useInstancesStore();
 const chat = useChatStore();
 
 const instance = computed(() => instances.current);
-const model = computed(() => chat.sessionInfo.model || instance.value?.model || "");
-const agentName = computed(
-  () => chat.sessionInfo.agentName || instance.value?.config_name || "",
-);
 const sessionId = computed(
   () => chat.sessionInfo.sessionId || instance.value?.session_id || "",
 );
@@ -85,7 +70,6 @@ const sessionIdShort = computed(() => {
 
 const jobCount = computed(() => Object.keys(chat.runningJobs || {}).length);
 
-// Simple rolling wall-clock based on instance.created_at when available.
 const now = ref(Date.now());
 let tick = null;
 onMounted(() => {
@@ -123,7 +107,8 @@ function copySession() {
   width: 1px;
   height: 12px;
   background: currentColor;
-  opacity: 0.2;
+  opacity: 0.15;
+  flex-shrink: 0;
 }
 .status-seg {
   user-select: none;

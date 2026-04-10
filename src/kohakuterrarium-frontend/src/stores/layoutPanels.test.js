@@ -38,6 +38,15 @@ vi.mock("@/components/panels/StatePanel.vue", () => ({
 vi.mock("@/components/status/StatusDashboard.vue", () => ({
   default: stub("StatusDashboard"),
 }));
+vi.mock("@/components/panels/CanvasPanel.vue", () => ({
+  default: stub("CanvasPanel"),
+}));
+vi.mock("@/components/panels/SettingsPanel.vue", () => ({
+  default: stub("SettingsPanel"),
+}));
+vi.mock("@/components/panels/DebugPanel.vue", () => ({
+  default: stub("DebugPanel"),
+}));
 
 beforeEach(() => {
   setActivePinia(createPinia());
@@ -59,6 +68,9 @@ describe("layoutPanels — registerBuiltinPanels", () => {
       "activity",
       "state",
       "creatures",
+      "canvas",
+      "settings",
+      "debug",
       "status-bar",
     ];
     for (const id of expected) {
