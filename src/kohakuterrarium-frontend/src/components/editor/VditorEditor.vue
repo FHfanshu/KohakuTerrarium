@@ -50,9 +50,16 @@ onMounted(() => {
       emit("save");
     },
     after: () => {
-      // Focus the editor after init.
       vd?.focus();
     },
+  });
+
+  // Ctrl+S to save (Vditor doesn't have a native hook for this).
+  editorEl.value.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+      e.preventDefault();
+      emit("save");
+    }
   });
 });
 
