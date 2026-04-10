@@ -1,6 +1,6 @@
 <template>
   <div v-if="instance" class="h-full overflow-hidden">
-    <WorkspaceShell :instance-id="route.params.id" />
+    <WorkspaceShell :instance-id="route.params.id" @stop="showStopConfirm = true" />
 
     <!-- Stop confirmation dialog (triggered from the status bar or nav) -->
     <el-dialog

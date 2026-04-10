@@ -3,8 +3,8 @@
     <!-- Edit mode banner -->
     <EditModeBanner />
 
-    <!-- Preset dropdown (compact) -->
-    <PresetStrip v-if="presetStrip && showPresetStrip" class="shrink-0" />
+    <!-- Top header: instance info + preset dropdown + Ctrl+K + stop -->
+    <AppHeader v-if="showHeader" @stop="$emit('stop')" />
 
     <!-- Save-as-new-preset modal -->
     <SavePresetModal v-model="saveModalOpen" @saved="onSaved" />
@@ -37,7 +37,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
-import PresetStrip from "@/components/chrome/PresetStrip.vue";
+import AppHeader from "@/components/chrome/AppHeader.vue";
 import StatusBar from "@/components/chrome/StatusBar.vue";
 import { useLayoutStore } from "@/stores/layout";
 import { LAYOUT_EVENTS, onLayoutEvent } from "@/utils/layoutEvents";
@@ -47,12 +47,13 @@ import SavePresetModal from "./SavePresetModal.vue";
 
 const props = defineProps({
   instanceId: { type: String, default: null },
-  presetStrip: { type: Boolean, default: true },
 });
+
+defineEmits(["stop"]);
 
 const layout = useLayoutStore();
 
-const showPresetStrip = computed(() => {
+const showHeader = computed(() => {
   const id = layout.activePresetId || "";
   return !id.startsWith("legacy-");
 });
