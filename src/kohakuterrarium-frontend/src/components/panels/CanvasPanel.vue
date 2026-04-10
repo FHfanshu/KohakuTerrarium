@@ -85,20 +85,14 @@
       />
     </div>
 
-    <!-- Version strip (bottom) -->
+    <!-- Bottom info strip -->
     <div
-      v-if="canvas.activeArtifact && canvas.activeArtifact.versions.length > 1"
-      class="flex items-center gap-1 px-2 h-6 border-t border-warm-200 dark:border-warm-700 text-[10px] text-warm-500 shrink-0"
+      v-if="canvas.activeArtifact"
+      class="flex items-center gap-2 px-2 h-6 border-t border-warm-200 dark:border-warm-700 text-[10px] text-warm-500 shrink-0"
     >
-      <span class="text-[9px] uppercase tracking-wider mr-1">Versions</span>
-      <span
-        v-for="(v, i) in canvas.activeArtifact.versions"
-        :key="i"
-        class="px-1.5 py-0.5 rounded font-mono"
-        :class="i === canvas.activeArtifact.versions.length - 1
-          ? 'bg-iolite/10 text-iolite'
-          : 'bg-warm-100 dark:bg-warm-800'"
-      >v{{ i + 1 }}</span>
+      <span class="font-mono">{{ canvas.activeVersion?.lang || 'text' }}</span>
+      <span class="opacity-50">·</span>
+      <span>{{ lineCount }} lines</span>
     </div>
   </div>
 </template>
@@ -114,6 +108,10 @@ import { useCanvasStore } from "@/stores/canvas";
 const canvas = useCanvasStore();
 
 const viewerType = computed(() => canvas.activeArtifact?.type || "code");
+const lineCount = computed(() => {
+  const c = canvas.activeVersion?.content;
+  return c ? c.split("\n").length : 0;
+});
 
 function typeIcon(t) {
   return {

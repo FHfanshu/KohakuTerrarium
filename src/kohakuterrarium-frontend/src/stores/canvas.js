@@ -51,16 +51,20 @@ export const useCanvasStore = defineStore("canvas", () => {
   /** Per-session dismissal: once the user closes canvas, don't auto-open. */
   const dismissed = ref(false);
 
-  /** Upsert an artifact, appending a new version if `sourceId` matches. */
+  /** Upsert an artifact. If sourceId matches and content is the same
+   *  as the latest version, skip (idempotent). Only appends a version
+   *  if the content actually changed. */
   function upsertArtifact({ sourceId, content, lang, type, seedName }) {
     const existing = artifacts.value.find((a) => a.sourceId === sourceId);
-    const version = {
-      content,
-      lang: lang || "text",
-      ts: new Date().toISOString(),
-    };
     if (existing) {
-      existing.versions.push(version);
+      const latest = existing.versions[existing.versions.length - 1];
+      // Skip if content unchanged (repeated scans of the same block).
+      if (latest && latest.content === content) return existing;
+      existing.versions.push({
+        content,
+        lang: lang || "text",
+        ts: new Date().toISOString(),
+      });
       if (!activeId.value) activeId.value = existing.id;
       return existing;
     }
