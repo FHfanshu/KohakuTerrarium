@@ -141,7 +141,7 @@ class EventType:
 
 
 def create_user_input_event(
-    content: str,
+    content: EventContent,
     source: str = "cli",
     **extra_context: Any,
 ) -> TriggerEvent:

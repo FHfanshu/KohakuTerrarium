@@ -14,11 +14,64 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from kohakuterrarium.api.deps import get_manager
 from kohakuterrarium.api.events import StreamOutput, get_event_log
+from kohakuterrarium.llm.message import FilePart, ImagePart, TextPart, VideoPart
 from kohakuterrarium.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
 router = APIRouter()
+
+
+def _build_multimodal_content(message: str, attachments: list[dict] | None):
+    parts = []
+    if message:
+        parts.append(TextPart(text=message))
+    for item in attachments or []:
+        att_type = str(item.get("type") or "").lower()
+        mime_type = str(item.get("mimeType") or "")
+        url = str(item.get("url") or "")
+        name = str(item.get("name") or "attachment")
+        if not url:
+            continue
+        if att_type == "image" or mime_type.startswith("image/"):
+            parts.append(
+                ImagePart(
+                    url=url,
+                    detail="low",
+                    source_type="attachment",
+                    source_name=name,
+                )
+            )
+            continue
+        if att_type == "video" or mime_type.startswith("video/"):
+            parts.append(VideoPart(data=url, mime_type=mime_type or "video/mp4", filename=name))
+            continue
+        if mime_type == "application/pdf" or att_type == "pdf":
+            parts.append(FilePart(data=url, mime_type="application/pdf", filename=name))
+            continue
+        label = f"[{att_type or 'file'} attachment: {name}]"
+        parts.append(TextPart(text=label))
+    if not parts:
+        return ""
+    if len(parts) == 1 and isinstance(parts[0], TextPart):
+        return parts[0].text
+    return parts
+
+
+def _apply_reasoning_effort(agent, reasoning_effort: str):
+    value = (reasoning_effort or "").strip()
+    if not value:
+        return None
+    previous = getattr(agent.config, "reasoning_effort", "")
+    agent.config.reasoning_effort = value
+    llm = getattr(agent, "llm", None)
+    if llm is not None:
+        if hasattr(llm, "reasoning_effort"):
+            llm.reasoning_effort = value
+        extra_body = getattr(llm, "extra_body", None)
+        if isinstance(extra_body, dict):
+            llm.extra_body = {**extra_body, "reasoning_effort": value}
+    return previous
 
 
 async def _forward_queue(queue: asyncio.Queue, ws: WebSocket) -> None:
@@ -87,11 +140,8 @@ def _register_channel_callbacks(
                     "source": "channel",
                     "channel": channel_name,
                     "sender": message.sender,
-                    "content": (
-                        message.content
-                        if isinstance(message.content, str)
-                        else str(message.content)
-                    ),
+                    "content": message.content,
+                    "metadata": message.metadata,
                     "message_id": message.message_id,
                     "timestamp": ts,
                     "ts": time.time(),
@@ -123,11 +173,8 @@ async def _send_channel_history(ws: WebSocket, runtime) -> None:
                     "source": "channel",
                     "channel": ch.name,
                     "sender": msg.sender,
-                    "content": (
-                        msg.content
-                        if isinstance(msg.content, str)
-                        else str(msg.content)
-                    ),
+                    "content": msg.content,
+                    "metadata": msg.metadata,
                     "message_id": msg.message_id,
                     "timestamp": ts,
                     "ts": time.time(),
@@ -144,20 +191,28 @@ async def _handle_terrarium_input(ws: WebSocket, manager, terrarium_id: str) -> 
             continue
         target = data.get("target", "root")
         message = data.get("message", "")
-        if not message:
+        attachments = data.get("attachments") or []
+        reasoning_effort = data.get("reasoning_effort", "")
+        if not message and not attachments:
             continue
         try:
             session = manager.terrarium_mount(terrarium_id, target)
+            content = _build_multimodal_content(message, attachments)
             log = get_event_log(f"{terrarium_id}:{target}")
             user_evt = {
                 "type": "user_input",
                 "source": target,
-                "content": message,
+                "content": content,
                 "ts": time.time(),
             }
             log.append(user_evt)
             await queue.put(user_evt)
-            await session.agent.inject_input(message, source="web")
+            previous_effort = _apply_reasoning_effort(session.agent, reasoning_effort)
+            try:
+                await session.agent.inject_input(content, source="web")
+            finally:
+                if previous_effort is not None:
+                    _apply_reasoning_effort(session.agent, previous_effort)
             await ws.send_json({"type": "idle", "source": target, "ts": time.time()})
         except ValueError as e:
             await ws.send_json(
@@ -272,17 +327,25 @@ async def ws_creature(websocket: WebSocket, agent_id: str):
             if data.get("type") != "input":
                 continue
             message = data.get("message", "")
-            if not message:
+            attachments = data.get("attachments") or []
+            reasoning_effort = data.get("reasoning_effort", "")
+            if not message and not attachments:
                 continue
+            content = _build_multimodal_content(message, attachments)
             user_evt = {
                 "type": "user_input",
                 "source": session.agent.config.name,
-                "content": message,
+                "content": content,
                 "ts": time.time(),
             }
             log.append(user_evt)
             await queue.put(user_evt)
-            await session.agent.inject_input(message, source="web")
+            previous_effort = _apply_reasoning_effort(session.agent, reasoning_effort)
+            try:
+                await session.agent.inject_input(content, source="web")
+            finally:
+                if previous_effort is not None:
+                    _apply_reasoning_effort(session.agent, previous_effort)
             await websocket.send_json(
                 {
                     "type": "idle",

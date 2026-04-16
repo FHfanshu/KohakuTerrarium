@@ -199,7 +199,8 @@ async def agent_history(agent_id: str, manager=Depends(get_manager)):
     """Get conversation history + event log for a standalone agent."""
     try:
         history = manager.agent_get_history(agent_id)
-        return {"agent_id": agent_id, "events": history}
+        session = manager._agents.get(agent_id)
+        return {"agent_id": agent_id, "messages": session.agent.conversation_history if session else [], "events": history}
     except ValueError as e:
         raise HTTPException(404, str(e))
 

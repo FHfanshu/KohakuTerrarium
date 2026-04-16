@@ -68,6 +68,8 @@ export default {
   "common.triggers": "触发器",
   "common.type": "类型",
   "common.view": "查看",
+  "chat.recoveringReply": "正在整理回复…",
+  "chat.recoveryRetry": ({ count }) => `第 ${count} 次重试`,
 
   "home.subtitle": "打造可独立运作的代理，并将它们组合成能协同工作的团队。",
   "home.runningInstances": "运行中的实例",
@@ -127,6 +129,8 @@ export default {
   "sessions.deleteConfirm": "要删除会话“{name}”吗？",
   "sessions.deleted": "会话已删除",
   "sessions.deleteFailed": "删除失败：{message}",
+  "chat.queueNotice": "新消息会在当前回复完成后发送。",
+  "chat.recoveryFailed": "回复同步比预期更慢。你可以稍等一下，或再次发送。",
 
   "registry.loadingConfigs": "正在加载设置...",
   "registry.noConfigsInstalled": "尚未安装任何设置。",
@@ -169,6 +173,11 @@ export default {
   "settings.models.modelId": "模型 ID *",
   "settings.models.provider": "提供者",
   "settings.models.baseUrlOptional": "Base URL（选填）",
+  "settings.models.apiKeyEnv": "API Key Env",
+  "settings.models.apiKeyOptional": "API 密钥（选填）",
+  "settings.models.apiKeyPlaceholder": "留空则保留当前密钥",
+  "settings.models.apiKeyEditHint": "编辑时若不想覆盖已存储密钥，可将 API 密钥留空。",
+  "settings.models.apiKeyEnvRequired": "设置 API 密钥时必须填写 API Key Env",
   "settings.models.maxContext": "最大上下文",
   "settings.models.temperature": "温度",
   "settings.models.update": "更新",
@@ -178,6 +187,7 @@ export default {
   "settings.models.deleted": "已删除配置文件“{name}”",
   "settings.models.deleteFailed": "删除失败",
   "settings.models.baseUrlShort": "url",
+  "settings.models.apiKeyEnvShort": "key",
   "settings.models.contextShort": "ctx",
   "settings.models.temperatureShort": "temp",
   "settings.mcp.description":

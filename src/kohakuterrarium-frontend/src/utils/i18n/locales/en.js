@@ -68,6 +68,8 @@ export default {
   "common.triggers": "Triggers",
   "common.type": "Type",
   "common.view": "View",
+  "chat.recoveringReply": "Finalizing reply…",
+  "chat.recoveryRetry": ({ count }) => `Retry ${count}`,
 
   "home.subtitle": "Build agents that work alone. Compose them into teams that work together.",
   "home.runningInstances": "Running Instances",
@@ -128,6 +130,8 @@ export default {
   "sessions.deleteConfirm": 'Delete session "{name}"?',
   "sessions.deleted": "Session deleted",
   "sessions.deleteFailed": "Failed to delete: {message}",
+  "chat.queueNotice": "New messages will be sent after the current reply finishes.",
+  "chat.recoveryFailed": "Reply sync is taking longer than expected. You can wait a moment or send again.",
 
   "registry.loadingConfigs": "Loading configs...",
   "registry.noConfigsInstalled": "No configs installed.",
@@ -171,6 +175,12 @@ export default {
   "settings.models.modelId": "Model ID *",
   "settings.models.provider": "Provider",
   "settings.models.baseUrlOptional": "Base URL (optional)",
+  "settings.models.apiKeyEnv": "API Key Env",
+  "settings.models.apiKeyOptional": "API Key (optional)",
+  "settings.models.apiKeyPlaceholder": "Leave blank to keep current key",
+  "settings.models.apiKeyEditHint":
+    "Leave the API key blank when editing to keep the currently stored value.",
+  "settings.models.apiKeyEnvRequired": "API Key Env is required when setting an API key",
   "settings.models.maxContext": "Max Context",
   "settings.models.temperature": "Temperature",
   "settings.models.update": "Update",
@@ -180,6 +190,7 @@ export default {
   "settings.models.deleted": 'Profile "{name}" deleted',
   "settings.models.deleteFailed": "Failed to delete",
   "settings.models.baseUrlShort": "url",
+  "settings.models.apiKeyEnvShort": "key",
   "settings.models.contextShort": "ctx",
   "settings.models.temperatureShort": "temp",
   "settings.mcp.description":

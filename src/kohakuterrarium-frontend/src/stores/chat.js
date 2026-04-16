@@ -4,6 +4,144 @@ import { useInstancesStore } from "@/stores/instances"
 import { useStatusStore } from "@/stores/status"
 import { getHybridPrefSync, setHybridPref } from "@/utils/uiPrefs"
 
+function normalizeAttachments(attachments) {
+  if (!Array.isArray(attachments)) return []
+  return attachments
+    .map((item, index) => {
+      if (!item) return null
+      const type = item.type || item.kind || "file"
+      const mimeType = item.mime_type || item.mimeType || item.mime || ""
+      const url = item.url || item.data_url || item.dataUrl || ""
+      return {
+        id: item.id || `att_${index}`,
+        type,
+        name: item.name || item.filename || `attachment-${index + 1}`,
+        mimeType,
+        size: item.size || 0,
+        url,
+      }
+    })
+    .filter(Boolean)
+}
+
+function parseMessageContent(content) {
+  if (typeof content === "string") return { text: content, attachments: [] }
+  if (!Array.isArray(content)) return { text: "", attachments: [] }
+
+  const text = []
+  const attachments = []
+  for (const part of content) {
+    if (!part) continue
+    if (part.type === "text") {
+      if (part.text) text.push(part.text)
+      continue
+    }
+    if (part.type === "input_text") {
+      if (part.text) text.push(part.text)
+      continue
+    }
+    if (part.type === "image_url" || part.type === "input_image") {
+      const image = part.image_url?.url || part.url || ""
+      attachments.push({
+        type: "image",
+        name: part.name || "image",
+        mimeType: part.mime_type || "",
+        url: image,
+      })
+      continue
+    }
+    if (part.type === "input_file" || part.type === "file") {
+      attachments.push({
+        type: part.mime_type === "application/pdf" ? "pdf" : "file",
+        name: part.filename || part.name || "file",
+        mimeType: part.mime_type || "",
+        url: part.file_data || part.url || "",
+      })
+      continue
+    }
+    if (part.type === "input_video" || part.type === "video") {
+      attachments.push({
+        type: "video",
+        name: part.filename || part.name || "video",
+        mimeType: part.mime_type || "",
+        url: part.video_data || part.url || "",
+      })
+    }
+  }
+  return { text: text.join("\n"), attachments: normalizeAttachments(attachments) }
+}
+
+function attachConversationIndices(uiMessages, rawMessages) {
+  if (!Array.isArray(uiMessages) || !Array.isArray(rawMessages) || !uiMessages.length || !rawMessages.length) {
+    return uiMessages
+  }
+  let rawUserIndex = 0
+  for (const message of uiMessages) {
+    if (message.role !== "user") continue
+    while (rawUserIndex < rawMessages.length && rawMessages[rawUserIndex]?.role !== "user") {
+      rawUserIndex += 1
+    }
+    if (rawUserIndex >= rawMessages.length) break
+    message.conversationIndex = rawUserIndex
+    rawUserIndex += 1
+  }
+  return uiMessages
+}
+
+function cloneMessage(message) {
+  return {
+    ...message,
+    attachments: Array.isArray(message.attachments)
+      ? message.attachments.map((item) => ({ ...item }))
+      : message.attachments,
+    tool_calls: Array.isArray(message.tool_calls)
+      ? message.tool_calls.map((item) => ({ ...item }))
+      : message.tool_calls,
+    parts: Array.isArray(message.parts)
+      ? message.parts.map((part) => ({
+          ...part,
+          args: part.args && typeof part.args === "object" ? { ...part.args } : part.args,
+          tools_used: Array.isArray(part.tools_used) ? [...part.tools_used] : part.tools_used,
+          children: Array.isArray(part.children)
+            ? part.children.map((child) => ({
+                ...child,
+                args:
+                  child.args && typeof child.args === "object"
+                    ? { ...child.args }
+                    : child.args,
+                tools_used: Array.isArray(child.tools_used)
+                  ? [...child.tools_used]
+                  : child.tools_used,
+              }))
+            : part.children,
+        }))
+      : message.parts,
+  }
+}
+
+function refreshTabMessages(store, tabKey) {
+  if (!tabKey) return
+  const messages = store.messagesByTab[tabKey]
+  if (!Array.isArray(messages)) return
+  store.messagesByTab = {
+    ...store.messagesByTab,
+    [tabKey]: messages.map((message) => cloneMessage(message)),
+  }
+}
+
+function mutateTabMessages(store, tabKey, updater) {
+  if (!tabKey) return null
+  const current = store.messagesByTab[tabKey]
+  if (!Array.isArray(current)) return null
+  const draft = current.map((message) => cloneMessage(message))
+  const next = updater(draft) || draft
+  store.messagesByTab = {
+    ...store.messagesByTab,
+    [tabKey]: next,
+  }
+  return next
+}
+
 /**
  * Convert OpenAI-format conversation history to frontend messages.
  */
@@ -16,10 +154,12 @@ export function _convertHistory(messages) {
   for (const msg of messages) {
     if (msg.role === "system" || msg.role === "tool") continue
     if (msg.role === "user") {
+      const parsed = parseMessageContent(msg.content)
       result.push({
         id: "h_" + result.length,
         role: "user",
-        content: msg.content || "",
+        content: parsed.text,
+        attachments: parsed.attachments.length ? parsed.attachments : undefined,
         timestamp: "",
       })
     } else if (msg.role === "assistant") {
@@ -31,10 +171,14 @@ export function _convertHistory(messages) {
         status: "done",
         result: toolResults[tc.id] || "",
       }))
+      // Handle multimodal content: parse array format like user messages
+      const parsed = parseMessageContent(msg.content)
       result.push({
         id: "h_" + result.length,
         role: "assistant",
-        content: msg.content || "",
+        content: parsed.text,
+        attachments: parsed.attachments.length ? parsed.attachments : undefined,
+        parts: [], // Will be filled by event replay or fallback
         timestamp: "",
         tool_calls: tcs.length ? tcs : undefined,
       })
@@ -269,10 +413,12 @@ export function _replayEvents(messages, events) {
     // ── Common types (both formats) ──
     if (t === "user_input") {
       cur = null
+      const parsed = parseMessageContent(evt.content)
       result.push({
         id: "h_" + result.length,
         role: "user",
-        content: evt.content || "",
+        content: parsed.text,
+        attachments: parsed.attachments.length ? parsed.attachments : undefined,
         timestamp: "",
       })
     } else if (t === "processing_start") {
@@ -517,27 +663,52 @@ export function _replayEvents(messages, events) {
     }
   }
 
-  // Only mark sub-agents as interrupted if they have NO job_id tracking
-  // (legacy events without job_id) AND have no result
-  for (const msg of result) {
-    for (const part of msg.parts || []) {
-      if (
-        part.type === "tool" &&
-        part.kind === "subagent" &&
-        part.status === "done" &&
-        !part.result &&
-        !part.jobId
-      ) {
-        part.status = "interrupted"
-      }
-    }
-  }
-
   // Clean up empty parts
   for (const msg of result) {
     if (msg.parts?.length === 0) delete msg.parts
   }
-  return { messages: result, pendingJobs }
+
+  const fallback = attachConversationIndices(_convertHistory(messages), messages)
+  for (let i = 0; i < Math.min(result.length, fallback.length); i++) {
+    const liveMsg = result[i]
+    const finalMsg = fallback[i]
+    if (!liveMsg || !finalMsg || liveMsg.role !== finalMsg.role) continue
+
+    if (liveMsg.role === "assistant") {
+      const hasText = Array.isArray(liveMsg.parts)
+        ? liveMsg.parts.some((part) => part.type === "text" && part.content)
+        : !!liveMsg.content
+      const hasTools = Array.isArray(liveMsg.parts)
+        ? liveMsg.parts.some((part) => part.type === "tool")
+        : Array.isArray(liveMsg.tool_calls) && liveMsg.tool_calls.length > 0
+      const hasAttachments = Array.isArray(liveMsg.attachments) && liveMsg.attachments.length > 0
+      const fallbackHasContent = finalMsg.content || (Array.isArray(finalMsg.attachments) && finalMsg.attachments.length > 0)
+
+      if (!hasText && !hasTools) {
+        // Live message has no visible content — use fallback.
+        // Merge live parts into fallback text so the rendered message
+        // contains both the fallback content AND any live tool/subagent parts.
+        const mergedParts = [
+          // Convert fallback content/attachments into text/attachment parts
+          ...(finalMsg.content ? [{ type: "text", content: finalMsg.content }] : []),
+          ...(finalMsg.attachments?.length ? finalMsg.attachments.map((a) => ({ type: a.type || "file", ...a, partType: "attachment" })) : []),
+          // Preserve any live tool/subagent parts
+          ...(Array.isArray(liveMsg.parts) ? liveMsg.parts : []),
+        ]
+        result[i] = {
+          ...finalMsg,
+          content: finalMsg.content,
+          attachments: finalMsg.attachments,
+          parts: mergedParts.length ? mergedParts : undefined,
+          tool_calls: liveMsg.tool_calls || finalMsg.tool_calls,
+        }
+      }
+    } else if (liveMsg.role === "user" && !liveMsg.content && finalMsg.content) {
+      result[i] = { ...liveMsg, content: finalMsg.content, attachments: finalMsg.attachments }
+    }
+  }
+
+  return { messages: attachConversationIndices(result, messages), pendingJobs }
 }
 
 function _parseArgs(args) {
@@ -580,6 +751,7 @@ export const useChatStore = defineStore("chat", {
       model: "",
       agentName: "",
       compactThreshold: 0,
+      reasoningEffort: "",
     },
     /** Reactive tick counter - incremented every second when jobs are running */
     _jobTick: 0,
@@ -595,6 +767,12 @@ export const useChatStore = defineStore("chat", {
     queuedMessages: [],
     /** @type {number} Monotonic token to ignore stale history/WS callbacks after instance switches */
     _instanceGeneration: 0,
+    /** @type {number | null} Recovery poll timer for empty assistant messages */
+    _recoveryPollTimer: null,
+    /** @type {number} Attempts used by empty-message recovery polling */
+    _recoveryPollAttempts: 0,
+    /** @type {string | null} Tab currently being recovery-polled */
+    _recoveryPollTab: null,
     /** @type {Record<string, number>} Recent user message signatures for cross-tab dedupe */
     _recentUserInputs: {},
   }),
@@ -605,6 +783,7 @@ export const useChatStore = defineStore("chat", {
       return state.messagesByTab[state.activeTab] || []
     },
     hasRunningJobs: (state) => Object.keys(state.runningJobs).length > 0,
+    isWorking: (state) => state.processing || Object.keys(state.runningJobs).length > 0,
     terrariumTarget: (state) => {
       if (state._instanceType !== "terrarium") return null
       const tab = state.activeTab
@@ -634,6 +813,7 @@ export const useChatStore = defineStore("chat", {
         agentName: "",
         compactThreshold: 0,
         maxContext: 0,
+        reasoningEffort: "",
       }
 
       // Reset status store too
@@ -724,8 +904,23 @@ export const useChatStore = defineStore("chat", {
       }
     },
 
-    async send(text) {
-      if (!this.activeTab || !text.trim() || !this._ws) return
+/** Force clear processing state (fallback when backend doesn't respond). */
+    _forceClearState() {
+      this.processing = false
+      // Clear cancelling jobs
+      for (const jobId in this.runningJobs) {
+        const job = this.runningJobs[jobId]
+        if (job.cancelling) {
+          delete this.runningJobs[jobId]
+        }
+      }
+      this._checkJobTimer()
+    },
+
+    async send(text, options = {}) {
+      const trimmed = typeof text === "string" ? text.trim() : ""
+      const attachments = normalizeAttachments(options.attachments)
+      if (!this.activeTab || (!trimmed && attachments.length === 0) || !this._ws) return
 
       const tab = this.activeTab
       const now = Date.now()
@@ -733,12 +928,12 @@ export const useChatStore = defineStore("chat", {
         id: "u_" + now,
         role: "user",
         content: text,
+        attachments: attachments.length ? attachments : undefined,
         timestamp: new Date(now).toISOString(),
       }
 
-      this._recentUserInputs[`${tab}:${text}`] = now
+      this._recentUserInputs[`${tab}:${trimmed}`] = now
       if (this.processing) {
-        // Don't put in main chat — hold in queue, shown above input box
         msg.queued = true
         this.queuedMessages.push(msg)
       } else {
@@ -748,14 +943,25 @@ export const useChatStore = defineStore("chat", {
       if (tab.startsWith("ch:")) {
         const chName = tab.slice(3)
         try {
-          await terrariumAPI.sendToChannel(this._instanceId, chName, text, "human")
+          await terrariumAPI.sendToChannel(this._instanceId, chName, text, "human", {
+            attachments,
+            reasoning_effort: options.reasoningEffort || "",
+          })
         } catch (err) {
           console.error("Channel send failed:", err)
         }
       } else {
         const target = tab
         if (this._ws.readyState === WebSocket.OPEN) {
-          this._ws.send(JSON.stringify({ type: "input", target, message: text }))
+          this._ws.send(
+            JSON.stringify({
+              type: "input",
+              target,
+              message: text,
+              attachments,
+              reasoning_effort: options.reasoningEffort || "",
+            }),
+          )
           this.processing = true
         }
       }
@@ -852,15 +1058,21 @@ export const useChatStore = defineStore("chat", {
 
     async _loadAgentHistory(agentId, tabKey, generation = this._instanceGeneration) {
       try {
-        const { messages, events } = await agentAPI.getHistory(agentId)
+        const data = await agentAPI.getHistory(agentId)
         if (generation !== this._instanceGeneration) return
-        if (events?.length) {
+
+        const events = Array.isArray(data?.events) ? data.events : []
+        const messages = Array.isArray(data?.messages) ? data.messages : []
+
+        if (events.length) {
           const { messages: msgs, pendingJobs } = _replayEvents(messages, events)
           this.messagesByTab[tabKey] = msgs
+          refreshTabMessages(this, tabKey)
           this._restoreTokenUsage(tabKey, events)
           this._restoreRunningState(pendingJobs)
-        } else if (messages?.length) {
+        } else if (messages.length) {
           this.messagesByTab[tabKey] = _convertHistory(messages)
+          refreshTabMessages(this, tabKey)
         }
       } catch {
         /* no history yet */
@@ -914,29 +1126,30 @@ export const useChatStore = defineStore("chat", {
     /** Handle ALL incoming WS messages */
     _onMessage(data) {
       const source = data.source || ""
+      const tabKey = this._resolveSourceTab(source)
 
       if (data.type === "user_input") {
-        this._handleUserInput(source, data)
+        this._handleUserInput(tabKey, data)
       } else if (data.type === "text") {
         // If we get text chunks but processing is false (e.g. reconnect mid-stream),
         // set processing to true so the UI shows "KohakUwUing"
         if (!this.processing) this.processing = true
-        this._appendStreamChunk(source, data.content)
+        this._appendStreamChunk(tabKey, data.content)
       } else if (data.type === "processing_start") {
         this.processing = true
         // Promote queued user messages (agent is now processing them)
-        this._promoteQueuedMessages(source)
+        this._promoteQueuedMessages(tabKey)
       } else if (data.type === "processing_end") {
-        this._finishStream(source)
+        this._finishStream(tabKey)
       } else if (data.type === "idle") {
         this.processing = false
-        this._finishStream(source)
+        this._finishStream(tabKey)
       } else if (data.type === "activity") {
-        this._handleActivity(source, data)
+        this._handleActivity(tabKey, data)
       } else if (data.type === "channel_message") {
         this._handleChannelMessage(data)
       } else if (data.type === "error") {
-        this._addMsg(source, {
+        this._addMsg(tabKey, {
           id: "err_" + Date.now(),
           role: "system",
           content: "Error: " + (data.content || ""),
@@ -944,6 +1157,18 @@ export const useChatStore = defineStore("chat", {
         })
         this.processing = false
       }
+    },
+
+    _resolveSourceTab(source) {
+      if (source && this.messagesByTab[source]) return source
+      if (this.activeTab && this.messagesByTab[this.activeTab] && !this.activeTab.startsWith("ch:")) {
+        return this.activeTab
+      }
+      const agentTabs = this.tabs.filter((tab) => !tab.startsWith("ch:"))
+      if (agentTabs.length === 1 && this.messagesByTab[agentTabs[0]]) {
+        return agentTabs[0]
+      }
+      return source
     },
 
     _handleActivity(source, data) {
@@ -1007,6 +1232,7 @@ export const useChatStore = defineStore("chat", {
             timestamp: new Date().toISOString(),
           })
         }
+        refreshTabMessages(this, source)
         return
       }
 
@@ -1020,6 +1246,7 @@ export const useChatStore = defineStore("chat", {
           existing.summary = data.summary || ""
           existing.messagesCompacted = data.messages_compacted || 0
           existing.status = "done"
+          refreshTabMessages(this, source)
           return
         }
         msgs.push({
@@ -1031,6 +1258,7 @@ export const useChatStore = defineStore("chat", {
           messagesCompacted: data.messages_compacted || 0,
           timestamp: new Date().toISOString(),
         })
+        refreshTabMessages(this, source)
         return
       }
 
@@ -1041,6 +1269,7 @@ export const useChatStore = defineStore("chat", {
           messagesCleared: data.messages_cleared || 0,
           timestamp: new Date().toISOString(),
         })
+        refreshTabMessages(this, source)
         return
       }
 
@@ -1055,6 +1284,7 @@ export const useChatStore = defineStore("chat", {
           timestamp: new Date().toISOString(),
         })
         this.processing = false
+        refreshTabMessages(this, source)
         return
       }
 
@@ -1072,6 +1302,7 @@ export const useChatStore = defineStore("chat", {
           sender,
           timestamp: new Date().toISOString(),
         })
+        refreshTabMessages(this, source)
         return
       }
 
@@ -1108,6 +1339,7 @@ export const useChatStore = defineStore("chat", {
           promotable: !isBg,
         }
         this._ensureJobTimer()
+        refreshTabMessages(this, source)
       } else if (at === "tool_done" || at === "subagent_done") {
         let tc = this._findToolPart(msgs, name, data.job_id)
         if (!tc) {
@@ -1136,6 +1368,7 @@ export const useChatStore = defineStore("chat", {
         if (data.completion_tokens != null) tc.completion_tokens = data.completion_tokens
         delete this.runningJobs[tc.jobId || tc.id]
         this._checkJobTimer()
+        refreshTabMessages(this, source)
       } else if (at === "tool_error" || at === "subagent_error") {
         let tc = this._findToolPart(msgs, name, data.job_id)
         if (!tc) {
@@ -1164,6 +1397,7 @@ export const useChatStore = defineStore("chat", {
         if (data.completion_tokens != null) tc.completion_tokens = data.completion_tokens
         delete this.runningJobs[tc.jobId || tc.id]
         this._checkJobTimer()
+        refreshTabMessages(this, source)
       } else if (at === "subagent_token_update") {
         // Live token usage update from a running sub-agent
         const saName = data.subagent || ""
@@ -1173,6 +1407,7 @@ export const useChatStore = defineStore("chat", {
           if (data.total_tokens) sa.total_tokens = data.total_tokens
           if (data.prompt_tokens) sa.prompt_tokens = data.prompt_tokens
           if (data.completion_tokens) sa.completion_tokens = data.completion_tokens
+          refreshTabMessages(this, source)
         }
       } else if (at?.startsWith("subagent_tool_")) {
         // Sub-agent internal tool activity: find parent by job_id or name
@@ -1194,6 +1429,7 @@ export const useChatStore = defineStore("chat", {
               result: "",
             })
             if (!sa.tools_used.includes(toolName)) sa.tools_used.push(toolName)
+            refreshTabMessages(this, source)
           } else if (subAct === "tool_done" && toolName) {
             const child = [...sa.children]
               .reverse()
@@ -1201,6 +1437,7 @@ export const useChatStore = defineStore("chat", {
             if (child) {
               child.status = "done"
               child.result = data.detail || ""
+              refreshTabMessages(this, source)
             }
           } else if (subAct === "tool_error" && toolName) {
             const child = [...sa.children]
@@ -1209,6 +1446,7 @@ export const useChatStore = defineStore("chat", {
             if (child) {
               child.status = "error"
               child.result = data.detail || ""
+              refreshTabMessages(this, source)
             }
           }
         }
@@ -1217,6 +1455,7 @@ export const useChatStore = defineStore("chat", {
         const promJobId = data.job_id || ""
         if (promJobId && this.runningJobs[promJobId]) {
           this.runningJobs[promJobId].promotable = false
+          refreshTabMessages(this, source)
         }
       }
     },
@@ -1285,22 +1524,119 @@ export const useChatStore = defineStore("chat", {
       }
     },
 
+    _logRecovery(event, detail = {}) {
+      if (!import.meta.env.DEV) return
+      console.debug("[chat-recovery]", event, {
+        instanceId: this._instanceId,
+        activeTab: this.activeTab,
+        attempts: this._recoveryPollAttempts,
+        ...detail,
+      })
+    },
+
+    _stopRecoveryPolling() {
+      if (this._recoveryPollTimer !== null) {
+        clearTimeout(this._recoveryPollTimer)
+        this._recoveryPollTimer = null
+      }
+      this._recoveryPollAttempts = 0
+      this._recoveryPollTab = null
+    },
+
+    _scheduleRecoveryPoll(tab, generation = this._instanceGeneration) {
+      if (!tab || !this._instanceId) return
+      const delays = [200, 350, 600, 1000, 1600, 2500]
+      const attempt = this._recoveryPollAttempts
+      if (attempt >= delays.length) {
+        this._logRecovery("failed", { tab, attempt })
+        mutateTabMessages(this, tab, (messages) => {
+          const last = messages[messages.length - 1]
+          if (last?.role === "assistant") {
+            last.recovering = false
+            last.recoveryFailed = true
+            last.recoveryAttempt = this._recoveryPollAttempts
+          }
+          return messages
+        })
+        this._stopRecoveryPolling()
+        return
+      }
+      this._recoveryPollTab = tab
+      if (this._recoveryPollTimer !== null) clearTimeout(this._recoveryPollTimer)
+      this._recoveryPollTimer = setTimeout(async () => {
+        this._logRecovery("poll", { tab, attempt, delay: delays[attempt] })
+        this._recoveryPollTimer = null
+        if (generation !== this._instanceGeneration) return this._stopRecoveryPolling()
+        if (this.activeTab !== tab) return this._stopRecoveryPolling()
+        const recovered = await this._resyncHistory({ tab, generation })
+        if (recovered) {
+          this._logRecovery("recovered", { tab, attempt })
+          this._stopRecoveryPolling()
+          return
+        }
+        mutateTabMessages(this, tab, (messages) => {
+          const last = messages[messages.length - 1]
+          if (last?.role === "assistant") {
+            last.recovering = true
+            last.recoveryAttempt = this._recoveryPollAttempts + 1
+          }
+          return messages
+        })
+        this._recoveryPollAttempts += 1
+        this._scheduleRecoveryPoll(tab, generation)
+      }, delays[attempt])
+    },
+
+    _startRecoveryPolling(tab) {
+      if (!tab || !this._instanceId) return
+      this._stopRecoveryPolling()
+      this._logRecovery("start", { tab })
+      this._recoveryPollAttempts = 0
+      mutateTabMessages(this, tab, (messages) => {
+        const last = messages[messages.length - 1]
+        if (last?.role === "assistant") {
+          last.recovering = true
+          last.recoveryFailed = false
+          last.recoveryAttempt = 0
+        }
+        return messages
+      })
+      this._scheduleRecoveryPoll(tab, this._instanceGeneration)
+    },
+
     /** Re-fetch conversation history from the backend and rebuild the
      *  local message list. Called after edit/regenerate/rewind so the
      *  frontend matches the backend's truncated conversation. */
-    async _resyncHistory() {
-      if (!this._instanceId) return
+    async _resyncHistory(options = {}) {
+      if (!this._instanceId) return false
+      const tab = options.tab || this.activeTab
+      const generation = options.generation ?? this._instanceGeneration
       try {
         const { agentAPI } = await import("@/utils/api")
         const data = await agentAPI.getHistory(this._instanceId)
-        const tab = this.activeTab
-        if (!tab || !data?.events) return
-        // Rebuild messages from the event history.
-        const events = data.events
-        const { messages } = _replayEvents([], events)
+        if (generation !== this._instanceGeneration) return false
+        if (!tab || !data?.events) return false
+        // Rebuild messages from backend history, preserving final conversation
+        // messages when event replay is incomplete (e.g. providers/paths that
+        // don't emit live text chunks for multimodal turns).
+        const events = Array.isArray(data.events) ? data.events : []
+        const rawMessages = Array.isArray(data.messages) ? data.messages : []
+        const { messages } = _replayEvents(rawMessages, events)
         this.messagesByTab[tab] = messages
+        refreshTabMessages(this, tab)
+        const latest = this.messagesByTab[tab]?.[this.messagesByTab[tab].length - 1]
+        if (!latest || latest.role !== "assistant") return false
+        const hasText = Array.isArray(latest.parts)
+          ? latest.parts.some((p) => p.type === "text" && p.content)
+          : !!latest.content
+        const hasToolOrSubagent = Array.isArray(latest.parts)
+          ? latest.parts.some((p) => p.type === "tool")
+          : Array.isArray(latest.tool_calls) && latest.tool_calls.length > 0
+        const hasAttachments = Array.isArray(latest.attachments) && latest.attachments.length > 0
+        return hasText || hasToolOrSubagent || hasAttachments
       } catch (e) {
         console.warn("Failed to resync history:", e)
+        return false
       }
     },
 
@@ -1374,13 +1710,14 @@ export const useChatStore = defineStore("chat", {
 
     _handleUserInput(source, data) {
       if (!source || !this.messagesByTab[source]) return
-      const signature = `${source}:${data.content || ""}`
+      const parsed = parseMessageContent(data.content)
+      const signature = `${source}:${parsed.text || ""}`
       const now = Date.now()
       const seenAt = this._recentUserInputs[signature] || 0
       if (now - seenAt < 2000) return
       const msgs = this.messagesByTab[source]
       const last = msgs[msgs.length - 1]
-      if (last?.role === "user" && last.content === (data.content || "")) {
+      if (last?.role === "user" && last.content === (parsed.text || "")) {
         this._recentUserInputs[signature] = now
         return
       }
@@ -1388,27 +1725,35 @@ export const useChatStore = defineStore("chat", {
       this._addMsg(source, {
         id: `u_sync_${now}`,
         role: "user",
-        content: data.content || "",
+        content: parsed.text || "",
+        attachments: parsed.attachments.length ? parsed.attachments : undefined,
         timestamp: data.timestamp || new Date((data.ts || now / 1000) * 1000).toISOString(),
       })
     },
 
     _handleChannelMessage(data) {
       const tabKey = `ch:${data.channel}`
+      const parsed = parseMessageContent(data.content)
 
       if (this.messagesByTab[tabKey]) {
-        const existing = this.messagesByTab[tabKey]
-        if (data.message_id && existing.some((m) => m.id === data.message_id)) {
-          return
-        }
-        this.messagesByTab[tabKey].push({
-          id: data.message_id || "ch_" + Date.now(),
-          role: "channel",
-          sender: data.sender,
-          content: data.content,
-          timestamp: data.timestamp,
+        let added = false
+        const next = mutateTabMessages(this, tabKey, (messages) => {
+          if (data.message_id && messages.some((m) => m.id === data.message_id)) {
+            return messages
+          }
+          messages.push({
+            id: data.message_id || "ch_" + Date.now(),
+            role: "channel",
+            sender: data.sender,
+            content: parsed.text,
+            attachments: parsed.attachments.length ? parsed.attachments : undefined,
+            timestamp: data.timestamp,
+          })
+          added = true
+          return messages
         })
-        if (this.activeTab !== tabKey) {
+        if (!next) return
+        if (added && this.activeTab !== tabKey) {
           this.unreadCounts[tabKey] = (this.unreadCounts[tabKey] || 0) + 1
         }
       }
@@ -1431,12 +1776,16 @@ export const useChatStore = defineStore("chat", {
     /** Move queued messages from the hold queue into the main chat. */
     _promoteQueuedMessages(source) {
       if (!this.queuedMessages.length) return
-      const msgs = this.messagesByTab[source]
-      if (!msgs) return
-      for (const msg of this.queuedMessages) {
-        delete msg.queued
-        msgs.push(msg)
-      }
+      const promoted = this.queuedMessages.map((msg) => {
+        const next = cloneMessage(msg)
+        delete next.queued
+        return next
+      })
+      const next = mutateTabMessages(this, source, (messages) => {
+        messages.push(...promoted)
+        return messages
+      })
+      if (!next) return
       this.queuedMessages = []
     },
 
@@ -1457,34 +1806,66 @@ export const useChatStore = defineStore("chat", {
     },
 
     _appendStreamChunk(source, content) {
-      const msgs = this.messagesByTab[source]
-      if (!msgs) return
-      const last = this._ensureAssistantMsg(msgs)
-      const tail = last.parts.length > 0 ? last.parts[last.parts.length - 1] : null
-      if (tail && tail.type === "text" && tail._streaming) {
-        tail.content += content
-      } else {
-        last.parts.push({ type: "text", content, _streaming: true })
-      }
+      mutateTabMessages(this, source, (messages) => {
+        const last = this._ensureAssistantMsg(messages)
+        const tail = last.parts.length > 0 ? last.parts[last.parts.length - 1] : null
+        if (tail && tail.type === "text" && tail._streaming) {
+          tail.content += content
+        } else {
+          last.parts.push({ type: "text", content, _streaming: true })
+        }
+        return messages
+      })
     },
 
     _finishStream(source) {
       this.processing = false
-      const msgs = this.messagesByTab[source]
-      if (msgs) {
-        const last = msgs[msgs.length - 1]
+      const msgs = mutateTabMessages(this, source, (messages) => {
+        const last = messages[messages.length - 1]
         if (last?._streaming) {
           last._streaming = false
           for (const p of last.parts || []) {
             if (p.type === "text") p._streaming = false
           }
         }
+        return messages
+      })
+      if (!msgs) return
+
+      const last = msgs[msgs.length - 1]
+      if (source !== this.activeTab) return
+      if (!last || last.role !== "assistant") return
+
+      const hasText = Array.isArray(last.parts)
+        ? last.parts.some((p) => p.type === "text" && p.content)
+        : !!last.content
+      const hasToolOrSubagent = Array.isArray(last.parts)
+        ? last.parts.some((p) => p.type === "tool")
+        : Array.isArray(last.tool_calls) && last.tool_calls.length > 0
+      const hasAttachments = Array.isArray(last.attachments) && last.attachments.length > 0
+
+      if (hasText || hasToolOrSubagent || hasAttachments) {
+        mutateTabMessages(this, source, (messages) => {
+          const latest = messages[messages.length - 1]
+          if (latest?.role === "assistant") {
+            delete latest.recovering
+            delete latest.recoveryAttempt
+            delete latest.recoveryFailed
+          }
+          return messages
+        })
+        this._stopRecoveryPolling()
+      } else {
+        this._startRecoveryPolling(source)
       }
     },
 
     _addMsg(tabKey, msg) {
       if (!this.messagesByTab[tabKey]) this.messagesByTab[tabKey] = []
-      this.messagesByTab[tabKey].push(msg)
+      mutateTabMessages(this, tabKey, (messages) => {
+        messages.push(cloneMessage(msg))
+        return messages
+      })
     },
 
     // ── Job timer (reactive elapsed tracking) ──
@@ -1515,6 +1896,7 @@ export const useChatStore = defineStore("chat", {
     },
 
     _cleanup() {
+      this._stopRecoveryPolling()
       this.activeTab = null
       this._historyLoaded = false
       this._wsBuffer = []
@@ -1525,6 +1907,10 @@ export const useChatStore = defineStore("chat", {
       if (this._jobTimer !== null) {
         clearInterval(this._jobTimer)
         this._jobTimer = null
+      }
+      if (this._recoveryPollTimer !== null) {
+        clearTimeout(this._recoveryPollTimer)
+        this._recoveryPollTimer = null
       }
     },
 
@@ -1556,3 +1942,6 @@ export const useChatStore = defineStore("chat", {
     },
   },
 })
+
+
+

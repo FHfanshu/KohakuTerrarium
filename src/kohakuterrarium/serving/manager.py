@@ -476,7 +476,12 @@ class KohakuManager:
         }
 
     async def terrarium_channel_send(
-        self, terrarium_id: str, channel: str, content: str, sender: str = "human"
+        self,
+        terrarium_id: str,
+        channel: str,
+        content: str | list | dict,
+        sender: str = "human",
+        reasoning_effort: str = "",
     ) -> str:
         """Send a message to a shared terrarium channel. Returns message_id."""
         runtime = self._get_runtime(terrarium_id)
@@ -484,7 +489,8 @@ class KohakuManager:
         if ch is None:
             available = runtime.environment.shared_channels.list_channels()
             raise ValueError(f"Channel '{channel}' not found. Available: {available}")
-        msg = ChannelMessage(sender=sender, content=content)
+        metadata = {"reasoning_effort": reasoning_effort} if reasoning_effort else {}
+        msg = ChannelMessage(sender=sender, content=content, metadata=metadata)
         await ch.send(msg)
         return msg.message_id
 

@@ -68,6 +68,8 @@ export default {
   "common.triggers": "トリガー",
   "common.type": "種類",
   "common.view": "表示",
+  "chat.recoveringReply": "返信を整えています…",
+  "chat.recoveryRetry": ({ count }) => `${count}回目の再試行`,
 
   "home.subtitle":
     "単独で動くエージェントを作り、それらを組み合わせて協調して動くチームにしましょう。",
@@ -130,6 +132,8 @@ export default {
   "sessions.deleteConfirm": "セッション「{name}」を削除しますか？",
   "sessions.deleted": "セッションを削除しました",
   "sessions.deleteFailed": "削除に失敗しました: {message}",
+  "chat.queueNotice": "新しいメッセージは現在の返信が終わってから送信されます。",
+  "chat.recoveryFailed": "返信の同期に時間がかかっています。少し待つか、もう一度送信してください。",
 
   "registry.loadingConfigs": "設定を読み込み中...",
   "registry.noConfigsInstalled": "インストール済みの設定はありません。",
@@ -173,6 +177,11 @@ export default {
   "settings.models.modelId": "モデル ID *",
   "settings.models.provider": "プロバイダー",
   "settings.models.baseUrlOptional": "Base URL（任意）",
+  "settings.models.apiKeyEnv": "API Key Env",
+  "settings.models.apiKeyOptional": "API キー（任意）",
+  "settings.models.apiKeyPlaceholder": "空欄なら現在のキーを保持します",
+  "settings.models.apiKeyEditHint": "編集中に現在のキーを保持したい場合は、API キーを空欄のままにしてください。",
+  "settings.models.apiKeyEnvRequired": "API キーを設定する場合は API Key Env が必要です",
   "settings.models.maxContext": "最大コンテキスト",
   "settings.models.temperature": "温度",
   "settings.models.update": "更新",
@@ -182,6 +191,7 @@ export default {
   "settings.models.deleted": "プロファイル「{name}」を削除しました",
   "settings.models.deleteFailed": "削除に失敗しました",
   "settings.models.baseUrlShort": "url",
+  "settings.models.apiKeyEnvShort": "key",
   "settings.models.contextShort": "ctx",
   "settings.models.temperatureShort": "temp",
   "settings.mcp.description":

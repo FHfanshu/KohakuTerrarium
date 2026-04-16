@@ -9,6 +9,8 @@ from typing import Any, AsyncIterator
 
 from openai import AsyncOpenAI
 
+from kohakuterrarium.llm.message import FilePart, ImagePart, VideoPart
+
 from kohakuterrarium.llm.base import (
     BaseLLMProvider,
     ChatResponse,
@@ -23,6 +25,82 @@ logger = get_logger(__name__)
 # Default API endpoints
 OPENAI_BASE_URL = "https://api.openai.com/v1"
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+GEMINI_OPENAI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+
+
+def _normalize_reasoning_effort(model: str, base_url: str, effort: str) -> tuple[str, dict[str, Any]]:
+    value = (effort or "").strip().lower()
+    if not value:
+        return "", {}
+    model_name = (model or "").lower()
+    url = (base_url or "").lower()
+    is_gemini = "gemini" in model_name or "generativelanguage.googleapis.com" in url or "google/" in model_name
+    is_anthropic = model_name.startswith("anthropic/") or "claude" in model_name
+    is_openai = ("gpt" in model_name or "codex" in model_name) and not is_gemini
+
+    if is_gemini:
+        mapped = "HIGH" if value == "high" else "LOW"
+        return "", {"google": {"thinking_config": {"thinking_level": mapped}}}
+    if is_anthropic:
+        allowed = {"low", "medium", "high", "max"}
+        mapped = value if value in allowed else "medium"
+        return "", {"reasoning": {"enabled": True, "effort": mapped}}
+    if is_openai:
+        allowed = {"minimal", "low", "medium", "high", "xhigh"}
+        mapped = value if value in allowed else "medium"
+        return "", {"reasoning": {"enabled": True, "effort": mapped}}
+    return value, {"reasoning_effort": value}
+
+
+def _prepare_messages_for_provider(messages: list[dict[str, Any]], model: str, base_url: str) -> list[dict[str, Any]]:
+    model_name = (model or "").lower()
+    url = (base_url or "").lower()
+    is_gemini = "gemini" in model_name or "generativelanguage.googleapis.com" in url or "google/" in model_name
+    if not is_gemini:
+        normalized = []
+        for msg in messages:
+            content = msg.get("content")
+            if not isinstance(content, list):
+                normalized.append(msg)
+                continue
+            next_content = []
+            for part in content:
+                if isinstance(part, dict) and part.get("type") in {"input_file", "input_video"}:
+                    mime = part.get("mime_type", "")
+                    name = part.get("filename") or part.get("name") or "attachment"
+                    label = f"[{part.get('type', 'file')} attachment: {name}{f' ({mime})' if mime else ''}]"
+                    next_content.append({"type": "text", "text": label})
+                else:
+                    next_content.append(part)
+            normalized.append({**msg, "content": next_content})
+        return normalized
+
+    normalized = []
+    for msg in messages:
+        content = msg.get("content")
+        if not isinstance(content, list):
+            normalized.append(msg)
+            continue
+        next_content = []
+        for part in content:
+            if not isinstance(part, dict):
+                next_content.append(part)
+                continue
+            part_type = part.get("type")
+            if part_type == "image_url":
+                next_content.append(part)
+            elif part_type == "input_file" and part.get("mime_type") == "application/pdf":
+                next_content.append(part)
+            elif part_type == "input_video":
+                next_content.append(part)
+            elif part_type == "input_file":
+                name = part.get("filename") or part.get("name") or "file"
+                mime = part.get("mime_type", "")
+                next_content.append({"type": "text", "text": f"[file attachment: {name}{f' ({mime})' if mime else ''}]"})
+            else:
+                next_content.append(part)
+        normalized.append({**msg, "content": next_content})
+    return normalized
 
 
 class OpenAIProvider(BaseLLMProvider):
@@ -90,6 +168,7 @@ class OpenAIProvider(BaseLLMProvider):
             )
 
         self.extra_body = extra_body or {}
+        self.base_url = base_url
         self._last_usage: dict[str, int] = {}
         self.prompt_cache_key: str | None = None
 
@@ -126,6 +205,7 @@ class OpenAIProvider(BaseLLMProvider):
         self._last_tool_calls = []
 
         api_tools = [t.to_api_format() for t in tools] if tools else None
+        messages = _prepare_messages_for_provider(messages, kwargs.get("model", self.config.model), self.base_url)
 
         create_kwargs: dict[str, Any] = {
             "model": kwargs.get("model", self.config.model),
@@ -150,10 +230,15 @@ class OpenAIProvider(BaseLLMProvider):
         if api_tools:
             create_kwargs["tools"] = api_tools
 
-        # extra_body: merged into the request body by the SDK
         merged_extra = {**self.extra_body}
         if "extra_body" in kwargs:
             merged_extra.update(kwargs["extra_body"])
+        _, reasoning_extra = _normalize_reasoning_effort(
+            kwargs.get("model", self.config.model),
+            self.base_url,
+            str(merged_extra.pop("reasoning_effort", "") or merged_extra.get("reasoning_effort", "")),
+        )
+        merged_extra.update(reasoning_extra)
         if merged_extra:
             create_kwargs["extra_body"] = merged_extra
 
@@ -244,6 +329,7 @@ class OpenAIProvider(BaseLLMProvider):
     ) -> ChatResponse:
         """Non-streaming chat completion via the OpenAI SDK."""
         self._last_tool_calls = []
+        messages = _prepare_messages_for_provider(messages, kwargs.get("model", self.config.model), self.base_url)
 
         create_kwargs: dict[str, Any] = {
             "model": kwargs.get("model", self.config.model),
@@ -261,6 +347,12 @@ class OpenAIProvider(BaseLLMProvider):
         merged_extra = {**self.extra_body}
         if "extra_body" in kwargs:
             merged_extra.update(kwargs["extra_body"])
+        _, reasoning_extra = _normalize_reasoning_effort(
+            kwargs.get("model", self.config.model),
+            self.base_url,
+            str(merged_extra.pop("reasoning_effort", "") or merged_extra.get("reasoning_effort", "")),
+        )
+        merged_extra.update(reasoning_extra)
         if merged_extra:
             create_kwargs["extra_body"] = merged_extra
 

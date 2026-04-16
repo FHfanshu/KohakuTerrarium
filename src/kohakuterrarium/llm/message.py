@@ -70,8 +70,48 @@ class ImagePart:
         return "[image]"
 
 
+@dataclass
+class FilePart:
+    """Generic file content part for multimodal messages."""
+
+    data: str
+    mime_type: str
+    filename: str | None = None
+    type: Literal["input_file"] = "input_file"
+
+    def to_dict(self) -> dict[str, Any]:
+        result = {
+            "type": "input_file",
+            "file_data": self.data,
+            "mime_type": self.mime_type,
+        }
+        if self.filename:
+            result["filename"] = self.filename
+        return result
+
+
+@dataclass
+class VideoPart:
+    """Video content part for Gemini-style multimodal input."""
+
+    data: str
+    mime_type: str
+    filename: str | None = None
+    type: Literal["input_video"] = "input_video"
+
+    def to_dict(self) -> dict[str, Any]:
+        result = {
+            "type": "input_video",
+            "video_data": self.data,
+            "mime_type": self.mime_type,
+        }
+        if self.filename:
+            result["filename"] = self.filename
+        return result
+
+
 # Union type for content parts
-ContentPart = TextPart | ImagePart
+ContentPart = TextPart | ImagePart | FilePart | VideoPart
 
 
 def content_parts_to_dicts(parts: list[ContentPart]) -> list[dict[str, Any]]:
@@ -148,6 +188,22 @@ class Message:
                         ImagePart(
                             url=img_data.get("url", ""),
                             detail=img_data.get("detail", "low"),
+                        )
+                    )
+                elif item.get("type") == "input_file" or item.get("type") == "file":
+                    parts.append(
+                        FilePart(
+                            data=item.get("file_data", "") or item.get("url", ""),
+                            mime_type=item.get("mime_type", ""),
+                            filename=item.get("filename") or item.get("name"),
+                        )
+                    )
+                elif item.get("type") == "input_video" or item.get("type") == "video":
+                    parts.append(
+                        VideoPart(
+                            data=item.get("video_data", "") or item.get("url", ""),
+                            mime_type=item.get("mime_type", ""),
+                            filename=item.get("filename") or item.get("name"),
                         )
                     )
             content = parts

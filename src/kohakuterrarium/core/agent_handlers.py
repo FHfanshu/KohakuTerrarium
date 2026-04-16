@@ -23,6 +23,7 @@ from kohakuterrarium.core.events import (
     TriggerEvent,
     create_tool_complete_event,
 )
+from kohakuterrarium.llm.message import content_parts_to_dicts
 from kohakuterrarium.parsing import (
     CommandResultEvent,
     SubAgentCallEvent,
@@ -107,11 +108,10 @@ class AgentHandlersMixin(AgentToolsMixin):
         """
         # Record user input to session store
         if self.session_store is not None and event.type == "user_input":
-            content = (
-                event.get_text_content()
-                if hasattr(event, "is_multimodal") and event.is_multimodal()
-                else (event.content or "")
-            )
+            if hasattr(event, "is_multimodal") and event.is_multimodal():
+                content = content_parts_to_dicts(event.content)
+            else:
+                content = event.content or ""
             self.session_store.append_event(
                 self.config.name, "user_input", {"content": content}
             )

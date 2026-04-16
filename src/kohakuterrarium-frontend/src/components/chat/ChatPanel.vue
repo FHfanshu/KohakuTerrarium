@@ -67,8 +67,8 @@
               <p class="text-warm-300 dark:text-warm-600 text-xs mt-1">{{ resolvedEmptySubtitle }}</p>
             </div>
           </template>
-          <ChatMessage v-for="(msg, idx) in chat.currentMessages" :key="msg.id" :message="msg" :prev-message="idx > 0 ? chat.currentMessages[idx - 1] : null" :is-first="idx === 0" :message-idx="idx" :is-last-assistant="msg.role === 'assistant' && idx === chat.currentMessages.length - 1" />
-          <div v-if="chat.processing" class="flex items-center gap-2.5 py-2 pl-1">
+          <ChatMessage v-for="(msg, idx) in chat.currentMessages" :key="msg.id" :message="msg" :prev-message="idx > 0 ? chat.currentMessages[idx - 1] : null" :is-first="idx === 0" :message-idx="idx" :is-last-assistant="msg.role === 'assistant' && idx === chat.currentMessages.length - 1" @request-edit="beginEditMessage" />
+          <div v-if="chat.isWorking" class="flex items-center gap-2.5 py-2 pl-1">
             <span class="w-2 h-2 rounded-full bg-amber kohaku-glow" />
             <span class="text-sm text-amber/80 kohaku-pulse">{{ t("chat.processing") }}</span>
           </div>
@@ -77,29 +77,46 @@
 
       <!-- Queued messages: shown above input, not in main chat -->
       <div v-if="!readOnly && chat.queuedMessages.length" class="px-4 pt-2 flex flex-col gap-1.5">
+        <div class="px-3 py-1 text-xs text-warm-400 dark:text-warm-500">
+          {{ t("chat.queueNotice") }}
+        </div>
         <div v-for="qm in chat.queuedMessages" :key="qm.id" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber/5 dark:bg-amber/5 border border-amber/20 text-sm">
           <span class="i-carbon-time text-amber/60 text-xs flex-shrink-0" />
-          <span class="text-warm-500 dark:text-warm-400 truncate">{{ qm.content }}</span>
+          <span class="text-warm-500 dark:text-warm-400 truncate">{{ qm.content || attachmentSummary(qm.attachments) }}</span>
+          <span v-if="qm.attachments?.length" class="text-[10px] text-warm-400 dark:text-warm-500 flex-shrink-0">{{ attachmentSummary(qm.attachments) }}</span>
           <span class="text-warm-300 dark:text-warm-600 text-xs flex-shrink-0 ml-auto">{{ t("chat.queued") }}</span>
         </div>
       </div>
 
       <!-- Input: sits inside bubble, with subtle top border -->
       <div v-if="!readOnly" class="px-4 pb-4 pt-2 border-t border-t-warm-100 dark:border-t-warm-800">
+        <div v-if="pendingAttachments.length" class="mb-2 flex flex-wrap gap-2">
+          <div v-for="file in pendingAttachments" :key="file.id" class="flex items-center gap-2 max-w-full px-2.5 py-1.5 rounded-lg bg-warm-100 dark:bg-warm-800 border border-warm-200 dark:border-warm-700 text-xs">
+            <span :class="attachmentIcon(file)" class="text-sm text-iolite dark:text-iolite-light shrink-0" />
+            <span v-if="file.type !== 'image'" class="truncate max-w-[12rem] text-warm-700 dark:text-warm-200">{{ file.name }}</span>
+            <span v-if="file.type !== 'image'" class="text-warm-400">{{ formatFileSize(file.size) }}</span>
+            <button class="text-warm-400 hover:text-coral" @click="removeAttachment(file.id)">
+              <span class="i-carbon-close text-xs" />
+            </button>
+          </div>
+        </div>
         <div class="flex gap-2 px-3 py-1.5 rounded-xl bg-warm-50 dark:bg-warm-800 border border-warm-200 dark:border-warm-700 focus-within:border-iolite/40 dark:focus-within:border-iolite-light/30 transition-colors" :class="inputText.includes('\n') ? 'items-end' : 'items-center'">
-          <textarea ref="inputEl" v-model="inputText" rows="1" class="flex-1 bg-transparent border-none outline-none text-sm text-warm-800 dark:text-warm-200 placeholder-warm-400 dark:placeholder-warm-500 resize-none max-h-32 leading-relaxed py-1" style="min-height: 2em" :placeholder="inputPlaceholder" @keydown="onInputKeydown" @input="autoResize" />
-          <!-- Compact/Clear actions -->
+          <input ref="fileInputEl" type="file" class="hidden" accept="image/*,video/*,application/pdf" multiple @change="onFileChange" />
+          <button class="w-7 h-7 flex items-center justify-center rounded-md transition-colors shrink-0 text-warm-400 hover:text-iolite dark:hover:text-iolite-light hover:bg-iolite/10" title="Attach image, video, or PDF" aria-label="Attach image, video, or PDF" @click="pickFiles">
+            <span class="i-carbon-attachment text-xs" />
+          </button>
+          <textarea ref="inputEl" v-model="inputText" rows="1" class="flex-1 bg-transparent border-none outline-none text-sm text-warm-800 dark:text-warm-200 placeholder-warm-400 dark:placeholder-warm-500 resize-none max-h-32 leading-relaxed py-1" style="min-height: 2em" :placeholder="inputPlaceholder" @keydown="onInputKeydown" @input="autoResize" @paste="onPaste" />
           <button class="w-7 h-7 flex items-center justify-center rounded-md transition-colors shrink-0 text-warm-400 hover:text-iolite dark:hover:text-iolite-light hover:bg-iolite/10" :title="t('chat.compactContext')" :aria-label="t('chat.compactContext')" @click="triggerCompact">
             <span class="i-carbon-collapse-all text-xs" />
           </button>
           <button class="w-7 h-7 flex items-center justify-center rounded-md transition-colors shrink-0 text-warm-400 hover:text-coral hover:bg-coral/10" :title="t('chat.clearContext')" :aria-label="t('chat.clearContext')" @click="triggerClear">
             <span class="i-carbon-clean text-xs" />
           </button>
-          <button v-if="chat.processing || chat.hasRunningJobs" class="w-8 h-8 flex items-center justify-center rounded-lg transition-all shrink-0 mb-0.5 bg-coral/90 text-white hover:bg-coral shadow-sm shadow-coral/20" :title="`${t('chat.stopGeneration')} (Esc)`" :aria-label="t('chat.stopGeneration')" @click="chat.interrupt()">
-            <span class="i-carbon-stop-filled text-sm" />
-          </button>
-          <button v-else class="w-8 h-8 flex items-center justify-center rounded-lg transition-all shrink-0 mb-0.5" :class="inputText.trim() ? 'bg-iolite text-white hover:bg-iolite-shadow shadow-sm shadow-iolite/20' : 'text-warm-300 dark:text-warm-600 cursor-not-allowed'" :disabled="!inputText.trim()" :aria-label="t('chat.sendMessage')" @click="send">
+<button v-if="shouldShowSendButton" class="w-8 h-8 flex items-center justify-center rounded-lg transition-all shrink-0 mb-0.5" :class="canSend ? 'bg-iolite text-white hover:bg-iolite-shadow shadow-sm shadow-iolite/20' : 'text-warm-300 dark:text-warm-600 cursor-not-allowed'" :disabled="!canSend" :aria-label="sendButtonLabel" @click="send">
             <span class="i-carbon-send text-sm" />
+          </button>
+          <button v-else class="w-8 h-8 flex items-center justify-center rounded-lg transition-all shrink-0 mb-0.5 shadow-sm" :class="chat.hasCancellingJobs ? 'bg-warm-400 text-white' : 'bg-coral/90 text-white hover:bg-coral shadow-coral/20'" :title="chat.hasCancellingJobs ? t('chat.stopping') : `${t('chat.stopGeneration')} (Esc)`" :aria-label="t('chat.stopGeneration')" :disabled="chat.hasCancellingJobs" @click="chat.interrupt()">
+            <span class="i-carbon-stop-filled text-sm" />
           </button>
         </div>
       </div>
@@ -127,6 +144,8 @@ const { t } = useI18n()
 const inputText = ref("")
 const messagesEl = ref(null)
 const inputEl = ref(null)
+const fileInputEl = ref(null)
+const pendingAttachments = ref([])
 
 function draftKey() {
   const instanceId = props.instance?.id || chat._instanceId || ""
@@ -181,6 +200,9 @@ const inputPlaceholder = computed(() => {
 
 const resolvedEmptyTitle = computed(() => props.emptyTitle || t("chat.noMessagesYet"))
 const resolvedEmptySubtitle = computed(() => props.emptySubtitle || t("chat.getStarted"))
+const canSend = computed(() => !!inputText.value.trim() || pendingAttachments.value.length > 0)
+const shouldShowSendButton = computed(() => canSend.value || (!chat.processing && !chat.hasRunningJobs))
+const sendButtonLabel = computed(() => (chat.processing || chat.hasRunningJobs) && canSend.value ? t("chat.sendMessage") : t("chat.stopGeneration"))
 
 function getCreatureStatus(name) {
   const creature = props.instance.creatures.find((c) => c.name === name)
@@ -314,12 +336,80 @@ watch(inputText, () => {
   persistDraft()
 })
 
+function formatFileSize(size) {
+  if (!size) return ""
+  if (size >= 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`
+  if (size >= 1024) return `${Math.round(size / 1024)} KB`
+  return `${size} B`
+}
+
+function attachmentIcon(file) {
+  if (file.type === "image") return "i-carbon-image"
+  if (file.type === "video") return "i-carbon-video"
+  if (file.type === "pdf") return "i-carbon-document-pdf"
+  return "i-carbon-document"
+}
+
+function attachmentSummary(attachments = []) {
+  if (!attachments.length) return ""
+  return attachments.map((item) => item.name).join(", ")
+}
+
+function pickFiles() {
+  fileInputEl.value?.click()
+}
+
+function removeAttachment(id) {
+  pendingAttachments.value = pendingAttachments.value.filter((item) => item.id !== id)
+}
+
+async function fileToAttachment(file) {
+  const url = await new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(file)
+  })
+  const kind = file.type.startsWith("image/") ? "image" : file.type.startsWith("video/") ? "video" : file.type === "application/pdf" ? "pdf" : "file"
+  return {
+    id: `${file.name}-${file.size}-${file.lastModified}`,
+    type: kind,
+    name: file.name,
+    mimeType: file.type,
+    size: file.size,
+    url,
+  }
+}
+
+async function appendFiles(fileList) {
+  const files = Array.from(fileList || []).filter((file) => file.type.startsWith("image/") || file.type.startsWith("video/") || file.type === "application/pdf")
+  if (!files.length) return
+  const next = await Promise.all(files.map((file) => fileToAttachment(file)))
+  const seen = new Set(pendingAttachments.value.map((item) => item.id))
+  pendingAttachments.value = [...pendingAttachments.value, ...next.filter((item) => !seen.has(item.id))]
+}
+
+async function onFileChange(event) {
+  await appendFiles(event.target.files)
+  if (fileInputEl.value) fileInputEl.value.value = ""
+}
+
+async function onPaste(event) {
+  const files = Array.from(event.clipboardData?.files || [])
+  if (!files.length) return
+  await appendFiles(files)
+}
+
 function send() {
-  if (props.readOnly || !inputText.value.trim()) return
-  chat.send(inputText.value)
+  if (props.readOnly || !canSend.value) return
+  chat.send(inputText.value, {
+    attachments: pendingAttachments.value,
+    reasoningEffort: chat.sessionInfo.reasoningEffort || "",
+  })
   inputText.value = ""
+  pendingAttachments.value = []
   persistDraft()
-  isNearBottom.value = true // force scroll after send
+  isNearBottom.value = true
   nextTick(() => {
     if (inputEl.value) inputEl.value.style.height = "auto"
     scrollToBottom()
@@ -383,3 +473,4 @@ function onGlobalKeydown(e) {
 onMounted(() => window.addEventListener("keydown", onGlobalKeydown))
 onUnmounted(() => window.removeEventListener("keydown", onGlobalKeydown))
 </script>
+

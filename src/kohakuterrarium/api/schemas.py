@@ -1,6 +1,6 @@
 """Pydantic request/response models for the HTTP API."""
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class TerrariumCreate(BaseModel):
@@ -30,11 +30,24 @@ class CreatureAdd(BaseModel):
     send_channels: list[str] = []
 
 
+class AttachmentInput(BaseModel):
+    """Frontend attachment payload for multimodal user input."""
+
+    id: str = ""
+    type: str = "file"
+    name: str = ""
+    mimeType: str = ""
+    size: int = 0
+    url: str = ""
+
+
 class ChannelSend(BaseModel):
     """Request body for sending a message to a channel."""
 
     content: str
     sender: str = "human"
+    attachments: list[AttachmentInput] = Field(default_factory=list)
+    reasoning_effort: str = ""
 
 
 class ChannelAdd(BaseModel):
@@ -70,6 +83,8 @@ class AgentChat(BaseModel):
     """Request body for sending a chat message to an agent."""
 
     message: str
+    attachments: list[AttachmentInput] = Field(default_factory=list)
+    reasoning_effort: str = ""
 
 
 class MessageEdit(BaseModel):

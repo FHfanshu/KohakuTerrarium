@@ -84,10 +84,12 @@ export const terrariumAPI = {
     return data
   },
 
-  async sendToChannel(id, channelName, content, sender = "human") {
+  async sendToChannel(id, channelName, content, sender = "human", options = {}) {
     const { data } = await api.post(`/terrariums/${id}/channels/${channelName}/send`, {
       content,
       sender,
+      attachments: options.attachments || [],
+      reasoning_effort: options.reasoning_effort || "",
     })
     return data
   },

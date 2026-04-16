@@ -60,29 +60,39 @@
 
   <!-- User message -->
   <div v-else-if="message.role === 'user'" class="ml-auto max-w-[80%] group relative">
-    <div class="card px-4 py-3 border-l-3" :class="message.queued ? 'border-l-amber dark:border-l-amber/60 opacity-70' : 'border-l-sapphire dark:border-l-sapphire/60'">
-      <div class="text-xs text-warm-400 mb-1 flex items-center gap-1.5">
+    <div class="card px-4 py-3 border-l-3 flex flex-col items-end" :class="message.queued ? 'border-l-amber dark:border-l-amber/60 opacity-70' : 'border-l-sapphire dark:border-l-sapphire/60'">
+      <div class="text-xs text-warm-400 mb-1 flex items-center justify-end gap-1.5 w-full">
         <span>You</span>
         <span v-if="message.queued" class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-amber/15 text-amber leading-none">Queued</span>
       </div>
-      <!-- Edit mode -->
-      <div v-if="editing" class="flex flex-col gap-2">
-        <textarea v-model="editText" class="w-full bg-transparent border border-warm-300 dark:border-warm-600 rounded px-2 py-1 text-body resize-none" :rows="Math.max(2, editText.split('\n').length)" @keydown.meta.enter="confirmEdit" @keydown.ctrl.enter="confirmEdit" @keydown.esc="cancelEdit" />
-        <div class="flex gap-2 justify-end text-xs">
-          <button class="px-2 py-0.5 rounded hover:bg-warm-100 dark:hover:bg-warm-800" @click="cancelEdit">Cancel</button>
-          <button class="px-2 py-0.5 rounded bg-sapphire text-white hover:bg-sapphire-dark" @click="confirmEdit">Save & Rerun</button>
+      <div class="flex flex-col gap-2 w-full">
+        <div v-if="message.attachments?.length" class="flex flex-wrap gap-2 mb-1 justify-end">
+          <a v-for="file in message.attachments" :key="file.id || file.url || file.name" :href="file.url" target="_blank" rel="noreferrer" class="attachment-chip" :class="{ 'attachment-chip-image': file.type === 'image' && file.url }" @click="onAttachmentClick($event, file, message.attachments)">
+            <span v-if="file.type === 'image' && file.url" class="attachment-preview-frame">
+              <img
+                :src="file.url"
+                :alt="file.name"
+                class="attachment-preview-image"
+              />
+            </span>
+            <span v-else :class="attachmentIcon(file)" class="text-sm text-iolite dark:text-iolite-light shrink-0" />
+            <span v-if="file.type !== 'image'" class="attachment-meta">
+              <span class="attachment-name truncate max-w-[12rem]">{{ file.name }}</span>
+              <span v-if="file.size" class="text-warm-400">{{ formatFileSize(file.size) }}</span>
+            </span>
+          </a>
         </div>
-      </div>
-      <div v-else class="text-body whitespace-pre-wrap break-words overflow-wrap-anywhere min-w-0">
-        {{ message.content }}
+        <div v-if="message.content" class="text-body whitespace-pre-wrap break-words overflow-wrap-anywhere min-w-0 w-full">
+          {{ message.content }}
+        </div>
       </div>
     </div>
     <!-- Hover actions for user messages -->
-    <div v-if="!editing && !message.queued && messageIdx != null" class="absolute -bottom-5 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+    <div v-if="!message.queued && message.conversationIndex != null" class="absolute -bottom-5 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
       <button class="msg-action-btn" title="Copy" aria-label="Copy message" @click="copyMessage">
         <span class="i-carbon-copy text-xs" />
       </button>
-      <button class="msg-action-btn" title="Edit & rerun" aria-label="Edit and rerun message" @click="startEdit">
+      <button class="msg-action-btn" title="Edit & rerun" aria-label="Edit and rerun message" @click="$emit('request-edit', message)">
         <span class="i-carbon-edit text-xs" />
       </button>
     </div>
@@ -100,6 +110,21 @@
         <ToolCallBlock :tc="part" :expanded="expandedTools[part.id]" @toggle="toggleTool(part.id)" />
       </div>
     </template>
+    <div
+      v-if="assistantRecovering"
+      class="inline-flex items-center gap-2 rounded-md border border-iolite/15 dark:border-iolite/20 bg-iolite/6 dark:bg-iolite/8 px-3 py-2 text-xs text-warm-500 dark:text-warm-400"
+    >
+      <span class="w-1.5 h-1.5 rounded-full bg-iolite kohaku-pulse shrink-0" />
+      <span>{{ t("chat.recoveringReply") }}</span>
+      <span v-if="message.recoveryAttempt > 0" class="text-[10px] text-warm-400">{{ t("chat.recoveryRetry", { count: message.recoveryAttempt }) }}</span>
+    </div>
+    <div
+      v-else-if="assistantRecoveryFailed"
+      class="inline-flex items-center gap-2 rounded-md border border-amber/15 dark:border-amber/20 bg-amber/6 dark:bg-amber/8 px-3 py-2 text-xs text-warm-500 dark:text-warm-400"
+    >
+      <span class="w-1.5 h-1.5 rounded-full bg-amber shrink-0" />
+      <span>{{ t("chat.recoveryFailed") }}</span>
+    </div>
     <!-- Hover actions -->
     <div v-if="isLastAssistant" class="absolute -bottom-5 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
       <button class="msg-action-btn" title="Copy" aria-label="Copy response" @click="copyAssistantText">
@@ -130,10 +155,34 @@
       <span class="text-xs font-semibold" :style="{ color: senderGemColor }">{{ message.sender }}</span>
       <span class="text-[10px] text-warm-400">{{ message.timestamp }}</span>
     </div>
-    <div class="pl-7 text-body">
-      <MarkdownRenderer :content="message.content" />
+    <div class="pl-7 flex flex-col gap-2">
+      <div v-if="message.attachments?.length" class="flex flex-wrap gap-2">
+        <a v-for="file in message.attachments" :key="file.id || file.url || file.name" :href="file.url" target="_blank" rel="noreferrer" class="attachment-chip" :class="{ 'attachment-chip-image': file.type === 'image' && file.url }" @click="onAttachmentClick($event, file, message.attachments)">
+          <img
+            v-if="file.type === 'image' && file.url"
+            :src="file.url"
+            :alt="file.name"
+            class="attachment-preview-image"
+          />
+          <span v-else :class="attachmentIcon(file)" class="text-sm text-iolite dark:text-iolite-light shrink-0" />
+          <span class="attachment-meta">
+            <span class="attachment-name truncate max-w-[16rem]">{{ file.name }}</span>
+            <span v-if="file.size" class="text-warm-400">{{ formatFileSize(file.size) }}</span>
+          </span>
+        </a>
+      </div>
+      <div v-if="message.content" class="text-body">
+        <MarkdownRenderer :content="message.content" />
+      </div>
     </div>
   </div>
+
+  <el-image-viewer
+    v-if="imagePreviewVisible && imagePreviewList.length"
+    :url-list="imagePreviewList"
+    :initial-index="imagePreviewIndex"
+    @close="imagePreviewVisible = false"
+  />
 </template>
 
 <script setup>
@@ -141,6 +190,7 @@ import MarkdownRenderer from "@/components/common/MarkdownRenderer.vue"
 import ToolCallBlock from "@/components/chat/ToolCallBlock.vue"
 import { GEM } from "@/utils/colors"
 import { useChatStore } from "@/stores/chat"
+import { useI18n } from "@/utils/i18n"
 
 const props = defineProps({
   message: { type: Object, required: true },
@@ -150,16 +200,39 @@ const props = defineProps({
   isLastAssistant: { type: Boolean, default: false },
 })
 
+defineEmits(["request-edit"])
+
+const { t } = useI18n()
+
 const expandedTools = reactive({})
-const editing = ref(false)
-const editText = ref("")
 const errorExpanded = ref(false)
+const imagePreviewVisible = ref(false)
+const imagePreviewIndex = ref(0)
+const imagePreviewList = ref([])
 
 const errorFirstLine = computed(() => {
   if (props.message.role !== "error") return ""
   const content = props.message.content || ""
   const firstLine = content.split("\n")[0] || ""
   return firstLine.length > 80 ? firstLine.slice(0, 80) + "…" : firstLine
+})
+
+const assistantRecovering = computed(() => {
+  if (props.message.role !== "assistant") return false
+  if (!props.message.recovering) return false
+  const hasText = Array.isArray(props.message.parts)
+    ? props.message.parts.some((part) => part.type === "text" && part.content)
+    : !!props.message.content
+  return !hasText
+})
+
+const assistantRecoveryFailed = computed(() => {
+  if (props.message.role !== "assistant") return false
+  if (!props.message.recoveryFailed) return false
+  const hasText = Array.isArray(props.message.parts)
+    ? props.message.parts.some((part) => part.type === "text" && part.content)
+    : !!props.message.content
+  return !hasText
 })
 
 function toggleTool(id) {
@@ -186,7 +259,31 @@ const senderGemColor = computed(() => {
   return senderColorCache[name]
 })
 
-// ── Message actions (copy / edit / regenerate) ──
+function formatFileSize(size) {
+  if (!size) return ""
+  if (size >= 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`
+  if (size >= 1024) return `${Math.round(size / 1024)} KB`
+  return `${size} B`
+}
+
+function attachmentIcon(file) {
+  if (file.type === "image") return "i-carbon-image"
+  if (file.type === "video") return "i-carbon-video"
+  if (file.type === "pdf") return "i-carbon-document-pdf"
+  return "i-carbon-document"
+}
+
+function onAttachmentClick(event, file, attachments = []) {
+  if (file.type !== "image" || !file.url) return
+  event.preventDefault()
+  const images = attachments.filter((item) => item.type === "image" && item.url)
+  imagePreviewList.value = images.map((item) => item.url)
+  imagePreviewIndex.value = Math.max(
+    0,
+    images.findIndex((item) => item.url === file.url),
+  )
+  imagePreviewVisible.value = true
+}
 
 const chat = useChatStore()
 
@@ -209,30 +306,84 @@ function copyAssistantText() {
   navigator.clipboard.writeText(text)
 }
 
-function startEdit() {
-  editText.value = props.message.content || ""
-  editing.value = true
-}
-
-function cancelEdit() {
-  editing.value = false
-  editText.value = ""
-}
-
-function confirmEdit() {
-  const newContent = editText.value.trim()
-  if (!newContent) return
-  chat.editMessage(props.messageIdx, newContent)
-  editing.value = false
-  editText.value = ""
-}
-
 function regenerate() {
   chat.regenerateLastResponse()
 }
 </script>
 
 <style scoped>
+.attachment-chip {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(120, 109, 98, 0.22);
+  background: rgba(255, 255, 255, 0.03);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    transform 0.15s;
+}
+
+.attachment-chip:hover {
+  border-color: rgba(125, 108, 255, 0.35);
+  background: rgba(125, 108, 255, 0.06);
+}
+
+.attachment-chip-image {
+  cursor: zoom-in;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+  width: auto;
+  max-width: 10rem;
+  padding: 0.375rem;
+}
+
+.attachment-chip-image:hover {
+  transform: translateY(-1px);
+}
+
+.attachment-preview-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 6rem;
+  height: 6rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.attachment-preview-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.attachment-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.attachment-chip-image .attachment-meta {
+  display: flex;
+  justify-content: space-between;
+}
+
+.attachment-name {
+  color: inherit;
+}
+
 .msg-action-btn {
   display: inline-flex;
   align-items: center;
