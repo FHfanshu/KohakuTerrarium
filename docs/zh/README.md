@@ -1,48 +1,50 @@
-# 指南
+# 琥珀生态瓶中文手册
 
-面向任务的文档：运行、构建、扩展 KohakuTerrarium。
+这个项目叫 KohakuTerrarium，中文名"琥珀生态瓶"——一个搭智能体的框架，不是拿来套 LLM API 的壳子。
 
-想看心智模型去[概念](/concepts/README.md)。
-想查字段、参数、签名去[参考](/reference/README.md)。
-想看引导式入门去[教程](/tutorials/README.md)。
+## 先跑起来
 
-## 从这里开始
+- [安装与快速开始](quickstart.md) — 装好环境、跑起第一个 creature
+- [模型与预设配置](llm-profiles.md) — 怎么配模型、选模型、切模型
+- [CLI 与 WebUI](cli-webui.md) — 命令行和网页界面怎么用
+- [配置文件写法](configuration.md) — config.yaml 里每个字段什么意思
+- [会话、审计与排错](audit-and-sessions.md) — 跑完的东西去哪了、出了问题怎么看
+- [定制 SWE 智能体](swe-bio-agent.md) — 怎么在默认 swe 基础上改出你自己的版本
 
-- [快速开始](getting-started.md) — 安装、认证、跑第一个 creature、resume、开 Web UI。
-- [Creatures](/guides/creatures.md)（英文） — 结构、继承、prompt 文件、tool/subagent 连接、打包。
-- [Sessions](/guides/sessions.md)（英文） — `.kohakutr` 文件、resume、compaction。
+## 进阶专题
 
-## 构建和配置
+- [MCP 进阶](mcp-advanced.md) — MCP 服务器的高级玩法
+- [kt install 与 package 进阶](packages-and-install-advanced.md) — 包管理细节
+- [skills、info 与 skill_mode 进阶](skills-and-skill-mode-advanced.md) — skill 系统深挖
 
-- [配置](/guides/configuration.md)（英文） — "怎么配置 X" 的任务式配方。
-- [Creatures](/guides/creatures.md)（英文） — 编写独立 agent。
-- [Plugins](/guides/plugins.md)（英文） — prompt 和生命周期插件。
-- [自定义模块](/guides/custom-modules.md)（英文） — 写 tools、inputs、outputs、triggers、sub-agents。
-- [MCP](/guides/mcp.md)（英文） — per-agent 或全局注册 MCP server。
-- [Packages](/guides/packages.md)（英文） — `kohaku.yaml` manifest、安装模式、发布。
+## 指南（对照英文原文）
 
-## 多智能体和组合
+- [快速上手](getting-started.md)
+- [智能体](creatures.md) — creature 结构、继承、打包
+- [会话](sessions.md) — 会话持久化与恢复
+- [配置](configuration.md) — 按问题查配方
+- [插件](plugins.md) — prompt 插件和生命周期插件
+- [MCP](mcp.md) — 注册 MCP 服务器
+- [包](packages.md) — kohaku.yaml、安装与发布
+- [自定义模块](custom-modules.md) — 写自己的 tool/input/output/trigger/sub-agent
+- [服务部署](serving.md) — kt web / kt app / kt serve
+- [记忆](memory.md) — embedding、向量搜索、search_memory
+- [组合](composition.md) — Python 里用 >>、&、|、* 串流程
+- [容器](terrariums.md) — channel、root agent、热插拔
+- [以代码方式使用](programmatic-usage.md) — 嵌入 Agent、AgentSession 等
+- [前端布局](frontend-layout.md) — 面板和预设
+- [示例](examples.md) — examples/ 目录下每个文件夹干什么的
 
-- [Terrariums](/guides/terrariums.md)（英文） — channels、root agents、hot-plug、observer。
-- [组合](/guides/composition.md)（英文） — Python 里 `>>`、`&`、`|`、`*` pipeline。
-- [编程式用法](/guides/programmatic-usage.md)（英文） — 嵌入 `Agent`、`AgentSession`、`TerrariumRuntime`、`KohakuManager`。
+## 教程（对照英文原文）
 
-## 持久化和搜索
+- [第一个 Creature](tutorials/first-creature.md)
+- [第一个 Terrarium](tutorials/first-terrarium.md)
+- [第一个 Python 嵌入](tutorials/first-python-embedding.md)
+- [第一个自定义工具](tutorials/first-custom-tool.md)
+- [第一个插件](tutorials/first-plugin.md)
 
-- [Sessions](/guides/sessions.md)（英文） — 持久化模型和 resume。
-- [Memory](/guides/memory.md)（英文） — embedding 供应商、FTS 和向量搜索、`search_memory` tool。
+## 不想只看用法的，往这走
 
-## 部署
-
-- [Serving](/guides/serving.md)（英文） — `kt web`、`kt app`、`kt serve` daemon。
-- [前端布局](/guides/frontend-layout.md)（英文） — Web dashboard panels 和 presets。
-
-## 从代码学习
-
-- [示例](/guides/examples.md)（英文） — `examples/` 下每个文件夹展示什么。
-
-## 参考
-
-- [概念](/concepts/README.md) — 为什么这样设计。
-- [参考](/reference/README.md) — 穷举式查表。
-- [开发](/dev/README.md)（英文） — 给框架本身贡献。
+- [概念](concepts/README.md) — 为什么设计成这样
+- [参考](reference/README.md) — 字段、参数、签名，当字典查
+- [开发](dev/README.md) — 给框架本身提 PR
