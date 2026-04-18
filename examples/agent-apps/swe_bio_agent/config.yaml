@@ -1,0 +1,42 @@
+name: swe_bio_agent
+version: "1.0"
+base_config: "@kt-defaults/creatures/swe"
+
+system_prompt_file: prompts/system.md
+session_key: swe_bio_agent
+
+input:
+  type: cli
+  prompt: "> "
+
+output:
+  type: stdout
+  controller_direct: true
+
+plugins:
+  - name: rules_guard
+    type: custom
+    module: ./custom/guard_plugin.py
+    class: RulesGuardPlugin
+    options:
+      rule_files:
+        - AGENTS.md
+        - CLAUDE.md
+        - CONTRIBUTING.md
+        - README.md
+      modify_tools:
+        - write
+        - edit
+        - multi_edit
+      guarded_subagents:
+        - worker
+      block_mutating_bash_before_rules: true
+  - name: audit_logger
+    type: custom
+    module: ./custom/audit_plugin.py
+    class: AuditLoggerPlugin
+    options:
+      log_dir: ./artifacts/audit
+      redact_large_values: true
+      task_preview_chars: 240
+      output_preview_chars: 240
