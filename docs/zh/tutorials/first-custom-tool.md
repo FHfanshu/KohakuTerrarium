@@ -1,16 +1,16 @@
 # 第一个自定义工具
 
-**问题：** 你的智能体需要一种内置工具没有提供的能力。你想给它加一个 LLM 可以调用的新函数。
+**问题：**内置工具不够用，你得给 agent 加一个 LLM 能直接调用的新函数。
 
-**完成后：** 你会得到一个 `BaseTool` 子类，文件放在 creature 目录里，在 `config.yaml` 中接好，运行时自动加载，并在需要时由 LLM 调用。
+**做完后：**你会有一个放在 creature 目录里的 `BaseTool` 子类，在 `config.yaml` 里接好，运行时自动加载，模型需要时就能调用。
 
-**前提：** [第一个 Creature（英文）](/tutorials/first-creature.md)。你需要先有一个自己可用的 creature 目录。
+**前提：**先看[第一个 Creature](first-creature.md)。你手里得先有一个自己的 creature 目录。
 
-这里的示例工具是一个很简单的 `wordcount`，用来统计字符串里的单词数。重点在结构，不在逻辑本身。想看工具除了简单函数还能怎么用，可以读[工具概念（英文）](/concepts/modules/tool.md)。
+这里用一个很简单的 `wordcount` 当例子：输入一段字符串，数一数有几个词。重点不是这点逻辑，而是工具该怎么写、怎么接进去。想看工具还能做什么，去读[工具概念](../concepts/modules/tool.md)。
 
-## 第 1 步：选一个目录
+## 第 1 步：选个目录
 
-先建一个 creature 目录，用它来承载这个工具。这里用 `creatures/tutorial-creature/` 作为例子。工具源码和配置文件放在一起：
+先准备一个 creature 目录，专门放这个工具。这里用 `creatures/tutorial-creature/` 举例。工具源码和配置放在一起：
 
 ```text
 creatures/tutorial-creature/
@@ -84,12 +84,12 @@ class WordCountTool(BaseTool):
 
 要点：
 
-- 继承 `BaseTool`。实现 `tool_name`、`description` 和 `_execute`。`BaseTool` 里的公共 `execute` 包装层已经处理了 `try/except`，出异常时会返回 `ToolResult(error=...)`。
-- `parameters` 是兼容 JSON Schema 的字典。控制器会用它来生成 LLM 能看到的工具 schema。
-- `_execute` 是异步方法，返回值是 `ToolResult`。`output` 可以是字符串，也可以是 `ContentPart` 列表，用来表示多模态结果。
-- 如果工具需要工作目录、会话或 scratchpad，把类属性 `needs_context = True` 打开，并在 `_execute` 里接收关键字参数 `context`。完整的 `ToolContext` 接口见[工具概念（英文）](/concepts/modules/tool.md)。
+- 继承 `BaseTool`，实现 `tool_name`、`description` 和 `_execute`。`BaseTool` 公开的 `execute` 已经包好了 `try/except`，抛异常时会返回 `ToolResult(error=...)`。
+- `parameters` 是兼容 JSON Schema 的字典。控制器会拿它生成给 LLM 看的工具 schema。
+- `_execute` 是异步方法，返回 `ToolResult`。`output` 可以是字符串，也可以是 `ContentPart` 列表，用来放多模态结果。
+- 如果工具需要工作目录、会话或者 scratchpad，把类属性 `needs_context = True` 打开，再让 `_execute` 用关键字参数接收 `context`。完整的 `ToolContext` 见[工具概念](../concepts/modules/tool.md)。
 
-## 第 3 步：把工具接到 creature 配置里
+## 第 3 步：接到 creature 配置里
 
 `creatures/tutorial-creature/config.yaml`：
 
@@ -107,13 +107,13 @@ tools:
     class_name: WordCountTool
 ```
 
-各字段的作用：
+这几个字段的意思：
 
-- `type: custom`：从本地 Python 文件加载，而不是 `builtin` 或 `package`。
-- `module`：`.py` 文件路径，相对于智能体目录 `creatures/tutorial-creature/` 解析。
+- `type: custom`：从本地 Python 文件加载，不是 `builtin` 或 `package`。
+- `module`：`.py` 文件路径，相对于 agent 目录 `creatures/tutorial-creature/` 来算。
 - `class_name`：这个模块里的类名。
 
-因为 `tools:` 会在继承来的列表基础上继续追加，所以你会保留 `general` 里原有的整套工具，再额外加上 `wordcount`。
+因为 `tools:` 是在继承来的列表后面继续追加，所以 `general` 里原有的工具都会保留，`wordcount` 只是额外加上的。
 
 `creatures/tutorial-creature/prompts/system.md`：
 
@@ -124,7 +124,7 @@ You are a helpful assistant for text experiments. When a user asks
 about word counts, prefer the `wordcount` tool.
 ```
 
-## 第 4 步：运行并试一下
+## 第 4 步：跑起来试试
 
 ```bash
 kt run creatures/tutorial-creature --mode cli
@@ -136,25 +136,27 @@ kt run creatures/tutorial-creature --mode cli
 > Count the words in "hello world foo bar"
 ```
 
-控制器应该会调用 `wordcount`，传入 `text="hello world foo bar"`，然后把结果显示出来，也就是 `4 words`。退出时，`kt` 会照常打印恢复会话的提示。如果你想更稳定地看到它触发，可以开一个新会话，或者加 `--no-session` 做一次性的运行。
+控制器应该会调用 `wordcount`，传入 `text="hello world foo bar"`，最后把结果 `4 words` 显示出来。
+
+退出时，`kt` 还是会照常打印恢复会话的提示。要是你想更稳定地看到它被触发，最好开个新会话，或者直接加 `--no-session` 跑一次性的测试。
 
 ## 第 5 步：选对执行模式
 
 工具有三种执行模式：
 
-| Mode | 适用场景 | 内置示例 |
+| Mode | 什么时候用 | 内置示例 |
 |---|---|---|
-| `DIRECT` | 很快、纯计算、能在当前轮内完成。下一次 LLM 调用前会先等待结果。 | `wordcount`, `read`, `grep` |
-| `BACKGROUND` | 运行时间较长，按秒计。会先返回一个任务句柄，结果作为后续事件到达。LLM 可以继续工作。 | `bash`（长命令）、子智能体 |
-| `STATEFUL` | 多轮交互。工具先产出一次，智能体响应后，工具还能继续产出。 | 有状态向导、REPL |
+| `DIRECT` | 很快、纯计算、能在当前轮里跑完。下一次 LLM 调用前会先等结果。 | `wordcount`, `read`, `grep` |
+| `BACKGROUND` | 运行时间比较长，通常是几秒起。先返回一个任务句柄，结果后面再作为事件送回来。LLM 这时还能继续干别的。 | `bash`（长命令）、子 agent |
+| `STATEFUL` | 多轮交互。工具先产出一次，agent 响应后，工具还能继续往下产出。 | 有状态向导、REPL |
 
-`BaseTool` 默认是 `BACKGROUND`。如果默认值不适合，要像示例那样重写 `execution_mode`。纯计算、100 毫秒以内的小工具，通常应该用 `DIRECT`。
+`BaseTool` 默认是 `BACKGROUND`。如果不合适，就像上面的例子那样重写 `execution_mode`。纯计算、100 毫秒以内的小工具，一般就该用 `DIRECT`。
 
-执行流水线的实现见[工具概念：实现方式（英文）](/concepts/modules/tool.md#how-we-implement-it)。流式输出在解析到结束块后就会立即启动工具；多个 `DIRECT` 工具会通过 `asyncio.gather` 并行运行。
+执行流程的细节可以看[工具概念：How we implement it](../concepts/modules/tool.md#how-we-implement-it)。流式输出在解析到结束块后就会立刻启动工具；多个 `DIRECT` 工具会通过 `asyncio.gather` 并行跑。
 
-## 第 6 步：用 ScriptedLLM 做测试（可选）
+## 第 6 步：用 ScriptedLLM 测一下（可选）
 
-做单元测试时，可以用可预测的 LLM 来驱动控制器。`kohakuterrarium.testing` 包自带了几个辅助工具：
+做单元测试时，可以拿一个可预测的 LLM 来驱动控制器。`kohakuterrarium.testing` 里已经带了现成的辅助工具：
 
 ```python
 import asyncio
@@ -180,19 +182,19 @@ async def test_wordcount() -> None:
 asyncio.run(test_wordcount())
 ```
 
-脚本里的工具调用语法取决于 creature 的 `tool_format`，也就是 `bracket`、`xml` 或 `native`。如果是原生函数调用，用对应 provider 的调用格式；如果是 `bracket`（SWE creature 的祖先配置默认就是这个），就写成 `[/name]{json}[name/]`。
+脚本里工具调用的写法，取决于 creature 的 `tool_format`，也就是 `bracket`、`xml` 或 `native`。如果是原生函数调用，就用对应 provider 的调用格式；如果是 `bracket`（SWE creature 的祖先配置默认就是这个），写成 `[/name]{json}[name/]` 就行。
 
-`OutputRecorder`、`EventRecorder` 和 `TestAgentBuilder` 可以看 `src/kohakuterrarium/testing/`。
+`OutputRecorder`、`EventRecorder` 和 `TestAgentBuilder` 在 `src/kohakuterrarium/testing/` 里。
 
-## 你学会了什么
+## 你学到了什么
 
-- 工具本质上是一个 `BaseTool` 子类，包含 `tool_name`、`description`、`parameters` 和 `_execute`。
-- 在 `config.yaml` 里，通过 `tools:`、`type: custom`、`module:` 和 `class_name:` 把它接进来。
-- 执行模式会影响行为。快速、纯粹的工作选 `DIRECT`，耗时任务选 `BACKGROUND`。
-- 测试时可以用 `ScriptedLLM` 把整条流程稳定地跑起来。
+- 一个工具就是 `BaseTool` 子类，里面要有 `tool_name`、`description`、`parameters` 和 `_execute`。
+- 在 `config.yaml` 里，用 `tools:`、`type: custom`、`module:` 和 `class_name:` 把它接进来。
+- 执行模式会直接影响行为。快而纯的工具用 `DIRECT`，耗时任务用 `BACKGROUND`。
+- 测试时可以用 `ScriptedLLM` 把整条流程稳定跑一遍。
 
-## 接下来可以读什么
+## 接着看
 
-- [工具概念（英文）](/concepts/modules/tool.md)：工具不只是函数，还可以是消息总线、状态句柄、智能体包装层等。
-- [自定义模块指南（英文）](/guides/custom-modules.md)：把工具、子智能体、触发器和输出模块放在一起看。
-- [第一个插件（英文）](/tutorials/first-plugin.md)：如果你要改的行为不在单个模块内部，而是在模块之间的衔接处，就看这个。
+- [工具概念](../concepts/modules/tool.md)：工具不只是函数，也可以是消息总线、状态句柄、agent 包装层之类的东西。
+- [自定义模块指南](../guides/custom-modules.md)：把工具、子 agent、触发器和输出模块放在一起看。
+- [第一个 Plugin](first-plugin.md)：如果你想改的不是某个模块内部，而是模块之间怎么接，那篇更合适。

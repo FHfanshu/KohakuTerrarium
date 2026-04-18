@@ -1,20 +1,20 @@
-# 服务方式
+# Serving
 
-给要运行 KohakuTerrarium Web UI、桌面应用，或长期驻留守护进程的读者。
+这篇给准备跑 KohakuTerrarium Web UI、桌面应用，或者常驻后台服务的人看。
 
-这里有三个命令：`kt web`（前台 Web 服务器）、`kt app`（通过 pywebview 打开的桌面窗口）、`kt serve`（脱离终端运行的守护进程）。三者共用同一套 FastAPI 后端和 Vue 前端，差别主要在生命周期和传输方式。
+相关命令有三个：`kt web`（前台 Web 服务器）、`kt app`（用 pywebview 打开的桌面窗口）、`kt serve`（脱离终端运行的守护进程）。三者共用同一套 FastAPI 后端和 Vue 前端，区别主要在运行方式和连接方式。
 
-概念预备：[agent as a Python object](/concepts/python-native/agent-as-python-object.md)（英文）—— serving 层只是核心运行时的另一种使用方式。
+先补个概念：[agent as a Python object](../concepts/python-native/agent-as-python-object.md)。服务层说白了只是核心运行时的另一种使用方式。
 
 ## 我该用哪个？
 
-| 方式 | 生命周期 | 适合什么场景 |
+| 方式 | 生命周期 | 适合什么时候用 |
 |---|---|---|
 | `kt web` | 前台运行；按 Ctrl+C 退出 | 你想在这台机器的浏览器里打开 `http://127.0.0.1:8001`。 |
-| `kt app` | 前台运行；关掉窗口就退出 | 想要更像原生应用的桌面体验。需要 `pywebview`。 |
-| `kt serve` | 守护进程；终端关掉后还继续运行 | 长时间运行的 agent、SSH 会话、远程机器、需要持续存在的工作流。 |
+| `kt app` | 前台运行；关掉窗口就退出 | 想要更像原生桌面应用的体验。需要 `pywebview`。 |
+| `kt serve` | 后台守护进程；终端关了也继续跑 | 长时间运行的 agent、SSH 会话、远程机器、要一直挂着的工作流。 |
 
-三者使用同一套 API 和前端。按生命周期来选就行。
+三种方式用的 API 和前端都一样，按你想怎么跑来选就行。
 
 ## `kt web`
 
@@ -25,18 +25,18 @@ kt web --dev
 kt web --log-level DEBUG
 ```
 
-- 默认 host 是 `127.0.0.1`，端口是 `8001`（如果被占用，会自动递增）。
-- `--dev` 只提供 API；前端热更新要单独运行 `npm run dev --prefix src/kohakuterrarium-frontend`。
-- 会一直运行，直到你按 Ctrl+C。
+- 默认 host 是 `127.0.0.1`，默认端口是 `8001`。端口占用时会自动往后加。
+- `--dev` 只启动 API；前端 HMR 需要你另外跑 `npm run dev --prefix src/kohakuterrarium-frontend`。
+- 会一直跑到你按 Ctrl+C。
 
-如果前端还没构建，你会看到一个占位页。源码安装时先构建一次：
+如果前端还没 build，页面里会看到一个占位提示。源码安装时先手动构建一次：
 
 ```bash
 npm install --prefix src/kohakuterrarium-frontend
 npm run build --prefix src/kohakuterrarium-frontend
 ```
 
-如果是通过 PyPI 安装，构建好的静态资源已经打包好了。
+如果你是从 PyPI 安装，构建好的静态资源已经带上了。
 
 ## `kt app`
 
@@ -45,28 +45,28 @@ kt app
 kt app --port 8002
 ```
 
-它会用 pywebview 打开一个原生桌面窗口，连接到内嵌的 API 服务器。需要安装桌面相关依赖：
+它会用 pywebview 打开一个桌面窗口，窗口后面连的是内嵌 API 服务器。需要安装桌面相关依赖：
 
 ```bash
 pip install 'kohakuterrarium[full]'
 ```
 
-窗口一关，服务器也会停止。
+窗口一关，服务器也会停。
 
 ## `kt serve`
 
 ```bash
-kt serve start                  # 脱离终端运行的守护进程
+kt serve start                  # 后台守护进程
 kt serve start --host 0.0.0.0 --port 8001 --dev --log-level INFO
 kt serve status                 # running/stopped/stale、PID、URL、运行时长
-kt serve logs --follow          # 持续跟踪守护进程日志
+kt serve logs --follow          # 持续看日志
 kt serve logs --lines 200
-kt serve stop                   # 先发 SIGTERM 并等待宽限期（默认 5 秒），再发 SIGKILL
+kt serve stop                   # 先发 SIGTERM，宽限期后默认 5 秒再 SIGKILL
 kt serve stop --timeout 30
-kt serve restart                # 先停再启
+kt serve restart                # 先停再起
 ```
 
-状态文件：
+状态文件在这里：
 
 ```
 ~/.kohakuterrarium/run/web.pid    # 进程 id
@@ -74,7 +74,7 @@ kt serve restart                # 先停再启
 ~/.kohakuterrarium/run/web.log    # stdout + stderr
 ```
 
-如果 PID 文件还在，但进程已经没了，`kt serve status` 会显示 `stale`。可以手动删除 `rm ~/.kohakuterrarium/run/web.*`，也可以直接运行 `kt serve start`，它会顺手清理。
+如果 PID 文件还在，但进程已经没了，`kt serve status` 会显示 `stale`。这时可以删掉 `~/.kohakuterrarium/run/web.*`，也可以直接重新跑 `kt serve start`，它会自己清理。
 
 ### 开发模式下的守护进程
 
@@ -83,36 +83,36 @@ kt serve start --dev
 npm run dev --prefix src/kohakuterrarium-frontend
 ```
 
-这样前端的 HMR 会连到守护进程 API，同时守护进程本身不受当前终端影响。
+这样前端 HMR 走的是守护进程的 API，后台服务也不会跟着终端一起死。
 
 ## 什么时候更适合用守护进程
 
-- SSH 会话总断：用 `kt serve start` 跑起来，然后通过 `ssh -L 8001:localhost:8001` 重新连回来。
-- 远程机器上不想一直挂着一个终端窗口。
-- 监控类 agent 需要长期运行，不能因为终端丢了就被杀掉。
-- 多个用户要连到同一个实例（可以绑定 `--host 0.0.0.0`，但最好前面加带认证的反向代理，因为 API 本身没有内置认证）。
+- SSH 会话老断，适合先用 `kt serve start` 跑起来，再用 `ssh -L 8001:localhost:8001` 重连。
+- 机器是远程的，你不想一直留个终端窗口挂着。
+- 有长期运行的监控 agent，不能因为终端断开就被带死。
+- 多个人要连同一个实例。这个场景下可以绑 `--host 0.0.0.0`，但最好前面再挂一个带认证的反向代理，因为 API 自己没有内建认证。
 
 ## API 本身
 
-这三种方式暴露的都是同一个 FastAPI 应用：
+这三种方式暴露出来的都是同一个 FastAPI 应用：
 
-- REST 端点在 `/api/agents`、`/api/terrariums`、`/api/creatures`、`/api/channels`、`/api/configs`、`/api/sessions`
-- WebSocket 端点用于流式聊天、channel 观察和日志 tail
+- REST endpoint：`/api/agents`、`/api/terrariums`、`/api/creatures`、`/api/channels`、`/api/configs`、`/api/sessions`
+- WebSocket endpoint：流式聊天、channel 观察、日志 tail
 
-完整端点列表见：[Reference / HTTP API](/reference/http.md)（英文）。
+完整列表见[参考 / HTTP API](../reference/http.md)。
 
 ## 排错
 
-- **`kt web` 打印 `frontend not built`。** 按上面的步骤构建前端，或者用 `kt web --dev`，然后单独运行 `vite dev`。
-- **`kt serve status` 显示 `stale`。** 一般是被 `kill -9` 后留下的旧 PID 文件。重新跑一次 `kt serve start` 就会清掉，或者手动删掉 `~/.kohakuterrarium/run/web.*`。
-- **两个实例都在抢 8001 端口。** `kt web` 会自动递增端口；`kt serve` 如果配置的端口已被占用，会直接失败。用 `--port` 指定别的端口。
-- **`kt web` 没有自动打开浏览器。** 它只会打印 URL，需要你自己打开。
-- **从别的主机访问不到守护进程。** 你绑定的是 `127.0.0.1`。用 `--host 0.0.0.0` 重启，并放到代理后面。
-- **`kt app` 一启动就崩。** 多半是没装 `pywebview`。运行 `pip install 'kohakuterrarium[full]'`，或者改用 `kt web`。
+- **`kt web` 打印出 "frontend not built"。** 按上面的步骤先 build，或者改用 `kt web --dev`，再单独跑 `vite dev`。
+- **`kt serve status` 显示 `stale`。** 多半是之前被 `kill -9` 之后留下了旧 PID 文件。重新跑一次 `kt serve start` 就会清掉，或者手动删 `~/.kohakuterrarium/run/web.*`。
+- **两个实例都在抢 8001 端口。** `kt web` 会自动换下一个端口；`kt serve` 如果端口被占，会直接报错。自己用 `--port` 指定。
+- **`kt web` 没自动打开浏览器。** 它只会把 URL 打出来，要自己打开。
+- **别的机器连不上守护进程。** 你大概率绑的是 `127.0.0.1`。重启时改成 `--host 0.0.0.0`，前面再加代理。
+- **`kt app` 一启动就崩。** 一般是没装 `pywebview`。装 `pip install 'kohakuterrarium[full]'`，或者先退回 `kt web`。
 
 ## 另见
 
-- [Frontend Layout](/guides/frontend-layout.md)（英文）—— UI 里有哪些面板和预设。
-- [Reference / HTTP API](/reference/http.md)（英文）—— REST 和 WebSocket 端点。
-- [Reference / CLI](/reference/cli.md)（英文）—— `kt web`、`kt app`、`kt serve` 的参数。
-- [ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md)（英文）—— 计划中的守护进程工作流。
+- 前端布局 —— UI 里有哪些面板和预设。
+- [参考 / HTTP API](../reference/http.md) —— REST 和 WebSocket endpoint。
+- [参考 / CLI](../reference/cli.md) —— `kt web`、`kt app`、`kt serve` 的参数说明。
+- [ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md) —— 之后计划做的守护进程工作流。

@@ -1,25 +1,32 @@
 # 参考
 
-穷举式查表文档：每个命令、字段、API、签名。
+参考页是拿来查具体信息的。
 
-想看心智模型去[概念](/concepts/README.md)。
-想看任务式配方去[指南](/guides/README.md)。
-想看引导式入门去[教程](/tutorials/README.md)。
+如果你已经知道自己要做什么，只是想找准确的命令、接口、类、字段或 hook，就看这里。
 
-## 核心
+如果你想先搞懂整体思路，看[概念](../concepts/README.md)。如果你是按任务找做法，看[指南](../guides/README.md)。
 
-- [CLI](/reference/cli.md)（英文） — `kt` 命令完整参数。
-- [配置](/reference/configuration.md)（英文） — `config.yaml` 所有字段。
-- [Python API](/reference/python.md)（英文） — `Agent`、`AgentSession`、`TerrariumRuntime`、`KohakuManager`。
-- [HTTP API](/reference/http.md)（英文） — `/api/*` endpoints。
+## 页面
 
-## 模块
+- [CLI](cli.md) — `kt` 的全部命令和参数。
+- [HTTP 和 WebSocket API](http.md) — 所有 REST 路由、WebSocket 端点，以及 Pydantic schema。
+- [Python API](python.md) — 所有公开类、函数和 protocol。
+- [配置](configuration.md) — creature 配置、terrarium 配置、LLM profile、MCP 目录和包清单里的全部字段。
+- [内置项](builtins.md) — 自带的全部工具、sub-agent、input、output、用户命令、框架命令、LLM provider 和 LLM preset。
+- [插件 hooks](plugin-hooks.md) — 所有生命周期、LLM、工具、sub-agent、回调和 prompt hook，包括签名和触发时机。
 
-- [内建](/reference/builtins.md)（英文） — tools、sub-agents、triggers 目录。
-- [Plugin Hooks](/reference/plugin-hooks.md)（英文） — 可拦截的事件点。
+## 这里放什么
 
-## 参考
+参考文档只管一件事：写得准，范围小。
 
-- [指南](/guides/README.md) — 任务式文档。
-- [概念](/concepts/README.md) — 心智模型。
-- [教程](/tutorials/README.md) — 引导式入门。
+- 命令语法
+- API 端点
+- Python 类和入口点
+- 配置字段和接口约定
+
+其他内容不放这里：
+
+- 教程带你从头走一遍
+- 指南告诉你怎么完成某件事
+- 概念文档解释系统为什么这么设计
+- 开发文档讲怎么参与框架本身的开发

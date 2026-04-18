@@ -1,24 +1,24 @@
 # 自定义模块
 
-给要自己写 tool、input、output、trigger 或 sub-agent 的人看。
+给想自己写 tool、input、output、trigger 或 sub-agent 的人看。
 
-KohakuTerrarium 里所有可扩展的部分，都是 Python protocol。你实现对应 protocol，把配置指到你的模块上，剩下的交给框架。不用改框架源码。
+KohakuTerrarium 里所有可扩展的地方，本质上都是 Python protocol。你把 protocol 实现好，再在配置里指向自己的模块，剩下的交给框架。不用改框架源码。
 
-概念预习：[modules](/concepts/modules/README.md)（英文），以及 `/concepts/modules/` 下各模块的页面（英文）。
+先补概念：[模块](/zh/concepts/modules/README.md)。各模块的概念页也都在 `/zh/concepts/modules/` 下面。
 
-## 自定义模块的基本形式
+## 自定义模块长什么样
 
-每个模块都放在一个 Python 文件里，位置随你定。常见做法是放在 creature 目录下，或者放进一个 package。配置里写 `module: ./path/to/file.py` 和 `class_name: YourClass`。
+每个模块就是一个 Python 文件，放哪都行。一般会放在 creature 目录里，或者放进一个 package。配置里填 `module: ./path/to/file.py` 和 `class_name: YourClass`。
 
-五种模块的接线方式都一样。区别只在于类实现的是哪个 protocol。
+这五类模块接线方式都差不多，真正不同的只是你的类要实现哪个 protocol。
 
 ## Tools
 
-约定见 `kohakuterrarium.modules.tool.base`：
+约定在 `kohakuterrarium.modules.tool.base`：
 
 - `async execute(args: dict, context: ToolContext | None) -> ToolResult`
 - 可选类属性：`needs_context`、`parallel_allowed`、`timeout`、`max_output`
-- 可选 `get_full_documentation() -> str`（由框架命令 `info` 加载）
+- 可选 `get_full_documentation() -> str`（框架命令 `info` 会读取它）
 
 最小示例：
 
@@ -58,11 +58,11 @@ tools:
     class_name: MyTool
 ```
 
-Tool 执行模式（通过 `BaseTool` 设置）：
+Tool 的执行模式在 `BaseTool` 里设置：
 
-- **direct**（默认）— 在当前 turn 里 await，结果会变成一个 `tool_complete` 事件。
-- **background** — 提交后立刻返回 job id；结果稍后到达。
-- **stateful** — 类似 generator，会跨多个 turn 产出中间结果。
+- **direct**（默认）—— 当前 turn 里直接等待执行完成，结果会变成一个 `tool_complete` 事件。
+- **background** —— 提交后立刻返回 job id，结果稍后到。
+- **stateful** —— 有点像 generator，会跨多个 turn 产出中间结果。
 
 测试：
 
@@ -80,12 +80,12 @@ assert "Did the thing to x" in env.output.all_text
 
 ## Inputs
 
-约定见 `kohakuterrarium.modules.input.base`：
+约定在 `kohakuterrarium.modules.input.base`：
 
 - `async start()` / `async stop()`
 - `async get_input() -> TriggerEvent | None`
 
-输入耗尽时返回 `None`，这会触发 agent 关闭。
+如果输入读完了，就返回 `None`。这会触发 agent 关闭。
 
 ```python
 # inputs/line_file.py
@@ -135,14 +135,14 @@ input:
 
 ## Outputs
 
-约定见 `kohakuterrarium.modules.output.base`：
+约定在 `kohakuterrarium.modules.output.base`：
 
 - `async start()`、`async stop()`
-- `async write(content: str)` — 完整消息
-- `async write_stream(chunk: str)` — 流式分块
+- `async write(content: str)` —— 完整消息
+- `async write_stream(chunk: str)` —— 流式输出的分片
 - `async flush()`
 - `async on_processing_start()`、`async on_processing_end()`
-- `def on_activity(activity_type: str, detail: str)` — tool/subagent 事件
+- `def on_activity(activity_type: str, detail: str)` —— tool / sub-agent 事件
 - 可选 `async on_user_input(text)`、`async on_resume(events)`
 
 ```python
@@ -193,7 +193,7 @@ output:
     webhook_url: "${DISCORD_WEBHOOK}"
 ```
 
-也可以把它作为命名 side-channel 使用。主输出仍然走 stdout，tool 可以把内容路由到这里：
+也可以把它挂成一个具名 side-channel。这样主输出还是 stdout，但 tool 可以把内容发到这里：
 
 ```yaml
 output:
@@ -208,12 +208,12 @@ output:
 
 ## Triggers
 
-约定见 `kohakuterrarium.modules.trigger.base`：
+约定在 `kohakuterrarium.modules.trigger.base`：
 
 - `async wait_for_trigger() -> TriggerEvent | None`
 - 可选 `async _on_start()`、`async _on_stop()`
 - 可选类属性：`resumable`、`universal`
-- 如果启用 `resumable`：`to_resume_dict()` / `from_resume_dict()`
+- 如果 `resumable` 为真：`to_resume_dict()` / `from_resume_dict()`
 
 最小 timer 示例：
 
@@ -250,11 +250,11 @@ triggers:
     prompt: "Check the dashboard."
 ```
 
-`universal: True` 表示这个类可以由 agent 自己安装。你需要在类上补齐 `setup_tool_name`、`setup_description`、`setup_param_schema`，以及可选的 `setup_full_doc`，然后在 creature 配置的 `tools:` 下声明一个 `type: trigger`、`name: <setup_tool_name>` 的条目。框架会把这个类包成一个同名 tool；调用后会通过 agent 的 `TriggerManager` 在后台安装 trigger。
+如果类上写了 `universal: True`，agent 就能在运行时自己安装这个 trigger。你需要在类里补上 `setup_tool_name`、`setup_description`、`setup_param_schema`，也可以额外提供 `setup_full_doc`。然后在 creature 配置的 `tools:` 下面声明一项，写上 `type: trigger` 和 `name: <setup_tool_name>`。框架会把这个类包成一个同名 tool；一旦调用，就会通过 agent 的 `TriggerManager` 在后台装上对应 trigger。
 
 ## Sub-agents
 
-Sub-agent 由 `SubAgentConfig` 定义。它本身是配置 dataclass，通常不需要直接继承 `SubAgent`。更常见的做法是提供一个导出配置对象的 Python 模块：
+Sub-agent 一般由 `SubAgentConfig` 定义。它本身是个配置 dataclass，所以大多数时候你不用直接去继承 `SubAgent`。常见做法是提供一个 Python 模块，导出一个配置对象：
 
 ```python
 # subagents/specialist.py
@@ -281,11 +281,11 @@ subagents:
     config_name: SPECIALIST_CONFIG
 ```
 
-如果你的 sub-agent 其实包了一整个自定义 agent，比如基于另一个框架，或者是 Python-first 的实现，那就继承 `SubAgent`，实现 `async run(input_text) -> SubAgentResult`。见 [concepts/modules/sub-agent](/concepts/modules/sub-agent.md)（英文）。
+如果你的 sub-agent 要包住一整个自定义 agent，比如接另一个框架，或者完全用 Python-first 的方式来实现，那就去继承 `SubAgent`，自己实现 `async run(input_text) -> SubAgentResult`。细节见[模块 / Sub-agent](/zh/concepts/modules/sub-agent.md)。
 
-## 打包自定义模块
+## 给自定义模块打包
 
-可以直接放进一个 package：
+可以直接把这些模块放进一个 package：
 
 ```
 my-pack/
@@ -313,13 +313,13 @@ python_dependencies:
   - httpx>=0.27
 ```
 
-这样一来，别的配置就可以用 `type: package` 来引用，框架会从 `my_pack.tools.my_tool:MyTool` 里取出这个类。
+这样别的配置就可以写 `type: package`，框架会从 `my_pack.tools.my_tool:MyTool` 里取这个类。
 
-见 [Packages](/guides/packages.md)（英文）。
+相关内容见 [Packages](/zh/packages-and-install-advanced.md)。
 
 ## 测试自定义模块
 
-`kohakuterrarium.testing` 里的 `TestAgentBuilder` 会给你一个完整 agent，里面带 `ScriptedLLM` 和 `OutputRecorder`。你可以直接把模块塞进去测试：
+`kohakuterrarium.testing` 里的 `TestAgentBuilder` 会给你一个完整 agent，里面带 `ScriptedLLM` 和 `OutputRecorder`。你可以直接把自己的模块塞进去测：
 
 ```python
 from kohakuterrarium.testing.agent import TestAgentBuilder
@@ -334,18 +334,18 @@ await env.inject("...")
 assert env.output.all_text == "..."
 ```
 
-测试 trigger 时，用 `EventRecorder`，检查 `TriggerEvent` 的结构是否正确。
+测 trigger 的话，用 `EventRecorder`，然后检查 `TriggerEvent` 的结构。
 
 ## 排错
 
-- **找不到模块。** `module:` 路径是相对 creature 目录解析的。如果这里说不清，就直接用绝对路径。
-- **Tool 没出现在 prompt 里。** 跑 `kt info path/to/creature` 看看。多数时候是这个 tool 被静默拒绝了，先确认 `class_name` 写对了。
-- **测试里明明设了 `needs_context=True`，但 `context` 还是 `None`。** `TestAgentBuilder` 会提供 context；如果你还需要 channel 或 scratchpad，确认已经调用了 `.with_session(...)`。
-- **Trigger 不能 resume。** 在类上设 `resumable = True`，并实现 `to_resume_dict()`。
+- **找不到模块。** `module:` 路径是相对 creature 目录解析的。如果这里容易搞混，就直接写绝对路径。
+- **Tool 没进 prompt。** 跑一下 `kt info path/to/creature`。很多时候不是没加载，而是被静默拒掉了；先确认 `class_name` 写对。
+- **测试里写了 `needs_context=True`，但 `context` 是 `None`。** `TestAgentBuilder` 本来会给 context。要是你还需要 channels 或 scratchpad，记得再补 `.with_session(...)`。
+- **Trigger 不能恢复。** 在类上设 `resumable = True`，再实现 `to_resume_dict()`。
 
 ## 另见
 
-- [Plugins](/guides/plugins.md)（英文）— 处理模块之间衔接处的行为，比如前后置 hook。
-- [Packages](/guides/packages.md)（英文）— 把模块打包出去复用。
-- [Reference / Python API](/reference/python.md)（英文）— `BaseTool`、`BaseInputModule`、`BaseOutputModule`、`BaseTrigger`、`SubAgentConfig`。
-- [Concepts / modules](/concepts/modules/README.md)（英文）— 每种模块各有一页说明。
+- [Plugins](plugins.md) —— 想改的是模块之间那层连接，而不是模块本身，就看这个。
+- [Packages](/zh/packages-and-install-advanced.md) —— 怎么把模块打包出去复用。
+- [Reference / Python API](/zh/reference/python.md) —— `BaseTool`、`BaseInputModule`、`BaseOutputModule`、`BaseTrigger`、`SubAgentConfig`。
+- [Concepts / 模块](/zh/concepts/modules/README.md) —— 每个模块一页。

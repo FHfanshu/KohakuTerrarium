@@ -1,16 +1,16 @@
-# 配置
+# Configuration
 
-这篇给想改现有 creature，或者新接一个 creature、但不想先把配置参考逐字段读完的人看。
+给已经有 creature，想改一改；或者准备接一个新的，但又不想去啃完整 reference 的人看。
 
-Creature 配置用 YAML，也支持 JSON/TOML。每个顶层键都对应 `AgentConfig` 的一个字段；`controller`、`input`、`output` 这类子块各自也有字段。这里按任务讲，完整字段列表见 [configuration](/reference/configuration.md)（英文）。
+Creature 配置用 YAML 写，也支持 JSON/TOML。每个顶层 key 都对应 `AgentConfig` 的一个字段；`controller`、`input`、`output` 这类子块各自也是 dataclass，有自己的字段。这篇按事情来讲。要看完整字段列表，去 [reference/configuration](../reference/configuration.md)。
 
-先看概念： [creatures](/guides/creatures.md)（英文）、[composing an agent](/concepts/foundations/composing-an-agent.md)（英文）。
+先补一下概念： [creatures](creatures.md)、[composing an agent](../concepts/foundations/composing-an-agent.md)。
 
-环境变量插值在任何位置都能用：`${VAR}` 或 `${VAR:default}`。
+环境变量插值哪里都能用：`${VAR}` 或 `${VAR:default}`。
 
 ## 怎么切换模型？
 
-从 `~/.kohakuterrarium/llm_profiles.yaml` 里选一个 preset；没有就用 `kt config llm add` 新增：
+先从 `~/.kohakuterrarium/llm_profiles.yaml` 里挑一个预设；没有就用 `kt config llm add` 加：
 
 ```yaml
 controller:
@@ -18,13 +18,13 @@ controller:
   reasoning_effort: high
 ```
 
-也可以只在单次运行时通过命令行覆盖：
+也可以只在这次运行里临时覆盖：
 
 ```bash
 kt run path/to/creature --llm gpt-5.4
 ```
 
-如果你想把设置全写在配置里，不用 profile 文件，就填 `model`、`api_key_env` 和 `base_url`：
+如果你想把设置全写在配置里，不走 profile 文件，那就用 `model` + `api_key_env` + `base_url`：
 
 ```yaml
 controller:
@@ -34,7 +34,7 @@ controller:
   temperature: 0.3
 ```
 
-## 怎么继承 OOTB creature？
+## 怎么继承一个开箱即用的 creature？
 
 ```yaml
 name: my-swe
@@ -47,15 +47,15 @@ tools:
     module: ./tools/my_tool.py
 ```
 
-标量字段直接覆盖；`controller`、`input`、`output` 会合并；列表会扩展，并按 `name` 去重。想替换列表而不是扩展，就写：
+标量字段直接覆盖；`controller`、`input`、`output` 会合并；列表会按 `name` 扩展并去重。如果你不想扩展，而是整列替换：
 
 ```yaml
 no_inherit: [tools, subagents]
 ```
 
-## 怎么加工具？
+## 怎么加一个 tool？
 
-内置工具可以用简写：
+内置工具可以直接写短名字：
 
 ```yaml
 tools:
@@ -64,7 +64,7 @@ tools:
   - web_search
 ```
 
-带选项时：
+要带参数就这样写：
 
 ```yaml
 tools:
@@ -74,7 +74,7 @@ tools:
       region: us-en
 ```
 
-自定义工具（本地模块）：
+自定义 tool（本地模块）：
 
 ```yaml
 tools:
@@ -84,7 +84,7 @@ tools:
     class_name: MyTool
 ```
 
-包工具（从已安装包的 `kohaku.yaml` 读取）：
+包里的 tool（来自已安装包的 `kohaku.yaml`）：
 
 ```yaml
 tools:
@@ -92,9 +92,9 @@ tools:
     type: package
 ```
 
-协议见 [Custom Modules](/guides/custom-modules.md)（英文）。
+协议怎么写，看 [Custom Modules](custom-modules.md)。
 
-## 怎么加子 agent？
+## 怎么加一个子 agent？
 
 ```yaml
 subagents:
@@ -104,13 +104,13 @@ subagents:
     type: custom
     module: ./subagents/critic.py
     config_name: CRITIC_CONFIG
-    interactive: true       # 在父 agent 的多轮之间保持存活
+    interactive: true       # 父 agent 换轮次后它也会继续活着
     can_modify: true
 ```
 
-内置项：`worker`、`coordinator`、`explore`、`plan`、`research`、`critic`、`response`、`memory_read`、`memory_write`、`summarize`。
+内置的有：`worker`、`coordinator`、`explore`、`plan`、`research`、`critic`、`response`、`memory_read`、`memory_write`、`summarize`。
 
-## 怎么加触发器？
+## 怎么加 trigger？
 
 ```yaml
 triggers:
@@ -124,7 +124,7 @@ triggers:
     prompt: "If the user seems stuck, ask."
 ```
 
-内置类型有 `timer`、`idle`、`webhook`、`channel`、`custom`、`package`。触发器触发时，`prompt` 会注入为 `TriggerEvent.prompt_override`。
+内置类型有：`timer`、`idle`、`webhook`、`channel`、`custom`、`package`。trigger 触发时，`prompt` 会注入到 `TriggerEvent.prompt_override`。
 
 ## 怎么设置 compaction？
 
@@ -137,9 +137,9 @@ compact:
   compact_model: gpt-4o-mini
 ```
 
-compaction 的作用见 [Sessions](/guides/sessions.md)（英文）。
+它具体做什么，看 [Sessions](sessions.md)。
 
-## 怎么加自定义输入？
+## 怎么加自定义 input？
 
 ```yaml
 input:
@@ -151,11 +151,11 @@ input:
     channel_id: 123456
 ```
 
-内置类型：`cli`、`tui`、`asr`、`whisper`、`none`。协议见 [Custom Modules](/guides/custom-modules.md)（英文）。
+内置类型有：`cli`、`tui`、`asr`、`whisper`、`none`。协议见 [Custom Modules](custom-modules.md)。
 
-## 怎么加具名输出通道？
+## 怎么加一个带名字的输出通道？
 
-当工具或子 agent 需要把输出发到特定通道时，这个配置很有用，比如 TTS、Discord、文件：
+当 tool 或子 agent 想把内容发到某个指定通道时，这个很有用，比如 TTS、Discord、文件：
 
 ```yaml
 output:
@@ -171,9 +171,9 @@ output:
       options: { webhook_url: "${DISCORD_WEBHOOK}" }
 ```
 
-## 怎么用插件限制工具？
+## 怎么用 plugin 给 tool 加一道限制？
 
-下面这个生命周期插件会拦住危险命令：
+下面这个生命周期插件会拦危险命令：
 
 ```yaml
 plugins:
@@ -185,7 +185,7 @@ plugins:
       deny_patterns: ["rm -rf", "dd if="]
 ```
 
-插件类怎么写，见 [Plugins](/guides/plugins.md)（英文）；参考实现见 [examples/plugins/tool_guard.py](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/examples/plugins/tool_guard.py)（英文）。
+插件类怎么写，看 [Plugins](plugins.md)。参考实现看 [examples/plugins/tool_guard.py](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/examples/plugins/tool_guard.py)。
 
 ## 怎么注册 MCP 服务器？
 
@@ -203,29 +203,29 @@ mcp_servers:
     env: { API_KEY: "${DOCS_API_KEY}" }
 ```
 
-全局文件 `~/.kohakuterrarium/mcp_servers.yaml` 用的是同一套 schema。见 [MCP](/guides/mcp.md)（英文）。
+全局配置 `~/.kohakuterrarium/mcp_servers.yaml` 用的是同一套格式。见 [MCP](mcp.md)。
 
-## 怎么改工具调用格式？
+## 怎么改 tool 调用格式？
 
 ```yaml
-tool_format: bracket        # 默认：[/name]@@arg=value\n[name/]
-# 或
+tool_format: bracket        # default: [/name]@@arg=value\n[name/]
+# or
 tool_format: xml            # <name arg="value"></name>
-# 或
+# or
 tool_format: native         # provider-native function calling
 ```
 
-每种格式的具体样子见 [creatures guide — Tool format](/guides/creatures.md)（英文）；完全自定义分隔符的配置见 [reference/configuration.md — `tool_format`](/reference/configuration.md)（英文）。
+每种格式具体长什么样，看 [creatures guide — Tool format](creatures.md)；如果你想自定义分隔符，看 [reference/configuration.md — `tool_format`](../reference/configuration.md)。
 
-## 怎么在 dynamic 和 static skill mode 之间选？
+## 怎么选 dynamic 还是 static skill mode？
 
 ```yaml
-skill_mode: dynamic   # 默认；`info` 框架命令按需加载完整文档
-# 或
-skill_mode: static    # 完整工具文档直接放进 system prompt
+skill_mode: dynamic   # 默认，`info` 框架命令按需加载完整文档
+# or
+skill_mode: static    # 完整 tool 文档直接塞进 system prompt
 ```
 
-## 怎么让 creature 在没有用户输入时继续运行？
+## 怎么让 creature 在没有用户输入时也一直活着？
 
 ```yaml
 input:
@@ -236,9 +236,9 @@ triggers:
     prompt: "Check for anomalies."
 ```
 
-`none` 输入配任意触发器，就是标准的 monitor-agent 模式。
+`none` input 加任意 trigger，就是标准的监控 agent 写法。
 
-## 怎么给一次运行设边界？
+## 怎么给一次运行加边界？
 
 ```yaml
 termination:
@@ -248,11 +248,11 @@ termination:
   keywords: ["DONE", "ABORT"]
 ```
 
-满足任一条件，agent 就会停止。
+其中任意一个条件满足，agent 就会停。
 
-## 怎么在多个 creature 之间共享状态（不通过 terrarium）？
+## 怎么让多个 creature 共享状态（不通过 terrarium）？
 
-给它们设同一个 `session_key`：
+给它们同一个 `session_key`：
 
 ```yaml
 name: writer
@@ -262,9 +262,9 @@ name: reviewer
 session_key: shared-workspace
 ```
 
-这样两个 creature 会共享 `Scratchpad` 和 `ChannelRegistry`。适合多个 creature 在同一进程里运行、但没有 terrarium 的情况。
+这样两个 creature 会共享 `Scratchpad` 和 `ChannelRegistry`。适合同一个进程里跑多个 creature，但又没用 terrarium 的情况。
 
-## 怎么配置 memory/embedding？
+## 怎么配 memory / embedding？
 
 ```yaml
 memory:
@@ -273,7 +273,7 @@ memory:
     model: "@retrieval"
 ```
 
-见 [Memory](/guides/memory.md)（英文）。
+见 [Memory](memory.md)。
 
 ## 怎么把 creature 固定到某个工作目录？
 
@@ -281,17 +281,17 @@ memory:
 kt run path/to/creature --pwd /path/to/project
 ```
 
-`pwd` 会传给每个工具的 `ToolContext`。
+`pwd` 会传给每个 tool 的 `ToolContext`。
 
 ## 排错
 
-- **环境变量没展开。** 要写 `${VAR}`，带花括号。`$VAR` 会按字面量处理。
-- **子配置里“丢了”父配置的工具。** 你声明了 `no_inherit: [tools]`。删掉它就会改为扩展。
-- **配置能加载，但工具没出现。** 简写名会去内置工具目录里解析，拼错时不会报明显错误。用 `kt info path/to/creature` 检查。
-- **两个设置冲突。** CLI 覆盖项（如 `--llm`）优先于配置；配置优先于 `llm_profiles.yaml` 里的 `default_model`。
+- **环境变量没展开。** 要写 `${VAR}`，花括号不能省。`$VAR` 会被当普通字符串。
+- **子配置里像是“丢了”父配置的 tool。** 你写了 `no_inherit: [tools]`。删掉它，列表就会改成扩展。
+- **配置能加载，但 tool 没出现。** 短名字会去内置工具目录里找，拼错了通常不会报得很明显。用 `kt info path/to/creature` 看看。
+- **两个设置打架。** CLI 覆盖项（比如 `--llm`）优先于配置；配置又优先于 `llm_profiles.yaml` 里的 `default_model`。
 
 ## 另见
 
-- [configuration](/reference/configuration.md)（英文）：全部字段、类型和默认值。
-- [Creatures](/guides/creatures.md)（英文）：目录结构和组成。
-- [Plugins](/guides/plugins.md)（英文）、[Custom Modules](/guides/custom-modules.md)（英文）、[MCP](/guides/mcp.md)（英文）、[Memory](/guides/memory.md)（英文）：分别说明对应部分怎么接入。
+- [Reference / configuration](../reference/configuration.md) —— 所有字段、类型和默认值。
+- [Creatures](creatures.md) —— 目录结构和组成。
+- [Plugins](plugins.md)、[Custom Modules](custom-modules.md)、[MCP](mcp.md)、[Memory](memory.md) —— 各块怎么接。

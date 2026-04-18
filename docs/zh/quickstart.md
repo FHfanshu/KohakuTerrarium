@@ -126,7 +126,7 @@ dir ~/.kohakuterrarium/sessions/*.kohakutr
 有本地扩展时额外验证：
 ```powershell
 kt info examples/agent-apps/swe_bio_agent
-dir examples/agent-apps/swe_bio_agent/artifacts/audit/*.jsonl
+dir examples/agent-apps/swe_bio_agent/creatures/swe_bio_agent/artifacts/audit/*.jsonl
 ```
 
 ## 常见问题

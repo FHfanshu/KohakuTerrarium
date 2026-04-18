@@ -7,8 +7,34 @@
 | 类型 | 存在哪 | 用来干嘛 |
 |------|--------|----------|
 | `.kohakutr` session | `~/.kohakuterrarium/sessions/` | 恢复现场、搜索历史 |
-| 审计日志 JSONL | `artifacts/audit/` | 人看、脚本分析、团队审计 |
-| 服务日志 | `app.log` 或 `kt serve logs` | 排查故障 |
+| 审计日志 JSONL | creature 目录下的 `artifacts/audit/` | 人看、脚本分析、团队审计 |
+| 服务日志 | `~/.kohakuterrarium/app.log` 或 `kt serve logs` | 排查故障 |
+
+## 文件到底在哪
+
+默认都在这个目录下：
+
+```text
+~/.kohakuterrarium/
+```
+
+如果你是 Windows 用户，通常就是：
+
+```text
+C:\Users\你的用户名\.kohakuterrarium\
+```
+
+想直接打开的话：
+
+```powershell
+explorer $env:USERPROFILE\.kohakuterrarium
+```
+
+常见几个位置：
+
+- session 文件：`%USERPROFILE%\.kohakuterrarium\sessions\`
+- 服务日志：`%USERPROFILE%\.kohakuterrarium\app.log`
+- 本地扩展示例 `swe_bio_agent` 的审计日志：项目里的 `examples/agent-apps/swe_bio_agent/creatures/swe_bio_agent/artifacts/audit/`
 
 ## session 是什么
 
@@ -23,13 +49,25 @@ KohakuTerrarium 每次运行都会保存一个 `.kohakutr` 文件。它不是简
 | conversation snapshots | 对话压缩快照 |
 | config metadata | 当时用的配置 |
 
-文件在这里：
+默认在这里：
 
 ```text
 ~/.kohakuterrarium/sessions/
 ├── 2024-01-15_10-30-00_swe_bio_agent.kohakutr
 ├── 2024-01-15_14-22-33_swe.kohakutr
 └── ...
+```
+
+Windows 一般对应：
+
+```text
+C:\Users\你的用户名\.kohakuterrarium\sessions\
+```
+
+可以直接打开：
+
+```powershell
+explorer $env:USERPROFILE\.kohakuterrarium\sessions
 ```
 
 ## 恢复 session
@@ -98,7 +136,7 @@ python scripts/inspect_session.py ~/.kohakuterrarium/sessions/your_session.kohak
 如果你使用的是带审计插件的本地扩展示例 creature，比如 `swe_bio_agent`，它还会额外写一份 JSONL，每行一条结构化记录：
 
 ```text
-examples/agent-apps/swe_bio_agent/artifacts/audit/
+examples/agent-apps/swe_bio_agent/creatures/swe_bio_agent/artifacts/audit/
 ├── 2024-01-15_10-30-00.jsonl
 └── ...
 ```

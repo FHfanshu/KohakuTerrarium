@@ -1,13 +1,12 @@
 # Python API
 
-`kohakuterrarium` Python 包里所有公开的类、函数和协议。条目按模块分组。签名使用现代类型标注。
+这里列的是 `kohakuterrarium` Python 包里所有公开的类、函数和 protocol。内容按模块分组，签名使用现代类型标注。
 
-架构说明见[concepts/README](/concepts/README.md)（英文）。
-任务示例见[guides/programmatic-usage](/guides/programmatic-usage.md)（英文）和[guides/custom-modules](/guides/custom-modules.md)（英文）。
+如果你想看整体架构，先读[概念](../concepts/README.md)。如果你想看按任务走的示例，可以看[程序化使用](../guides/programmatic-usage.md)和[自定义模块](../guides/custom-modules.md)。
 
 ## 导入入口
 
-| 当你需要 | 使用 |
+| 你想要 | 用这个 |
 |---|---|
 | 最省事的流式聊天封装 | `kohakuterrarium.serving.agent_session.AgentSession` |
 | 直接控制 agent | `kohakuterrarium.core.agent.Agent` |
@@ -15,8 +14,8 @@
 | 与传输层无关的管理器 | `kohakuterrarium.serving.manager.KohakuManager` |
 | 加载配置 | `kohakuterrarium.core.config.load_agent_config` / `kohakuterrarium.terrarium.config.load_terrarium_config` |
 | 持久化 / 搜索 | `kohakuterrarium.session.store.SessionStore`, `kohakuterrarium.session.memory.SessionMemory` |
-| 编写扩展 | `kohakuterrarium.modules.{tool,input,output,trigger,subagent}.base` |
-| 组合 pipeline | `kohakuterrarium.compose` |
+| 扩展开发 | `kohakuterrarium.modules.{tool,input,output,trigger,subagent}.base` |
+| 管道组合 | `kohakuterrarium.compose` |
 | 测试 | `kohakuterrarium.testing` |
 
 ---
@@ -27,7 +26,7 @@
 
 模块：`kohakuterrarium.core.agent`。
 
-主调度器，把 LLM、controller、executor、triggers、I/O 和 plugins 接到一起。继承 `AgentInitMixin`、`AgentHandlersMixin` 和 `AgentMessagesMixin`。
+主调度器。它把 LLM、controller、executor、trigger、I/O 和插件接在一起。继承自 `AgentInitMixin`、`AgentHandlersMixin` 和 `AgentMessagesMixin`。
 
 类方法工厂：
 
@@ -46,10 +45,10 @@ Agent.from_path(
 
 生命周期：
 
-- `async start() -> None` — 启动 I/O、output、triggers、LLM 和 plugins。
+- `async start() -> None` — 启动 I/O、output、trigger、LLM 和插件。
 - `async stop() -> None` — 干净地停止所有模块。
-- `async run() -> None` — 完整事件循环。若尚未启动，会先调用 `start()`。
-- `interrupt() -> None` — 非阻塞；可安全地从任意线程调用。
+- `async run() -> None` — 完整事件循环。如果还没启动，会先调 `start()`。
+- `interrupt() -> None` — 非阻塞；可以从任何线程安全调用。
 
 输入与事件：
 
@@ -67,14 +66,14 @@ Agent.from_path(
 - `set_output_handler(handler: Any, replace_default: bool = False) -> None`
 - `get_state() -> dict[str, Any]` — name、running、tools、subagents、message count、pending jobs。
 
-属性：
+属性（properties）：
 
 - `is_running: bool`
 - `tools: list[str]`
 - `subagents: list[str]`
 - `conversation_history: list[dict]`
 
-字段：
+属性（attributes）：
 
 - `config: AgentConfig`
 - `llm: LLMProvider`
@@ -92,8 +91,8 @@ Agent.from_path(
 
 说明：
 
-- 多 agent 场景下，`environment` 由 `TerrariumRuntime` 提供；单独运行时为 `None`。
-- `Agent` 实例在 `stop()` 之后不能复用；如果要从 `SessionStore` 恢复，重新创建一个。
+- 多 agent 场景下，`environment` 由 `TerrariumRuntime` 提供；单独运行时是 `None`。
+- `Agent` 实例在 `stop()` 之后不能复用；如果你想从 `SessionStore` 恢复，要新建一个。
 
 ```python
 agent = Agent.from_path("creatures/my_agent", llm_override="claude-opus-4.6")
@@ -104,9 +103,9 @@ await agent.stop()
 
 ### `AgentConfig`
 
-模块：`kohakuterrarium.core.config_types`。数据类。
+模块：`kohakuterrarium.core.config_types`。Dataclass。
 
-包含 creature 配置的全部字段。YAML 形式见[configuration.md](/reference/configuration.md)（英文）。
+包含 creature 配置的所有字段。YAML 形式见[配置](configuration.md)。
 
 字段：
 
@@ -148,11 +147,11 @@ await agent.stop()
 
 方法：
 
-- `get_api_key() -> str | None` — 读取配置的环境变量。
+- `get_api_key() -> str | None` — 读取配置指定的环境变量。
 
 ### `InputConfig`, `OutputConfig`, `OutputConfigItem`, `TriggerConfig`, `ToolConfigItem`, `SubAgentConfigItem`
 
-模块：`kohakuterrarium.core.config_types`。数据类。
+模块：`kohakuterrarium.core.config_types`。Dataclass。
 
 **`InputConfig`**
 
@@ -185,7 +184,7 @@ await agent.stop()
 
 **`OutputConfig`**
 
-继承 `OutputConfigItem`，并增加：
+继承 `OutputConfigItem`，另外还有：
 
 - `controller_direct: bool = True`
 - `named_outputs: dict[str, OutputConfigItem]`
@@ -208,13 +207,13 @@ await agent.stop()
 load_agent_config(config_path: str) -> AgentConfig
 ```
 
-解析 YAML/JSON/TOML（`config.yaml` → `.yml` → `.json` → `.toml`），并处理 `base_config` 继承、环境变量插值和路径解析。
+解析 YAML/JSON/TOML（`config.yaml` → `.yml` → `.json` → `.toml`），处理 `base_config` 继承、环境变量插值和路径解析。
 
 ### `Conversation`, `ConversationConfig`, `ConversationMetadata`
 
 模块：`kohakuterrarium.core.conversation`。
 
-`Conversation` 负责管理消息历史，以及 OpenAI 格式的序列化。
+`Conversation` 管理消息历史，并支持 OpenAI 格式序列化。
 
 方法：
 
@@ -248,7 +247,7 @@ load_agent_config(config_path: str) -> AgentConfig
 
 模块：`kohakuterrarium.core.events`。
 
-在输入、trigger、tool 和 sub-agent 之间传递的通用事件。
+输入、trigger、tool、sub-agent 之间传递的通用事件。
 
 字段：
 
@@ -264,7 +263,7 @@ load_agent_config(config_path: str) -> AgentConfig
 
 - `get_text_content() -> str`
 - `is_multimodal() -> bool`
-- `with_context(**kwargs) -> TriggerEvent` — 不会修改原对象。
+- `with_context(**kwargs) -> TriggerEvent` — 不会原地修改。
 
 `EventType` 常量：`USER_INPUT`、`IDLE`、`TIMER`、`CONTEXT_UPDATE`、`TOOL_COMPLETE`、`SUBAGENT_OUTPUT`、`CHANNEL_MESSAGE`、`MONITOR`、`ERROR`、`STARTUP`、`SHUTDOWN`。
 
@@ -273,7 +272,7 @@ load_agent_config(config_path: str) -> AgentConfig
 - `create_user_input_event(content, source="cli", **extra_context) -> TriggerEvent`
 - `create_tool_complete_event(job_id, content, exit_code=None, error=None, **extra_context) -> TriggerEvent`
 - `create_error_event(error_type, message, job_id=None, **extra_context) -> TriggerEvent`
-  （`stackable=False`）。
+  （`stackable=False`）
 
 ### Channels
 
@@ -322,7 +321,7 @@ load_agent_config(config_path: str) -> AgentConfig
 - `get(name) -> BaseChannel | None`
 - `list_channels() -> list[str]`
 - `remove(name) -> bool`
-- `get_channel_info() -> list[dict]` — 用于注入到 prompt。
+- `get_channel_info() -> list[dict]` — 用于注入 prompt。
 
 ### `Session`, `Scratchpad`, `Environment`
 
@@ -330,7 +329,7 @@ load_agent_config(config_path: str) -> AgentConfig
 
 **`Session`**
 
-每个 creature 的共享状态数据类。
+按 creature 划分的共享状态 dataclass。
 
 - `key: str`
 - `channels: ChannelRegistry`
@@ -358,7 +357,7 @@ load_agent_config(config_path: str) -> AgentConfig
 - `clear() -> None`
 - `to_dict() -> dict[str, str]`
 - `to_prompt_section() -> str`
-- `__len__`, `__contains__`
+- `__len__`、`__contains__`
 
 **`Environment`**
 
@@ -404,7 +403,7 @@ terrarium 的共享执行上下文。
 - `exit_code: int | None = None`
 - `error: str | None = None`
 - `metadata: dict[str, Any]`
-- `success: bool` 属性。
+- `success: bool` property。
 - `get_lines(start=0, count=None) -> list[str]`
 - `truncated(max_chars=1000) -> str`
 
@@ -453,7 +452,7 @@ terrarium 的共享执行上下文。
 
 模块：`kohakuterrarium.llm.base`。
 
-异步协议：
+异步 protocol：
 
 - `async chat(messages, *, stream=True, tools=None, **kwargs) -> AsyncIterator[str]`
 - `async chat_complete(messages, **kwargs) -> ChatResponse`
@@ -464,7 +463,7 @@ terrarium 的共享执行上下文。
 - `async _stream_chat(messages, *, tools=None, **kwargs)`
 - `async _complete_chat(messages, **kwargs) -> ChatResponse`
 
-基类字段：`config: LLMConfig`、`last_usage: dict[str, int]`。
+基础属性：`config: LLMConfig`、`last_usage: dict[str, int]`。
 
 ### 消息类型
 
@@ -514,14 +513,14 @@ terrarium 的共享执行上下文。
 - `get_images() -> list[ImagePart]`
 - `is_multimodal() -> bool`
 
-子类 `SystemMessage`、`UserMessage`、`AssistantMessage`、`ToolMessage` 会强制固定 role。
+子类 `SystemMessage`、`UserMessage`、`AssistantMessage`、`ToolMessage` 会固定 role。
 
-**`TextPart`** — `text: str`, `type: "text"`。
+**`TextPart`** — `text: str`、`type: "text"`。
 
 **`ImagePart`** — `url, detail ("auto"|"low"|"high"), source_type, source_name`；
 `get_description() -> str`。
 
-**`FilePart`** — 文件引用对应类型。
+**`FilePart`** — 文件引用对应的部分。
 
 工厂函数：
 
@@ -539,7 +538,7 @@ terrarium 的共享执行上下文。
 
 **`LLMPreset`** — `name, model, provider, max_context, max_output, temperature, reasoning_effort, service_tier, extra_body`。
 
-**`LLMProfile`** — preset 和 backend 在运行时合并后的结果：
+**`LLMProfile`** — preset 和 backend 合并后的运行时结果：
 `name, model, provider, backend_type, max_context, max_output, base_url, api_key_env, temperature, reasoning_effort, service_tier, extra_body`。
 
 模块级函数：
@@ -558,7 +557,7 @@ terrarium 的共享执行上下文。
 - `resolve_controller_llm(controller_config, llm_override=None) -> LLMProfile | None`
 - `list_all() -> list[dict]`
 
-内建 provider 名称：`codex`、`openai`、`openrouter`、`anthropic`、`gemini`、`mimo`。
+内置 provider 名：`codex`、`openai`、`openrouter`、`anthropic`、`gemini`、`mimo`。
 
 ### API keys
 
@@ -566,7 +565,7 @@ terrarium 的共享执行上下文。
 
 - `save_api_key(provider, key) -> None`
 - `get_api_key(provider_or_env) -> str`
-- `list_api_keys() -> dict[str, str]`（已脱敏）。
+- `list_api_keys() -> dict[str, str]`（掩码后）
 - `KT_DIR: Path`
 - `KEYS_PATH: Path`
 - `PROVIDER_KEY_MAP: dict[str, str]`
@@ -625,18 +624,18 @@ Jobs：
 - `touch() -> None`
 - `load_meta() -> dict[str, Any]`
 
-其他：
+杂项：
 
 - `search(query, k=10) -> list[dict]` — FTS5 BM25。
 - `flush() -> None`
 - `close(update_status=True) -> None`
-- `path: str` 属性。
+- `path: str` property。
 
 ### `SessionMemory`
 
 模块：`kohakuterrarium.session.memory`。
 
-带索引的搜索（FTS + 向量 + hybrid）。
+带索引的搜索（FTS + 向量 + 混合）。
 
 - `index_events(agent) -> None`
 - `async search(query, mode="hybrid", k=5) -> list[SearchResult]`
@@ -655,8 +654,7 @@ Jobs：
 
 模块：`kohakuterrarium.session.embedding`。
 
-provider 类型：`model2vec`、`sentence-transformer`、`api`。API
-providers 包括 `GeminiEmbedder`。别名：`@tiny`、`@base`、`@retrieval`、`@best`、`@multilingual`、`@multilingual-best`、`@science`、`@nomic`、`@gemma`。
+provider 类型：`model2vec`、`sentence-transformer`、`api`。API provider 包括 `GeminiEmbedder`。别名有：`@tiny`、`@base`、`@retrieval`、`@best`、`@multilingual`、`@multilingual-best`、`@science`、`@nomic`、`@gemma`。
 
 ---
 
@@ -681,11 +679,11 @@ providers 包括 `GeminiEmbedder`。别名：`@tiny`、`@base`、`@retrieval`、
 
 属性：`api: TerrariumAPI`、`observer: ChannelObserver`。
 
-字段：`config: TerrariumConfig`、`environment: Environment`、`_creatures: dict[str, CreatureHandle]`。
+属性字段：`config: TerrariumConfig`、`environment: Environment`、`_creatures: dict[str, CreatureHandle]`。
 
 ### `TerrariumConfig`, `CreatureConfig`, `ChannelConfig`, `RootConfig`
 
-模块：`kohakuterrarium.terrarium.config`。数据类。
+模块：`kohakuterrarium.terrarium.config`。Dataclass。
 
 **`TerrariumConfig`**
 
@@ -722,7 +720,7 @@ providers 包括 `GeminiEmbedder`。别名：`@tiny`、`@base`、`@retrieval`、
 
 ### `TerrariumAPI`, `ChannelObserver`, `CreatureHandle`
 
-用于编程控制的接口。`TerrariumAPI` 对应 root agent 可用的 terrarium tools。`ChannelObserver` 提供非破坏式观察。`CreatureHandle` 封装了 `Agent` 及其在 terrarium 里的连线信息。
+程序化控制入口。`TerrariumAPI` 对应 root agent 可以使用的 terrarium tools。`ChannelObserver` 用来做不破坏内容的观察。`CreatureHandle` 把一个 `Agent` 和它在 terrarium 里的连接关系包在一起。
 
 ---
 
@@ -730,7 +728,7 @@ providers 包括 `GeminiEmbedder`。别名：`@tiny`、`@base`、`@retrieval`、
 
 ### `KohakuManager`
 
-模块：`kohakuterrarium.serving.manager`。与传输层无关的管理器；HTTP API 和任何自定义传输都用它。
+模块：`kohakuterrarium.serving.manager`。和传输层无关的管理器；HTTP API 和自定义传输都用它。
 
 Agent 方法：
 
@@ -750,13 +748,13 @@ Terrarium 方法：
 - `async terrarium_create(config_path, ...) -> str`
 - `async terrarium_stop(terrarium_id) -> None`
 - `async terrarium_run(terrarium_id) -> AsyncIterator[str]`
-- creature / channel / observer 操作与 HTTP 接口一致。
+- creature / channel / observer 相关操作，与 HTTP 接口保持一致。
 
 ### `AgentSession`
 
-模块：`kohakuterrarium.serving.agent_session`。对 `Agent` 的轻量封装，支持并发注入输入和流式输出。
+模块：`kohakuterrarium.serving.agent_session`。对 `Agent` 的一层薄封装，支持并发注入输入和流式输出。
 
-工厂方法：
+工厂函数：
 
 - `async from_path(config_path, llm_override=None, pwd=None) -> AgentSession`
 - `async from_config(config: AgentConfig) -> AgentSession`
@@ -768,17 +766,17 @@ Terrarium 方法：
 - `async chat(message: str | list[dict]) -> AsyncIterator[str]`
 - `get_status() -> dict`
 
-字段：`agent_id: str`、`agent: Agent`。
+属性：`agent_id: str`、`agent: Agent`。
 
 ---
 
-## Module protocols（扩展 API）
+## 模块 protocol（扩展 API）
 
 ### `Tool`
 
 模块：`kohakuterrarium.modules.tool.base`。
 
-协议 / `BaseTool` 基类。
+Protocol / `BaseTool` 基类。
 
 - `async execute(args: dict, context: ToolContext | None = None) -> ToolResult` — 必需。
 - `needs_context: bool = False`
@@ -829,53 +827,53 @@ Terrarium 方法：
 - `get_status() -> SubAgentJob`
 - `get_pending_count() -> int`
 
-字段：`config: SubAgentConfig`、`llm`、`registry`、`executor`、`conversation`。
+属性：`config: SubAgentConfig`、`llm`、`registry`、`executor`、`conversation`。
 
-`kohakuterrarium.modules.subagent` 中的辅助类：
+`kohakuterrarium.modules.subagent` 里还有这些辅助类：
 `SubAgentResult`、`SubAgentJob`、`SubAgentManager`、`InteractiveSubAgent`、`InteractiveManagerMixin`、`SubAgentConfig`。
 
 ### Plugin hooks
 
-模块：`kohakuterrarium.modules.plugin`。每个 hook、签名和触发时机见[plugin-hooks.md](/reference/plugin-hooks.md)（英文）。
+模块：`kohakuterrarium.modules.plugin`。所有 hook、签名和触发时机见[插件 hooks](plugin-hooks.md)。
 
 ---
 
 ## `kohakuterrarium.compose`
 
-用于组合 agents 和纯函数的 pipeline 代数。
+用于组合 agent 和纯函数的管道代数。
 
 ### `BaseRunnable`
 
 - `async run(input) -> Any`
 - `async __call__(input) -> Any`
-- `__rshift__(other)` — `>>` 顺序执行。
+- `__rshift__(other)` — `>>` 串联。
 - `__and__(other)` — `&` 并行。
-- `__or__(other)` — `|` 兜底。
+- `__or__(other)` — `|` 回退。
 - `__mul__(n)` — `*` 重试。
 - `iterate(initial_input) -> PipelineIterator`
-- `map(fn) -> BaseRunnable` — 对输出做后置转换。
-- `contramap(fn) -> BaseRunnable` — 对输入做前置转换。
+- `map(fn) -> BaseRunnable` — 后处理输出。
+- `contramap(fn) -> BaseRunnable` — 预处理输入。
 - `fails_when(predicate) -> BaseRunnable`
 
 ### 工厂函数
 
 模块：`kohakuterrarium.compose.core`。
 
-- `Pure(fn)` / `pure(fn)` — 包装同步或异步可调用对象。
+- `Pure(fn)` / `pure(fn)` — 包装同步或异步 callable。
 - `Sequence(*stages)` — 串联。
 - `Product(*stages)` — 并行（`asyncio.gather`）。
 - `Fallback(*stages)`
 - `Retry(stage, attempts)`
-- `Router(mapping)` — 基于 dict 的分发。
-- `Iterator(...)` — 遍历异步数据源。
-- `effects.Effects()` — 记录副作用的句柄。
+- `Router(mapping)` — 基于字典的分发。
+- `Iterator(...)` — 对异步源做迭代。
+- `effects.Effects()` — 副作用日志句柄。
 
 ### Agent 组合
 
 模块：`kohakuterrarium.compose.agent`。
 
 - `async agent(config_path: str) -> AgentRunnable` — 持久 agent，可跨多次调用复用（异步上下文管理器）。
-- `factory(config: AgentConfig) -> AgentRunnable` — 临时工厂；每次调用都会新建一个 agent。
+- `factory(config: AgentConfig) -> AgentRunnable` — 临时工厂；每次调用都会创建新的 agent。
 
 运算符优先级：`* > | > & > >>`。
 
@@ -894,7 +892,7 @@ async with await agent("@kt-defaults/creatures/swe") as swe:
 
 ### `TestAgentBuilder`
 
-模块：`kohakuterrarium.testing.agent`。用于确定性 agent 测试的链式 builder。
+模块：`kohakuterrarium.testing.agent`。用来写可预测 agent 测试的链式 builder。
 
 builder 方法（返回 `self`）：
 
@@ -959,21 +957,3 @@ builder 方法（返回 `self`）：
 包根目录：`~/.kohakuterrarium/packages/`。可编辑安装不会复制文件，而是使用 `<name>.link` 指针。
 
 ---
-
-## 另见
-
-- 概念：
-  [composing an agent](/concepts/foundations/composing-an-agent.md)（英文）、
-  [modules/tool](/concepts/modules/tool.md)（英文）、
-  [modules/sub-agent](/concepts/modules/sub-agent.md)（英文）、
-  [impl-notes/session-persistence](/concepts/impl-notes/session-persistence.md)（英文）。
-- 指南：
-  [programmatic usage](/guides/programmatic-usage.md)（英文）、
-  [custom modules](/guides/custom-modules.md)（英文）、
-  [plugins](/guides/plugins.md)（英文）。
-- 参考：
-  [cli](/reference/cli.md)（英文）、
-  [http](/reference/http.md)（英文）、
-  [configuration](/reference/configuration.md)（英文）、
-  [builtins](/reference/builtins.md)（英文）、
-  [plugin-hooks](/reference/plugin-hooks.md)（英文）。

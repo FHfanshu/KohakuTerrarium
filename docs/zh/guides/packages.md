@@ -1,23 +1,23 @@
 # Package
 
-给需要在多个项目之间共享 creature、terrarium、tool 或 plugin 的读者。
+给想在多个项目之间共用 creature、terrarium、tool 或 plugin 的人看。
 
-KohakuTerrarium 的 package 本质上是一个带 `kohaku.yaml` 清单文件的目录。里面可以放 creatures、terrariums、自定义 tools、plugins 和 LLM presets。运行 `kt install` 后，它会被放到 `~/.kohakuterrarium/packages/<name>/`，然后你可以用 `@<name>/path` 引用里面的内容。
+KohakuTerrarium 的 package 就是一个带 `kohaku.yaml` 清单的目录。里面可以放 creatures、terrariums、自定义 tools、plugins，还有 LLM presets。运行 `kt install` 之后，它会被装到 `~/.kohakuterrarium/packages/<name>/`。之后你就可以用 `@<name>/path` 这种写法去引用里面的内容。
 
-概念预读：[boundaries](/concepts/boundaries.md)（英文）。package 这一层，就是框架用来低成本复用和共享组件的方式。
+概念预读：[boundaries](../concepts/boundaries.md)。package 这一层，主要就是为了让“把能复用的东西拆出来分享”这件事更省事。
 
 ## 官方包：`kt-defaults`
 
-大多数人第一个安装的 package 是 `kt-defaults`。这是官方示例包，里面有 `swe`、`reviewer`、`researcher`、`ops`、`creative`、`general`、`root` 这些 creatures，也有 `swe_team`、`deep_research` 这样的 terrariums，还带了一些 plugins。
+很多人第一个装的 package 都是 `kt-defaults`。这是官方示例包，里面带了 `swe`、`reviewer`、`researcher`、`ops`、`creative`、`general`、`root` 这些 creatures，也有 `swe_team`、`deep_research` 这样的 terrariums，还附带了一些 plugins。
 
 ```bash
 kt install https://github.com/Kohaku-Lab/kt-defaults.git
 kt run @kt-defaults/creatures/swe
 ```
 
-如果你准备做自己的 package，先看看 `kt-defaults` 会很有帮助。
+如果你要做自己的 package，先拿 `kt-defaults` 当参考最直接。
 
-## 清单文件：`kohaku.yaml`
+## 清单：`kohaku.yaml`
 
 ```yaml
 name: my-pack
@@ -61,9 +61,9 @@ my-pack/
     plugins/my_guard.py
 ```
 
-Python 模块通过点号路径解析，比如 `my_pack.tools.my_tool:MyTool`。配置则通过 `@my-pack/creatures/researcher` 这样的路径解析。
+Python 模块按点号路径解析，比如 `my_pack.tools.my_tool:MyTool`。配置路径则用 `@my-pack/creatures/researcher` 这种写法。
 
-如果声明了 `python_dependencies`，`kt install` 会一并安装这些 Python 依赖。
+如果声明了 `python_dependencies`，`kt install` 也会顺手把这些 Python 依赖装上。
 
 ## 安装方式
 
@@ -73,7 +73,7 @@ Python 模块通过点号路径解析，比如 `my_pack.tools.my_tool:MyTool`。
 kt install https://github.com/you/my-pack.git
 ```
 
-会 clone 到 `~/.kohakuterrarium/packages/my-pack/`。更新用 `kt update my-pack`。
+会 clone 到 `~/.kohakuterrarium/packages/my-pack/`。之后可以用 `kt update my-pack` 更新。
 
 ### 本地路径（复制）
 
@@ -81,7 +81,7 @@ kt install https://github.com/you/my-pack.git
 kt install ./my-pack
 ```
 
-会把整个目录复制进去。后续要么重新运行 `kt install`，要么直接改复制过去的那份。
+会把整个目录复制进去。后面要更新，要么重新跑一次 `kt install`，要么直接去改复制后的那份。
 
 ### 本地路径（editable）
 
@@ -89,7 +89,7 @@ kt install ./my-pack
 kt install ./my-pack -e
 ```
 
-这会写入 `~/.kohakuterrarium/packages/my-pack.link`，指向源码目录。你在源码里的修改会立刻生效，不需要重新安装。开发阶段反复调整时很好用。
+这会写一个 `~/.kohakuterrarium/packages/my-pack.link`，指向源码目录。你改源码，效果会马上生效，不用重新安装。开发时反复调这个最好用。
 
 ### 卸载
 
@@ -97,16 +97,16 @@ kt install ./my-pack -e
 kt uninstall my-pack
 ```
 
-## `@pkg/path` 的解析方式
+## `@pkg/path` 怎么解析
 
-`@my-pack/creatures/researcher` 会这样解析：
+`@my-pack/creatures/researcher` 的解析规则是：
 
-- 如果存在 `my-pack.link`，就跟着这个指针走。
-- 否则就解析到 `~/.kohakuterrarium/packages/my-pack/creatures/researcher/`。
+- 如果有 `my-pack.link`，就跟着它指向的目录走。
+- 否则就去 `~/.kohakuterrarium/packages/my-pack/creatures/researcher/` 找。
 
-`kt run`、`kt terrarium run`、`kt edit`、`kt update`、`base_config:` 继承，以及代码里的 `Agent.from_path(...)` 都会用到这套规则。
+`kt run`、`kt terrarium run`、`kt edit`、`kt update`、`base_config:` 继承，还有代码里的 `Agent.from_path(...)`，都用这套规则。
 
-## 发现与查看命令
+## 查看和发现命令
 
 ```bash
 kt list                         # installed packages + local agents
@@ -115,7 +115,7 @@ kt extension list               # all tools/plugins/presets from all packages
 kt extension info my-pack       # package metadata + what it ships
 ```
 
-想快速看当前环境里都有哪些扩展，最方便的就是 `kt extension list`。
+想快速看看当前环境里到底装了哪些扩展，用 `kt extension list` 最省事。
 
 ## 编辑已安装的配置
 
@@ -123,29 +123,29 @@ kt extension info my-pack       # package metadata + what it ships
 kt edit @my-pack/creatures/researcher
 ```
 
-这会在 `$EDITOR` 里打开 `config.yaml`，如果没设置，就依次回退到 `$VISUAL` 和 `nano`。editable 安装会直接改源码；普通安装改的是 `~/.kohakuterrarium/packages/` 下面那份副本。
+它会在 `$EDITOR` 里打开 `config.yaml`；如果没设，就按 `$VISUAL`、`nano` 的顺序往后试。editable 安装会直接改源码，普通安装改的是 `~/.kohakuterrarium/packages/` 下面那份副本。
 
 ## 发布
 
-1. 把仓库推到 git 上。GitHub、GitLab、自建仓库都可以，只要 `git clone` 能处理就行。
-2. 打一个版本标签：`git tag v0.1.0 && git push --tags`。
-3. 每次发布时，同步更新 `kohaku.yaml` 里的 `version:`。
-4. 把 URL 发出去：`kt install https://your/repo.git`。
+1. 把仓库推到 git 上。GitHub、GitLab、自建仓库都行，只要 `git clone` 能拉下来。
+2. 打版本标签：`git tag v0.1.0 && git push --tags`。
+3. 每次发版时，记得把 `kohaku.yaml` 里的 `version:` 一起更新。
+4. 把 URL 发给别人：`kt install https://your/repo.git`。
 
-这里没有中心注册表。所谓 package，就是一个带 `kohaku.yaml` 的 git 仓库。
+这里没有中心注册表。package 说到底，就是一个带 `kohaku.yaml` 的 git 仓库。
 
 ### 版本管理
 
-`version:` 最好和 git tag 保持一致。`kt update` 底层做的是 `git pull`；如果使用方固定在某个 tag，上游也可以手动切过去：
+`version:` 最好和 git tag 对齐。`kt update` 底层其实就是跑 `git pull`；如果使用方固定在某个 tag，也可以自己手动切过去：
 
 ```bash
 cd ~/.kohakuterrarium/packages/my-pack
 git checkout v0.1.0
 ```
 
-## 运行时的扩展发现
+## 运行时怎么发现扩展
 
-框架加载 creature 时，会先在 creature 本地配置里查找 tool 和 plugin 名称，再去已安装 package 的清单里查。package 里声明的 tool 会通过配置中的 `type: package` 暴露出来：
+框架加载 creature 时，会先去 creature 自己的本地配置里找 tool 和 plugin 名称，再去已安装 package 的清单里查。package 里声明的 tool，会通过配置里的 `type: package` 暴露出来：
 
 ```yaml
 tools:
@@ -153,18 +153,18 @@ tools:
     type: package          # resolved through the `tools:` list in kohaku.yaml
 ```
 
-这意味着，一个 package 里的 creature 可以引用另一个 package 里声明的 tool，只要这两个 package 都已经安装。
+所以，只要两个 package 都装了，一个 package 里的 creature 就可以引用另一个 package 里声明的 tool。
 
 ## 排错
 
-- **`@my-pack/...` 无法解析。** 先用 `kt list` 确认 package 已安装。editable 安装的话，再检查 `.link` 文件指向的目录是否存在。
-- **`kt update my-pack` 显示 "skipped"。** editable 安装和非 git package 都不能通过 `kt update` 更新。前者直接改源码，后者重新安装。
-- **`python_dependencies` 没有安装。** 确认 `kt install` 在当前环境里有权限安装包，比如使用 virtualenv，或者用 `pip install --user`。
-- **package tool 遮蔽了内置 tool。** 内置 tool 的解析优先级更高。如果你想让自己的 tool 生效，改个名字。
+- **`@my-pack/...` 解析失败。** 先用 `kt list` 确认 package 已经装上了。editable 安装的话，再检查 `.link` 文件指向的目录还在不在。
+- **`kt update my-pack` 提示 "skipped"。** editable 安装和非 git package 都不能用 `kt update` 更新。前者直接改源码，后者重新安装。
+- **`python_dependencies` 没装上。** 确认 `kt install` 在当前环境里有安装包的权限，比如用 virtualenv，或者用 `pip install --user`。
+- **package 里的 tool 把内置 tool 挡住了。** 实际上内置 tool 的解析优先级更高。你要是想让自己的 tool 生效，就换个名字。
 
 ## 另见
 
-- [Creatures](/guides/creatures.md)（英文）—— 如何把 creature 打包出去。
-- [Custom Modules](/guides/custom-modules.md)（英文）—— 如何编写要随 package 一起发布的 tools 和 plugins。
-- [Reference / CLI](/reference/cli.md)（英文）—— `kt install`、`kt list`、`kt extension`。
-- [`kt-defaults`](https://github.com/Kohaku-Lab/kt-defaults)（英文）—— 参考 package。
+- [Creatures](creatures.md) —— 怎么打包 creature。
+- [Custom Modules](custom-modules.md) —— 怎么写要随 package 一起发布的 tools 和 plugins。
+- [Reference / CLI](../reference/cli.md) —— `kt install`、`kt list`、`kt extension`。
+- [`kt-defaults`](https://github.com/Kohaku-Lab/kt-defaults) —— 参考 package。

@@ -1,84 +1,84 @@
-# Memory 与压缩
+# Memory and compaction
 
 ## 它是什么
 
-这是两个彼此相关的系统：
+这是两套挨得很近的系统：
 
-- **Memory。** `.kohakutr` 会话文件既是运行时持久化存储，也是可搜索的知识库。每个事件都会被建立索引，用于全文检索（FTS5），也可以选择建立向量检索。Agent 在自身运行过程中可以通过 `search_memory` 工具查询这些内容。
-- **Compaction。** 长时间运行的 creature 迟早会把上下文窗口撑满。自动压缩会在后台总结较早的轮次，不会暂停 controller，所以 agent 会继续工作，历史则被压缩成更短的形式。
+- **Memory。** `.kohakutr` session 文件既是运行时持久化，也是可搜索的知识库。每个事件都会建索引，支持全文检索（FTS5），也可以按需加上向量检索。agent 在自己内部就能通过 `search_memory` tool 查这些内容。
+- **Compaction。** 跑得久了，creature 早晚会撞上上下文窗口上限。自动 compaction 会在后台总结旧 turn，而且不会把 controller 卡住。agent 一边继续工作，一边把旧上下文压缩掉。
 
-两者其实都在回答同一个问题：creature 累积下来的历史，该怎么处理。
+这两件事其实都在回答同一个问题：**creature 累积下来的历史，到底怎么处理？**
 
-## 为什么需要它
+## 为什么要有它
 
 ### Memory
 
-很多 agent 框架把历史当成临时数据：只服务当前这次 LLM 调用，最多为了“恢复运行”存一下，除此之外基本就丢了。这样会浪费很多有用信息。同一份事件日志，其实可以同时支持：
+很多 agent 框架把历史只当临时材料：给当前这次 LLM 调用用一下，最多为了“恢复运行”顺手持久化，别的就不管了。这样会丢很多信息。其实同一份事件日志，可以同时服务三种场景：
 
-- `kt resume`：在任务做到一半时把 agent 重新构建出来。
-- `kt search`：让人直接查看会话里发生过什么。
-- agent 侧基于自身历史做 RAG（`search_memory`）。
+- `kt resume`：把中断的 agent 接着跑起来；
+- `kt search`：让人回头查之前发生了什么；
+- agent 自己对历史做 RAG，也就是 `search_memory`。
 
-一个存储，三种用法。
+一份存储，三种消费方式。
 
 ### Compaction
 
-上下文窗口会变大，但增长速度永远追不上长时间运行的需求。不做压缩的话，一个连续跑了几个小时的 creature 迟早会撞上上限。最直接的压缩办法，是让 agent 停下来做总结；但在 agent 框架里，这就意味着 controller 会被冻结，眼看着 5 万 token 被浓缩成 2 千。对于常驻运行的 agent，这种停顿没法接受。
+上下文窗口一直在变大，但永远不够快。没有 compaction，跑上几个小时的 creature 迟早会顶到天花板。最笨的 compaction 做法，是一边总结一边暂停 agent；在 agent 框架里，这就等于 controller 卡死，眼看着 50k token 被揉成 2k。这对 ambient agent 来说很难接受。
 
-非阻塞压缩会在后台任务里完成总结，再在轮次之间用原子方式把结果接进去。controller 不会停。
+non-blocking compaction 会把总结工作放到后台 task 里做，再在两个 turn 之间原子地把结果接进去。controller 不用停。
 
-## 我们怎么定义它
+## 怎么定义它
 
-### Session store 的结构
+### Session store 的形状
 
-`.kohakutr` 是一个 SQLite 文件（通过 KohakuVault 访问），里面有这些表：
+`.kohakutr` 是一个 SQLite 文件（通过 KohakuVault），里面有这些表：
 
-- `meta` —— 会话元数据、快照、配置
+- `meta` —— session 元数据、snapshot、配置
 - `events` —— 只追加的事件日志
-- `state` —— 草稿区、计数器、每个 agent 的状态
+- `state` —— scratchpad、计数器、每个 agent 的状态
 - `channels` —— 消息历史
-- `conversation` —— 用于快速恢复的最新快照
-- `subagents` —— 子 agent 的会话快照
-- `jobs` —— 工具和子 agent 的执行记录
+- `conversation` —— 用于快速 resume 的最新快照
+- `subagents` —— sub-agent 的会话快照
+- `jobs` —— tool / subagent 的执行记录
 - `fts` —— 事件上的全文索引
-- （可选）向量索引，在生成 embedding 时建立
+- （可选）向量索引，只有在构建 embeddings 时才有
 
-### Compaction 的约定
+### Compaction contract
 
-一个 creature 会有 `compact` 配置块，包含这些字段：`enabled`、`max_tokens`（或自动推导出的值）、`threshold`（达到预算的 N% 时开始压缩）、`target`（压缩到 N%）、`keep_recent_turns`（永远不总结的最近轮次区域），以及可选的 `compact_model`（更便宜的总结模型）。
+creature 有一个 `compact` 配置块，里面包括：`enabled`、`max_tokens`（或自动推导）、`threshold`（达到预算 N% 时开始 compaction）、`target`（压到 N% 为止）、`keep_recent_turns`（永远不总结的最近活动区），还可以选填 `compact_model`（更便宜的总结模型）。
 
-每轮结束时，如果 `prompt_tokens >= threshold * max_tokens`，compact manager 就会启动一个后台任务。
+每个 turn 结束时，如果 `prompt_tokens >= threshold * max_tokens`，compact manager 就会起一个后台任务。
 
-## 我们怎么实现它
+## 怎么实现它
 
 - `session/store.py` —— 基于 KohakuVault 的持久化存储。
 - `session/output.py` —— 把事件写入存储的 output consumer。
-- `session/resume.py` —— 把记录回放到一个新建的 agent 中。
+- `session/resume.py` —— 把历史重放到一个新建 agent 里。
 - `session/memory.py` —— FTS5 查询和向量检索。
-- `session/embedding.py` —— 负责 embedding 的 model2vec / sentence-transformer / API provider。
-- `core/compact.py` —— 带有 atomic-splice 技巧的 `CompactManager`。见 [impl-notes/non-blocking-compaction](/concepts/impl-notes/non-blocking-compaction.md)（英文）。
+- `session/embedding.py` —— model2vec / sentence-transformer / API provider 的 embeddings。
+- `core/compact.py` —— 带原子拼接技巧的 `CompactManager`。细节见 [impl-notes/non-blocking-compaction](/zh/concepts/impl-notes/non-blocking-compaction.md)。
 
-Embedding provider（`kt embedding`）有这些：
+embedding provider（`kt embedding`）有这些：
 
-- **model2vec**（默认，不需要 torch；预设包括 `@tiny`、`@best`、`@multilingual-best` 等）
+- **model2vec**（默认，不需要 torch；预设有 `@tiny`、`@best`、`@multilingual-best` 等）
 - **sentence-transformer**（需要 torch）
-- **api**（外部 embedding 端点，比如 jina-v5-nano）
+- **api**（外部 embedding 接口，比如 jina-v5-nano）
 
-## 因而你能做什么
+## 你能拿它做什么
 
-- **从任意位置恢复。** `kt resume` / `kt resume --last` 可以接着一个几小时前中断的会话继续跑。
-- **搜索会话。** `kt search <session> <query>` 支持 FTS、语义检索、混合检索，或自动判断模式。
-- **让 agent 用自己的历史做 RAG。** agent 在某一轮里调用 `search_memory`，拿到相关的过往事件，再带着这些上下文继续往下做。
-- **支撑长时间常驻运行。** 一个连续跑了几天的 creature 不会因为上下文上限停住；压缩会把滚动摘要放在前面，后面保留最近的 N 轮。
-- **跨会话共享记忆。** 配置更复杂一点时，可以从配置里取出 session store 路径，让一组相关的 creature 共用同一份存储。
+- **从任何地方恢复。** `kt resume` / `kt resume --last` 可以把几小时前中断的 session 接上。
+- **查 session。** `kt search <session> <query>` 支持 FTS、语义检索、混合检索，或者自动判断模式。
+- **agent 自己做 RAG。** agent 在一个 turn 里调用 `search_memory`，拿到相关旧事件，再带着这些上下文继续往下走。
+- **长时间后台运行。** creature 连跑几天也不一定撞墙；compaction 会让滚动摘要压在最近 N 个 turn 上面。
+- **跨 session 记忆。** 更复杂的配置可以把 session store 路径提出来，让一组相关 creature 共用。
 
-## 别被它框住
+## 别把它当铁律
 
-会话持久化默认开启，可用 `--no-session` 关闭。Embedding 默认不开。Compaction 对每个 creature 来说也是默认开启、可单独关闭。你当然也可以一个都不用——memory 只是方便，不是前提。
+session 持久化可以关掉（`--no-session`）。embeddings 是可选的。compaction 也是按 creature 选择开启或关闭。一个 creature 完全可以什么都不用；memory 是方便，不是前提。
 
 ## 另见
 
-- [impl-notes/session-persistence](/concepts/impl-notes/session-persistence.md)（英文）—— 双存储的细节。
-- [impl-notes/non-blocking-compaction](/concepts/impl-notes/non-blocking-compaction.md)（英文）—— atomic-splice 算法。
-- [reference/cli.md — kt embedding, kt search, kt resume](/reference/cli.md)（英文）—— 相关命令入口。
-- [guides/memory.md](/guides/memory.md)（英文）—— 使用指南。
+- [impl-notes/session-persistence](/zh/concepts/impl-notes/session-persistence.md) —— 双存储的细节。
+- [impl-notes/non-blocking-compaction](/zh/concepts/impl-notes/non-blocking-compaction.md) —— 原子拼接算法。
+- [reference/cli.md — kt embedding, kt search, kt resume](/zh/reference/cli.md) —— 命令入口。
+- [guides/memory.md](/zh/guides/memory.md) —— 实操说明。

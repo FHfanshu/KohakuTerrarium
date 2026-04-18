@@ -2,53 +2,53 @@
 
 ## 它是什么
 
-当 agent 成了 Python 值，下一步通常就是把它们接起来。**组合代数**提供了一小组操作符和组合子，把 agent（以及任何异步可调用对象）都当成可组合的单元：
+当 agent 变成 Python 里的值，接下来你多半会想把它们串起来。**组合代数**就是一小组操作符和 combinator，用来把 agent（还有任何 async callable）当成可以拼接的单元：
 
-- `a >> b` — 顺序执行（`a` 的输出变成 `b` 的输入）
-- `a & b` — 并行执行（两边同时运行，返回 `[result_a, result_b]`）
-- `a | b` — 回退（如果 `a` 抛异常，就试 `b`）
-- `a * N` — 重试（失败时最多再试 `N` 次）
-- `pipeline.iterate(stream)` — 把管道应用到异步可迭代对象的每个元素上；如果你想做循环，也可以把输出再喂回输入
+- `a >> b` — 顺序执行（`a` 的输出会变成 `b` 的输入）
+- `a & b` — 并行执行（两边一起跑，返回 `[result_a, result_b]`）
+- `a | b` — fallback（如果 `a` 抛异常，就试 `b`）
+- `a * N` — retry（失败时最多额外重试 `N` 次）
+- `pipeline.iterate(stream)` — 把整条 pipeline 应用到 async iterable 的每个元素上；如果你想做循环，也可以把输出再喂回输入
 
-这些操作最后都会返回一个 `BaseRunnable`，所以你可以继续往下组合。
+不管怎么组合，最后拿到的都是一个 `BaseRunnable`，所以还能继续往下拼。
 
-## 为什么会有它
+## 为什么会有这个
 
-creature 里的 controller 本身就是个循环。但有时你想把循环放在 creature 外面：writer ↔ reviewer 反复迭代直到通过，多个 agent 并行回答再选最好的，或者在不同 provider 之间做重试加回退。
+creature 里的 controller 本来就是个 loop。但有些 loop，你会想放在 creature 外面。比如 writer 和 reviewer 来回改，直到通过；几个 agent 并行回答，再挑一个最好的；或者跨 provider 做 retry 和 fallback。
 
-这些事情直接用 `asyncio.gather` 和 `try/except` 当然也能写，只是调用点会变乱。
+这些东西直接用 `asyncio.gather` 和 `try/except` 当然写得出来，就是调用的地方会变得很碎。
 
-这些操作符本质上是给 asyncio 加了一层顺手的语法糖。它们没有引入新的执行模型，只是让“组合两个 agent”这件事，读起来像“两个数相加”一样直接。
+这套操作符本质上只是 asyncio 上面的一层语法糖。没有新的执行模型，也没藏什么魔法。它只是让“把两个 agent 组合起来”这件事，看起来像“两个数相加”一样顺手。
 
-## 我们怎么定义它
+## 它是怎么定义的
 
-`BaseRunnable.run(input) -> Any`（异步）是这里的协议。任何实现了这个方法的对象都可以参与组合。
+这里的协议是 `BaseRunnable.run(input) -> Any`（异步）。只要实现了这个方法，就能参与组合。
 
 这些操作符分别对应：
 
-- `__rshift__` 把两边包成 `Sequence`（会自动拍平嵌套的 sequence；如果右侧是 dict，会变成 `Router`）。
-- `__and__` 包成 `Product`；`run(x)` 会对所有分支执行 `asyncio.gather`，并把 `x` 广播为每个分支的输入。
-- `__or__` 包成 `Fallback`；遇到异常就往后接着试。
-- `__mul__` 包成 `Retry`；遇到异常时最多重跑 N 次。
+- `__rshift__` 把两边包成 `Sequence`（会自动拍平嵌套的 sequence；如果右边是 dict，会变成 `Router`）。
+- `__and__` 包成 `Product`；`run(x)` 会对所有分支做 `asyncio.gather`，并把 `x` 广播给每个分支当输入。
+- `__or__` 包成 `Fallback`；一旦抛异常，就往后继续试。
+- `__mul__` 包成 `Retry`；抛异常时最多重跑 N 次。
 
-另外还有一些组合子：
+另外还有几种 combinator：
 
-- `Pure(value)` — 包装普通值或可调用对象；忽略输入。
-- `Router(routes)` — 输入是 `{key: value}` 时，分发到对应的 runnable。
-- `.map(fn)` — 预先变换输入（`contramap`）。
-- `.contramap(fn)` — 后处理输出。
-- `.fails_when(pred)` — 谓词命中时主动抛错；和 `|` 一起用很方便。
+- `Pure(value)` — 包一层普通值或 callable；忽略输入。
+- `Router(routes)` — 输入是 `{key: value}` 时，分发给对应的 runnable。
+- `.map(fn)` — 先变换输入（`contramap`）。
+- `.contramap(fn)` — 再变换输出。
+- `.fails_when(pred)` — 如果谓词命中就主动抛错；和 `|` 搭起来很好用。
 
-agent 工厂有两种：
+agent factory 有两种：
 
-- `agent(config)` — 把持久化 agent 包成 runnable。对话上下文会在多次调用之间累积。
+- `agent(config)` — 把持久化 agent 包成 runnable。多次调用之间会累积对话上下文。
 - `factory(config)` — 每次调用都新建一个 agent；不保留持久状态。
 
-## 我们怎么实现它
+## 它是怎么实现的
 
-`compose/core.py` 放基础协议和各个组合子类。`compose/agent.py` 负责把 agent 包装成 runnable。`compose/effects.py` 是可选的，用来记录管道里的副作用。
+`compose/core.py` 放基础协议和 combinator 类。`compose/agent.py` 负责把 agent 包成 runnable。`compose/effects.py` 是可选的，用来记录 pipeline 里的副作用。
 
-agent-factory 的包装器会处理生命周期这部分样板代码：进入和退出时启动 / 停止底层 `Agent`，并通过 `inject_input` 传入输入，再收集输出。
+agent factory 的 wrapper 会把生命周期那点样板代码收掉：进入和退出时启动 / 停止底层 `Agent`，然后通过 `inject_input` 把输入送进去，再把输出收回来。
 
 ## 一个实际例子
 
@@ -82,25 +82,25 @@ async def main():
 asyncio.run(main())
 ```
 
-这里有两个 agent、持久对话、一个反馈循环，还有一个带回退和重试的并行组合，写法都还是普通 Python。
+这里有两个 agent、持久对话、一个反馈 loop，再加上一个带 fallback 和 retry 的并行组合。写法还是普通 Python。
 
 ## 你可以拿它做什么
 
-- **审阅循环。** `writer >> reviewer` 再配合 `.iterate(...)`，一直跑到某个条件满足，不用额外写编排代码。
-- **组合回答。** `(fast & deep) >> pick_best`，让两个 agent 并行运行，再把结果合起来。
-- **回退链。** 先试便宜的 provider，失败了再退到更强的。
-- **处理临时性失败。** 给任何 runnable 套一层 `* N`。
-- **流式管道。** `.iterate(async_generator)` 会把异步生成器里的每个元素都跑完整条管道。
+- **审阅 loop。** `writer >> reviewer` 配上 `.iterate(...)`，一直跑到某个条件满足，不用另写编排代码。
+- **组合回答。** `(fast & deep) >> pick_best`，让两个 agent 并行跑，再把结果合起来。
+- **fallback 链。** 先试便宜的 provider，失败了再切到更强的。
+- **处理暂时性失败。** 给任何 runnable 套一层 `* N`。
+- **流式 pipeline。** `.iterate(async_generator)` 会让异步生成器里的每个元素都走完整条 pipeline。
 
-## 别被它绑住
+## 别被它框住
 
-组合代数不是必需的。对大多数嵌入式使用场景，creature 配置加上 `AgentSession` 已经够了。只有当你真的想在不启用 terrarium 的情况下，直接用 Python 写多 agent 编排时，这套操作符才会派上用场。
+组合代数不是必需的。大多数嵌入场景里，creature config 加上 `AgentSession` 就够了。只有在你真想不靠 terrarium，直接用 Python 写多 agent 编排的时候，这套操作符才特别顺手。
 
-状态说明：这套代数已经能用，但还在继续调整。具体的操作符集合后面可能会增加，也可能会收缩，取决于反馈。内部管道可以放心用；如果要上生产，最好把它看作早期稳定。
+状态说明：这套代数已经挺有用，但还在继续调整。操作符后面可能会增加，也可能会简化，具体看反馈。拿它写内部 pipeline 没什么问题；如果要上生产，先把它当成 early-stable 比较稳妥。
 
 ## 另见
 
-- [Agent as a Python object](/concepts/python-native/agent-as-python-object.md)（英文）— 这篇的基础。
-- [Patterns](/concepts/patterns.md)（英文）— 组合代数和嵌入式 agent 一起使用时的常见模式。
-- [guides/composition.md](/guides/composition.md)（英文）— 面向任务的用法。
-- [reference/python.md — kohakuterrarium.compose](/reference/python.md)（英文）— 完整 API。
+- [Agent as a Python object](agent-as-python-object.md) —— 这篇的基础。
+- [Patterns](../patterns.md) —— 组合代数和嵌入式 agent 混着用时的一些模式。
+- [组合](../../guides/composition.md) —— 面向任务的用法。
+- [Python 参考：`kohakuterrarium.compose`](../../reference/python.md) —— 完整 API。

@@ -1,27 +1,27 @@
-# Creature
+# Creatures
 
-写、定制或打包独立 agent。
+给想自己写、改，或者打包一个独立 agent 的人看。
 
-creature 是自包含 agent：自己的 controller、tools、sub-agents、triggers、prompts、I/O。可单独跑（`kt run path/to/creature`）、继承另一个 creature、或打包进 package。它不知道自己在 terrarium 里。
+**creature** 就是一个自带全套东西的 agent：有自己的 controller、tools、sub-agents、triggers、prompts，还有输入输出。它可以单独跑（`kt run path/to/creature`），可以继承别的 creature，也可以放进 package 里发出去。它自己并不知道自己是不是在 terrarium 里。
 
-概念：[什么是 agent](../concepts/foundations/what-is-an-agent.md)、[组合 agent](../concepts/foundations/composing-an-agent.md)、[模块索引](../concepts/modules/README.md)。
+先补概念： [what is an agent](../concepts/foundations/what-is-an-agent.md)、[composing an agent](../concepts/foundations/composing-an-agent.md)、[module index](../concepts/modules/README.md)。
 
 ## 结构
 
-creature 在文件夹里：
+一个 creature 就是一整个文件夹：
 
 ```
 creatures/my-agent/
-  config.yaml            # 必须
+  config.yaml            # 必需
   prompts/
-    system.md            # system_prompt_file 引用
-    context.md           # prompt_context_files 引用
-  tools/                 # 可选自定义 tool 模块
-  subagents/             # 可选自定义 sub-agent 配置
-  memory/                # 可选 text/markdown memory 文件
+    system.md            # 给 system_prompt_file 用
+    context.md           # 给 prompt_context_files 用
+  tools/                 # 可选，自定义 tool 模块
+  subagents/             # 可选，自定义子 agent 配置
+  memory/                # 可选，文本 / markdown memory 文件
 ```
 
-查找顺序：`config.yaml` → `config.yml` → `config.json` → `config.toml`。环境变量插值（`${VAR}` 或 `${VAR:default}`）在 YAML 任意位置有效。
+配置文件查找顺序是：`config.yaml` → `config.yml` → `config.json` → `config.toml`。YAML 里任何地方都能用环境变量插值（`${VAR}` 或 `${VAR:default}`）。
 
 ### 最小配置
 
@@ -36,11 +36,11 @@ tools:
   - bash
 ```
 
-每个字段对应 `AgentConfig` dataclass。见[配置](configuration.md)任务索引和[配置参考](../reference/configuration.md)完整字段。
+每个字段都对应 `AgentConfig` 里的一个 dataclass 字段。按事情来查，看 [Configuration](configuration.md)；完整字段去 [reference/configuration](../reference/configuration.md)。
 
 ## 继承
 
-复用已有 creature 作为基座：
+拿现成 creature 当底子：
 
 ```yaml
 name: my-swe
@@ -48,38 +48,39 @@ base_config: "@kt-defaults/creatures/swe"
 controller:
   reasoning_effort: high
 tools:
-  - name: my_tool          # 新 tool，追加
+  - name: my_tool          # 新 tool，会追加进去
     type: custom
     module: ./tools/my_tool.py
 ```
 
-规则 — 所有字段统一模型：
+规则就这一套，所有字段都按它来：
 
-- **标量**：子覆盖。
-- **Dict**（`controller`、`input`、`output`、`memory`、`compact` 等）：浅合并。
-- **按名键列表**（`tools`、`subagents`、`plugins`、`mcp_servers`、`triggers`）：按 `name` 合并。同名时**子覆盖**并替换基座条目。无 `name` 的条目拼接。
-- **Prompt 文件**：`system_prompt_file` 沿链拼接；inline `system_prompt` 最后追加。
-- `base_config` 解析 `@pkg/...`、`creatures/<name>`（向上找项目根）或相对路径。
+- **标量**：子配置覆盖父配置。
+- **字典**（`controller`、`input`、`output`、`memory`、`compact` 等）：浅合并。
+- **按标识键处理的列表**（`tools`、`subagents`、`plugins`、`mcp_servers`、`triggers`）：按 `name` 合并。名字撞了就以**子项为准**，直接在原位置替换父项。没有 `name` 的项就直接拼接。
+- **Prompt 文件**：`system_prompt_file` 会沿继承链拼起来；内联的 `system_prompt` 最后再追加。
+- `base_config` 可以解析 `@pkg/...`、`creatures/<name>`（会一路向上找项目根目录），或者相对路径。
 
-两个指令退出默认：
+有两个开关可以不走默认继承规则：
 
 ```yaml
-# 1. 丢弃继承字段，重定义
+# 1. 整个继承字段不要了，然后你自己从头重写
 no_inherit: [tools, plugins]
 tools:
   - { name: think, type: builtin }
 
-# 2. 替换继承 prompt 链（等同于 no_inherit: [system_prompt, system_prompt_file]）
+# 2. 把继承来的 prompt 链整条换掉（等价于
+#    no_inherit: [system_prompt, system_prompt_file])
 prompt_mode: replace
 system_prompt_file: prompts/brand_new.md
 ```
 
-### 什么时候用 prompt_mode: replace
+### 什么时候用 `prompt_mode: replace`
 
-**sub-agent** 和 **terrarium creature** 继承基座 persona 但需要完全不同语气时有用：
+这个对 **sub-agent** 和 **terrarium creature** 特别有用。它们可能继承的是同一个基础人格，但你现在要的说话方式已经完全不是一回事了：
 
 ```yaml
-# creature 配置里的 sub-agent 条目
+# creature 配置里的一个 sub-agent 条目
 subagents:
   - name: niche_responder
     base_config: "@kt-defaults/subagents/response"
@@ -88,20 +89,20 @@ subagents:
 ```
 
 ```yaml
-# terrarium creature 把 OOTB creature 改成团队专家
+# terrarium 里的 creature，把一个开箱即用 creature 改造成团队里的专职角色
 creatures:
   - name: reviewer
     base_config: "@kt-defaults/creatures/critic"
     prompt_mode: replace
     system_prompt: |
-      你是团队主审。只说批准或拒绝，一行理由。
+      You are the team's lead reviewer. Speak only to approve or reject, with one-line reasoning.
 ```
 
-默认 `prompt_mode: concat` 适用于基座 prompt 是你要扩展的通用约定，而不是替换。
+默认值是 `prompt_mode: concat`。如果父 prompt 更像一份通用约定，你只是想在上面加东西，不是彻底换掉，那就用默认的。
 
-### 覆盖 vs 扩展列表条目
+### 覆盖列表项，还是扩展列表项？
 
-按 `name` 冲突时子的条目覆盖：
+只要 `name` 撞上，子项就赢：
 
 ```yaml
 base_config: "@kt-defaults/creatures/general"
@@ -109,16 +110,16 @@ tools:
   - { name: bash, type: custom, module: ./tools/safe_bash.py, class: SafeBash }
 ```
 
-子的 `bash` 替换基座的 `bash`，位置不变；其他继承 tools 保留。
+这里子配置里的 `bash` 会直接替换父配置里的 `bash`；其他继承来的 tool 还在。
 
 ## Prompt 文件
 
-系统提示词放在 Markdown。只放 *personality 和 guideline* — tool 列表、调用语法、完整 tool 文档自动聚合。
+system prompt 最好放 Markdown 里。里面只写*人格和规则*就够了。工具列表、调用语法、完整 tool 文档，系统会自己聚合进去。
 
 ```markdown
 <!-- prompts/system.md -->
-你是专注的 SWE agent。直接用工具，不要叙述。
-偏好最小 diff。做完前验证。
+You are a focused SWE agent. Use tools immediately rather than narrating.
+Prefer minimal diffs. Validate before declaring done.
 ```
 
 模板变量来自 `prompt_context_files`：
@@ -129,7 +130,7 @@ prompt_context_files:
   today:       memory/today.md
 ```
 
-在 `system.md` 里：
+在 `system.md` 里这样用：
 
 ```
 ## Style guide
@@ -139,41 +140,41 @@ prompt_context_files:
 {{ today }}
 ```
 
-聚合器自动追加 tool-list、framework hints、env info、`CLAUDE.md`。不要重复。
+聚合器会自动加上 tool-list、framework hints、环境信息，还有 `CLAUDE.md`。这些别自己再写一遍，不然就是重复。
 
-## Skill mode：dynamic vs static
+## Skill mode：dynamic 还是 static
 
-- `skill_mode: dynamic`（默认） — tools 在 prompt 里显示为一行描述。controller 用 `info` framework command 按需加载完整文档。
-- `skill_mode: static` — 所有 tool 文档 upfront inline（更大的系统提示词，少往返）。
+- `skill_mode: dynamic`（默认）—— prompt 里只放 tool 的一句话说明。controller 需要时再用 `info` 框架命令按需加载完整文档。
+- `skill_mode: static` —— 所有 tool 文档一开始就内联进去，system prompt 会更大，但少几次来回。
 
-除非要固定可审计 prompt，用 `dynamic`。
+一般用 `dynamic` 就行。除非你想要一份固定、可审计的 prompt。
 
 ## Tool format
 
-控制 LLM 发出 tool 调用的语法（以及 framework command）。作用于 parser 和系统提示词的 framework-hints block。
+这个决定 LLM 调用 tool 时吐出的语法长什么样，也决定框架命令用什么格式。解析器和 system prompt 里的 framework-hints 块都会跟着它走。
 
-`bash` 调用 `command=ls` 的具体例子：
+下面是 `bash` 调用 `command=ls` 的实际样子：
 
-- `bracket`（默认） — `[/name]` 开，`[name/]` 关，args 用 `@@key=value` 行：
+- `bracket`（默认）—— 用 `[/name]` 开头，`[name/]` 结尾，参数写成 `@@key=value`：
   ```
   [/bash]
   @@command=ls
   [bash/]
   ```
-- `xml` — 标签带属性：
+- `xml` —— 普通的标签加属性：
   ```
   <bash command="ls"></bash>
   ```
-- `native` — 供应商原生 function calling（OpenAI / Anthropic tool use）。LLM 不发文本块；API 结构化携带调用。
-- dict — 自定义分隔符（见[配置参考 — tool_format](../reference/configuration.md)）。
+- `native` —— provider 原生 function calling（OpenAI / Anthropic 的 tool use）。LLM 不会输出文本块，调用信息直接走 API 的结构化字段。
+- dict —— 自定义分隔符（见 [configuration reference — `tool_format`](../reference/configuration.md)）。
 
-三种格式互换 — 选模型处理最好的。`native` 在主要供应商上最可靠；`bracket` 在所有模型包括本地模型都能用。
+这三种都能用，挑你的模型更稳的就行。大厂 provider 上 `native` 往往最稳；`bracket` 胜在到处都能跑，本地模型也行。
 
 ## Tools 和 sub-agents
 
 ```yaml
 tools:
-  - read                              # 简写 = builtin
+  - read                              # 简写，等于 builtin
   - bash
   - name: my_tool                     # custom / package tool
     type: custom
@@ -182,7 +183,9 @@ tools:
   - name: web_search
     options:
       max_results: 5
-  # 把 universal trigger 当 setup tool — LLM 运行时安装
+  # 把通用 trigger 暴露成 setup tool，LLM 运行时可以直接调这个名字来安装
+  # framework 会用 `CallableTriggerTool` 包一层 trigger 类；简介前面还会加
+  # "**Trigger** — "，提醒 LLM 这不是立刻执行一个动作，而是在装一个会长期生效的东西。
   - { name: add_timer, type: trigger }
   - { name: watch_channel, type: trigger }
   - { name: add_schedule, type: trigger }
@@ -194,13 +197,13 @@ subagents:
     type: custom
     module: ./subagents/specialist.py
     config_name: SPECIALIST_CONFIG
-    interactive: true                 # 跨 parent turn 存活
+    interactive: true                 # 父 agent 换轮次后它也会继续活着
     can_modify: true
 ```
 
-可 setup 的 triggers per-creature opt-in — 没有 `type: trigger` 条目的 creature 不能运行时安装 trigger。每个 `BaseTrigger` 子类声明自己的 `setup_tool_name`（如 `add_timer`）、`setup_description`、`setup_param_schema`。写自己的见[自定义模块 — Triggers](custom-modules.md)。
+能不能在运行时安装 trigger，是按 creature 单独开的。一个 creature 如果没有任何 `type: trigger` 条目，就没法在运行中装 trigger。每个通用 `BaseTrigger` 子类都会自己声明 `setup_tool_name`（比如 `add_timer`）、`setup_description` 和 `setup_param_schema`。你要自己写，去看 [Custom Modules — Triggers](custom-modules.md)。
 
-见[内建参考](../reference/builtins.md)完整 tool/sub-agent 目录；[自定义模块](custom-modules.md)写自己的。
+完整 tool 和 sub-agent 目录见 [reference/builtins](../reference/builtins.md)；自己写则看 [Custom Modules](custom-modules.md)。
 
 ## Triggers
 
@@ -216,35 +219,176 @@ triggers:
     class_name: WebhookTrigger
 ```
 
-内建类型：`timer`、`idle`、`webhook`、`channel`、`custom`、`package`。见[概念/modules/trigger](../concepts/modules/trigger.md)。
+内置类型有：`timer`、`idle`、`webhook`、`channel`、`custom`、`package`。见 [concepts/modules/trigger](../concepts/modules/trigger.md)。
 
 ## Startup trigger
 
-creature 启动时触发一次：
+creature 启动时会触发一次：
 
 ```yaml
 startup_trigger:
   prompt: "Review the project status and plan today's work."
 ```
 
-## Termination conditions
+## 终止条件
 
 ```yaml
 termination:
   max_turns: 20
   max_duration: 300          # 秒
-  idle_timeout: 60           # 无事件秒数
+  idle_timeout: 60           # 多久没事件就算 idle，单位秒
   keywords: ["DONE", "SHUTDOWN"]
 ```
 
-任一条件满足停止 agent。`keywords` 是 controller 输出的子串匹配。
+只要任意一个条件满足，agent 就会停。`keywords` 是在 controller 输出里做子串匹配。
 
 ## Session key
 
-多个 creature 可共享同一个 `Session`（scratchpad + channels）：
+多个 creature 可以通过设置同一个 `session_key` 来共用一个 `Session`（scratchpad + channels）：
 
 ```yaml
 session_key: shared_workspace
 ```
 
-默认是 creature 的 `name`。在 terrarium 里，每个 creature 有私有 `Session` 和共享 `Environment`；见[概念/modules/session-and-environment](/concepts/modules/session-and-environment.md)（英文）。and-environment.md)。t.md)。
+默认值是 creature 的 `name`。如果在 terrarium 里，每个 creature 会拿到自己的私有 `Session`，同时共享一个 `Environment`。见 [concepts/modules/session-and-environment](../concepts/modules/session-and-environment.md)。
+
+## Framework commands
+
+controller 也可以直接输出和 framework 对话的内联指令，不用走一轮 tool 调用。它们会写在 framework-hints 这个 prompt 块里。
+
+这些框架命令和 tool 调用用的是同一套语法，也就是你配置的 `tool_format`（bracket、XML、native）。默认 bracket 形式下，大概是这样，占位符直接写名字：
+
+- `[/info]tool_or_subagent[info/]` —— 按需加载完整文档。
+- `[/read_job]job_id[read_job/]` —— 读取后台任务输出（body 里还能带 `--lines N` 和 `--offset M`）。
+- `[/jobs][jobs/]` —— 列出正在跑的任务和它们的 ID。
+- `[/wait]job_id[wait/]` —— 阻塞当前轮次，等后台任务结束。
+
+这些命令和 tool 名字共用一个命名空间，所以读后台任务输出的命令特地叫 `read_job`，就是为了不跟读文件的 `read` tool 撞名。
+
+agent 靠这些能力来读流式 tool 输出、查它没记住的文档，以及和自己的后台任务同步。
+
+## User commands
+
+这是*用户*在 CLI / TUI 输入框里敲的 slash 命令。内置的有：
+
+| Command | Alias | Effect |
+|---|---|---|
+| `/help` | `/h`, `/?` | 列出命令 |
+| `/status` | `/info` | 模型、消息、tools、jobs、compact 状态 |
+| `/clear` | | 清空对话 |
+| `/model [name]` | `/llm` | 列出或切换 LLM profile |
+| `/compact` | | 手动 compact |
+| `/regen` | `/regenerate` | 重跑上一轮 assistant 输出 |
+| `/plugin [list\|enable\|disable\|toggle] [name]` | `/plugins` | 管理 lifecycle plugins |
+| `/exit` | `/quit`, `/q` | 正常退出 |
+
+自定义 user command 放在 `builtins/user_commands/` 下，或者跟着 package 一起发。怎么写见 [Custom Modules](custom-modules.md)。
+
+## 输入和输出
+
+```yaml
+input:
+  type: cli                  # 也可以是：tui, whisper, asr, none, custom, package
+  prompt: "> "
+  history_file: ~/.my_agent_history
+
+output:
+  type: stdout               # 也可以是：tts, tui, custom, package
+  named_outputs:
+    discord:
+      type: custom
+      module: ./outputs/discord.py
+      class_name: DiscordOutput
+      options: { webhook_url: "${DISCORD_WEBHOOK}" }
+```
+
+`named_outputs` 能让 tool 或 sub-agent 把内容发到指定出口，比如 Discord webhook、TTS、文件。见 [concepts/modules/output](../concepts/modules/output.md)。
+
+## 每个 creature 自己的 MCP servers
+
+```yaml
+mcp_servers:
+  - name: sqlite
+    transport: stdio
+    command: mcp-server-sqlite
+    args: ["/var/db/my.db"]
+  - name: docs_api
+    transport: http
+    url: https://mcp.example.com/sse
+```
+
+MCP tools 会通过元工具 `mcp_list`、`mcp_call` 暴露给 controller。完整流程看 [MCP](mcp.md)。
+
+## Compaction
+
+```yaml
+compact:
+  enabled: true
+  threshold: 0.8             # 上下文占到 max_tokens 的 80% 就触发
+  target: 0.5                # 压到 50% 左右
+  keep_recent_turns: 5
+  compact_model: gpt-4o-mini  # 总结这一步单独换便宜模型
+```
+
+Compaction 在后台跑，不会卡住 controller。见 [Sessions](sessions.md) 和 [concepts/modules/memory-and-compaction](../concepts/modules/memory-and-compaction.md)。
+
+## Plugins
+
+只给这个 creature 挂 lifecycle / prompt plugins：
+
+```yaml
+plugins:
+  - name: tool_timer
+    type: custom
+    module: ./plugins/tool_timer.py
+    class: ToolTimer
+  - name: project_rules
+    type: package             # 来自已安装 package 的 manifest
+```
+
+见 [Plugins](plugins.md)。
+
+## 打包 creature 复用
+
+把你的 creature 文件夹包进一个 package：
+
+```
+my-creatures/
+  kohaku.yaml
+  creatures/
+    my-agent/
+      config.yaml
+      prompts/...
+```
+
+`kohaku.yaml`：
+
+```yaml
+name: my-creatures
+version: "0.1.0"
+description: "My shared creatures"
+creatures:
+  - name: my-agent
+```
+
+本地安装（editable）或者发到 git：
+
+```bash
+kt install ./my-creatures -e
+# then:
+kt run @my-creatures/creatures/my-agent
+```
+
+把仓库推到 git 之后，别人就可以直接 `kt install <url>`。完整流程看 [Packages](packages.md)。
+
+## 排错
+
+- **Agent 不按 tool 调用语法来。** 先看 `tool_format`。如果你设成了 `native`，底层 provider 也得支持才行。
+- **System prompt 里出现两份 tool 列表。** 你自己在 `system.md` 里又写了一份。删掉，聚合器会自动加。
+- **继承来的 creature 把别的都覆盖掉了。** 对标量字段来说这就是预期行为。想保住父级列表，就别在子级重新声明整列。
+- **`base_config: "@pkg/..."` 解析失败。** 用 `kt list` 确认 package 已经装上了；package 引用都在 `~/.kohakuterrarium/packages/` 下面。
+
+## 另见
+
+- [Configuration](configuration.md) —— 按任务分类的配置做法。
+- [Custom Modules](custom-modules.md) —— 自己写 tools / inputs / outputs / triggers / sub-agents。

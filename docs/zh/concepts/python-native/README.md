@@ -1,12 +1,12 @@
-# Python 原生
+# Python-native
 
-KohakuTerrarium 里，creature 的每个模块都是 Python 类。agent 是异步 Python 对象。terrarium 是 Python 运行时。plugin 是 Python 类。tool 也是 Python 类。组合代数则是一套 Python API。
+KohakuTerrarium 里的每个 creature module 都是 Python class。agent 是异步 Python object。terrarium 是 Python runtime。plugin 是 Python class。tool 也是 Python class。compose algebra 则是一套 Python API。
 
-这不是巧合，是框架刻意保持的一个特性：既然一切都是 Python，agent 和它的各个部分就能作为值放进*别的*部分里。plugin 可以内嵌一个 agent。trigger 可以内嵌一个 agent。tool 也可以内嵌一个 agent。很多模式就是这么来的，比如更聪明的 guard、会自适应的 watcher、无缝接上的 memory。它们往往只要几十行组合代码，不用再造一套新框架。
+这不是碰巧这样设计的，而是框架本身就故意这么做：既然所有东西都是 Python，agent 和它的各个部分就都能当成值，塞进*别的*部分里。plugin 里可以嵌 agent，trigger 里可以嵌 agent，tool 里也可以嵌 agent。很多有意思的模式——比如 smart guard、adaptive watcher、seamless memory——因此不用另起一套框架，写几十行组合代码就够了。
 
 这一节有两篇文档：
 
-- [Agent 作为 Python 对象](/concepts/python-native/agent-as-python-object.md)（英文）—— 解释“agent 就是 Python”意味着什么，以及它能解开什么限制。
-- [组合代数](/concepts/python-native/composition-algebra.md)（英文）—— 用来把 agent 串成流水线的 API（`>>`、`&`、`|`、`*`、`.iterate`）。
+- [Agent as a Python object](agent-as-python-object.md) —— 讲 first-class value 这件事，也就是“agents are Python”到底能让你做什么。
+- [Composition algebra](composition-algebra.md) —— 讲把 agent 拼成 pipeline 的那套 API（`>>`, `&`, `|`, `*`, `.iterate`）。
 
-先读第一篇，理解原则。第二篇只在你打算用 Python 写 agent 流水线时再看；如果你写的是 creature 配置，可以跳过。
+先看第一篇，理解核心思路。第二篇只有在你打算直接用 Python 写 agent pipeline 时才需要看；如果你平时写的是 creature config，可以先跳过。

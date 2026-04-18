@@ -1,53 +1,53 @@
-# Output（输出）
+# Output
 
 ## 它是什么
 
-**Output** 模块负责把 creature 的内容送回外部世界。它接收 controller 发出的所有事件——LLM 的文本分块、工具开始/完成事件、活动通知、token 使用量更新——再把它们分发到对应的输出端。
+**output** 模块决定 creature 怎么把东西往外送。controller 产出的内容，不管是 LLM 的文本片段、tool 开始/结束事件、活动通知，还是 token 用量更新，都会先到这里，再被路由到合适的去处。
 
-输出端可以不止一个。一个 creature 可以同时打印到 stdout、推流到 TTS、发到 Discord，再写一份日志到文件里。
+而且去处不一定只有一个。一个 creature 可以同时往 stdout 打字、往 TTS 流式播报、推到 Discord，再顺手写一份日志。
 
-## 为什么需要它
+## 为什么要有它
 
-“把 LLM 的回复打印到 stdout”只是最简单的情况。真正在部署时，问题会多得多：
+“把 LLM 的回复打印到 stdout”只是最简单的情况。真部署起来，麻烦马上就来了：
 
-- LLM 的流式文本分块在有三个监听方时该发到哪里？
-- 工具活动怎么办？走同一条流，还是另一条？
-- 给用户看的文本和写日志的文本，要不要共用一个输出端？
-- 如果 creature 跑在 Web UI 里，谁在订阅这些事件？
+- LLM 流式输出的 chunk，如果有三个监听方，到底往哪发？
+- tool 活动要不要混在同一条流里？
+- 给用户看的文本和给日志看的文本，能不能走不同出口？
+- creature 跑在 web UI 里时，到底是谁在订阅这些事件？
 
-框架没有为每种界面分别写一套特例，而是用一个统一路由器，把每个输出端都当成一个有名字的 output。
+与其每个界面都写一套特判，不如收成一个统一 router，把每个 sink 都当成一个命名 output。
 
-## 我们怎么定义它
+## 怎么定义它
 
-`OutputModule` 是一个异步消费者，提供 `on_text(chunk)`、`on_tool_start(...)`、`on_tool_complete(...)`、`on_resume(events)`、`start()`、`stop()` 这类方法。`OutputRouter` 持有一组这类模块——一个默认输出，加上任意数量的 `named_outputs`——并负责把事件分发出去。
+`OutputModule` 是一个异步 consumer，通常会有这些方法：`on_text(chunk)`、`on_tool_start(...)`、`on_tool_complete(...)`、`on_resume(events)`、`start()`、`stop()`。`OutputRouter` 持有一组 output：一个默认 output，再加任意多个 `named_outputs`，然后把事件扇出去。
 
-`controller_direct: true`（默认值）表示 controller 的文本流会直接进入默认输出。设成 `controller_direct: false` 后，你可以在中间插一个处理器，比如改写器、安全过滤器或摘要器。
+`controller_direct: true`（默认值）表示 controller 的文本流会直接送到默认 output。`controller_direct: false` 则允许你在中间插一层处理器，比如重写器、安全过滤器、摘要器。
 
-## 我们怎么实现它
+## 怎么实现它
 
-内置输出包括：
+内置 output 有这些：
 
-- **`stdout`** —— 普通终端输出，可配置 prefix、suffix 和 stream-suffix。
-- **`tts`** —— 文本转语音；后端包括 Fish、Edge、OpenAI，运行时自动选择。
-- **`tui`** —— creature 在 TUI 下运行时使用的、基于 Textual 的显示层。
-- **（隐式）web streaming output** —— creature 运行在 HTTP/WebSocket 服务器中时使用。
+- **`stdout`** —— 普通终端输出，可配置 prefix、suffix、stream-suffix。
+- **`tts`** —— 文本转语音；backend 包括 Fish、Edge、OpenAI，运行时自动选择。
+- **`tui`** —— creature 跑在 TUI 里时使用的 Textual 显示层。
+- **（隐式）web streaming output** —— creature 跑在 HTTP / WebSocket 服务里时使用。
 
-`OutputRouter`（`modules/output/router.py`）还提供一条 activity 流，TUI 和 HTTP 客户端可以用它显示工具开始/完成事件，不必把这些事件塞进文本通道。
+`OutputRouter`（`modules/output/router.py`）还暴露了一条 activity stream，TUI 和 HTTP 客户端会用它来显示 tool 开始/结束事件，而不是把这些信息硬塞进文本通道。
 
-## 所以你能怎么用
+## 你能拿它做什么
 
-- **安静的 controller，流式输出的 sub-agent。** 给 sub-agent 标上 `output_to: external`，它的文本就会直接流给用户，而父级 controller 留在内部。用户看到的是一段完整回复，但这段回复实际由某个专门 agent 产出。
-- **按用途分开输出端。** 给用户看的答案发到 stdout，把调试笔记发到名为 `logs` 的 output 并写入文件，把最终产物发到 Discord webhook。
-- **后处理文本。** 把 `controller_direct` 设为 `false`，再加一个自定义 output，在 controller 的文本到达用户之前先做清洗、翻译或加水印。
-- **与传输方式解耦。** 同一个 creature 可以跑在 CLI、Web 或桌面环境里，因为输出层把传输细节隔开了。
+- **安静的 controller，外放的 sub-agent。** 给 sub-agent 配 `output_to: external`，它的文本就会直接流给用户；父 controller 则留在内部。用户看到的是一段完整回复，但实际是专家 sub-agent 写的。
+- **按用途分流。** 用户可见答案走 stdout，调试信息走一个写文件的 `logs` named output，最终产物再发到 Discord webhook。
+- **后处理文本。** 把 `controller_direct` 设成 `false`，再加一个自定义 output，对 controller 产出的文本做清洗、翻译或加水印。
+- **和传输方式解耦。** 同一个 creature 可以跑在 CLI、web 或桌面环境，因为 output 层把传输细节挡住了。
 
-## 别把它想死了
+## 别把它当铁律
 
-没有 output 的 creature 也是成立的：有些 trigger 只会产生副作用，比如写文件、发邮件。反过来，output 也不只是个薄封装，它本身就是完整模块——一个 Python 模块完全可以在里面再跑一个 mini-agent，决定每个文本分块该怎么格式化。听上去有点过头，通常也确实没这个必要，但框架允许你这么做。
+没有 output 的 creature 也说得通：有些 trigger 只是引发副作用，比如写文件、发邮件。反过来，output 也可以做得很重。一个 Python output 模块完全可以自己再跑个 mini-agent，决定每个 chunk 怎么格式化。听上去有点夸张，实际也确实有点夸张，但不是不行。
 
 ## 另见
 
-- [Sub-agent](/docs/concepts/modules/sub-agent.md)（英文）—— `output_to: external` 会通过 router 直接把内容流出去。
-- [Controller](/docs/concepts/modules/controller.md)（英文）—— 真正向 router 喂数据的是它。
-- [reference/builtins.md — Outputs](/docs/reference/builtins.md)（英文）—— 内置输出列表。
-- [guides/custom-modules.md](/docs/guides/custom-modules.md)（英文）—— 如何自己写一个。
+- [Sub-agent](/zh/concepts/modules/sub-agent.md) —— `output_to: external` 会直接通过 router 往外流。
+- [Controller](/zh/concepts/modules/controller.md) —— 真正喂给 router 的是谁。
+- [reference/builtins.md — Outputs](/zh/reference/builtins.md) —— 内置列表。
+- [guides/custom-modules.md](/zh/guides/custom-modules.md) —— 怎么自己写。

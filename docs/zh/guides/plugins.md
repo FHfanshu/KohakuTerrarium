@@ -1,26 +1,26 @@
-# 插件
+# Plugins
 
-适合那些想在模块之间的衔接处加行为、又不想 fork 任何模块的读者。
+给不想 fork 模块本体，只想在模块之间那层接口上加行为的人看。
 
-插件改的是 controller、tools、sub-agents 和 LLM 之间的连接，不是模块本身。插件分两类：**prompt 插件**负责往 system prompt 里加内容，**lifecycle 插件**挂到运行期事件上，比如 LLM 调用前后、工具执行前后。
+Plugin 改的是 controller、tools、sub-agents 和 LLM 之间的连接方式，不是模块本身。它分两类：**prompt plugin** 往 system prompt 里塞内容；**lifecycle plugin** 挂在运行时事件上，比如 LLM 前后、tool 前后这些点。
 
-概念先看：[plugin（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/modules/plugin.md)、[patterns（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/patterns.md)。
+先补概念： [plugin](../concepts/modules/plugin.md)、[patterns](../concepts/patterns.md)。
 
-## 什么时候该写插件、工具或模块
+## 什么时候该写 plugin，什么时候写 tool，什么时候写 module
 
-- *tool* 是 LLM 可以按名字调用的东西。
-- *module*（input/output/trigger/sub-agent）是一整块运行时能力。
-- *plugin* 是跑在它们之间的规则，比如拦截、计费、注入提示词、检索记忆。
+- *tool*：LLM 可以按名字直接调用的东西。
+- *module*（input / output / trigger / sub-agent）：一整块运行时能力。
+- *plugin*：夹在它们中间跑的规则，比如拦截、记账、注入 prompt、查 memory。
 
-如果你的需求是“每次 X 前后都做 Y”，那基本该写插件。
+如果你的需求说出来是“每次 X 前后都要做一下 Y”，那十有八九该写 plugin。
 
-## Prompt 插件
+## Prompt plugins
 
-约定：
+约定是这样的：
 
-- 继承 `BasePlugin`。
-- 设置 `name`、`priority`（值越小，在最终 prompt 里越靠前）。
-- 实现 `get_content(context) -> str | None`。
+- 继承 `BasePlugin`
+- 设置 `name`、`priority`（越小越早出现在最终 prompt 里）
+- 实现 `get_content(context) -> str | None`
 
 ```python
 # plugins/project_header.py
@@ -41,33 +41,33 @@ class ProjectHeaderPlugin(BasePlugin):
         return f"## Project Header\n\n{self.text}"
 ```
 
-内置 prompt 插件（始终存在）：
+内置 prompt plugins（一直都在）：
 
-| 插件 | 优先级 | 作用 |
+| Plugin | Priority | Purpose |
 |---|---|---|
 | `ProjectInstructionsPlugin` | 30 | 加载 `CLAUDE.md` / `.claude/rules.md` |
 | `EnvInfoPlugin` | 40 | 工作目录、平台、日期 |
-| `FrameworkHintsPlugin` | 45 | 工具调用语法和框架命令示例（`info`、`jobs`、`wait`） |
-| `ToolListPlugin` | 50 | 每个工具一行说明 |
+| `FrameworkHintsPlugin` | 45 | tool 调用语法 + 框架命令例子（`info`、`jobs`、`wait`） |
+| `ToolListPlugin` | 50 | 每个 tool 的一句话说明 |
 
-优先级越低，运行越早。按这个规则给你的插件排位置。
+priority 越小越早跑。你自己的 plugin 放哪一层，就自己把 priority 选到对应位置。
 
-## Lifecycle 插件
+## Lifecycle plugins
 
-继承 `BasePlugin`，实现下面任意 hook。它们都是 async。
+继承 `BasePlugin`，然后按需要实现下面这些 hook。它们全都是 async。
 
-| Hook | 签名 | 作用 |
+| Hook | Signature | Effect |
 |---|---|---|
-| `on_load(context)` | agent 启动时初始化 | — |
-| `on_unload()` | 停止时清理 | — |
-| `pre_llm_call(messages, **kwargs)` | 返回 `list[dict] \| None` | 替换发给 LLM 的消息 |
-| `post_llm_call(response)` | 返回 `ChatResponse \| None` | 替换响应 |
-| `pre_tool_execute(name, args)` | 返回 `dict \| None`；或抛出 `PluginBlockError` | 替换参数，或阻止调用 |
-| `post_tool_execute(name, result)` | 返回 `ToolResult \| None` | 替换工具结果 |
-| `pre_subagent_run(name, context)` | 返回 `dict \| None` | 替换 sub-agent 上下文 |
-| `post_subagent_run(name, output)` | 返回 `str \| None` | 替换 sub-agent 输出 |
+| `on_load(context)` | setup at agent start | — |
+| `on_unload()` | teardown at stop | — |
+| `pre_llm_call(messages, **kwargs)` | return `list[dict] \| None` | 替换发给 LLM 的 messages |
+| `post_llm_call(response)` | return `ChatResponse \| None` | 替换 response |
+| `pre_tool_execute(name, args)` | return `dict \| None`; or raise `PluginBlockError` | 替换参数，或者直接拦掉调用 |
+| `post_tool_execute(name, result)` | return `ToolResult \| None` | 替换 tool result |
+| `pre_subagent_run(name, context)` | return `dict \| None` | 替换 sub-agent context |
+| `post_subagent_run(name, output)` | return `str \| None` | 替换 sub-agent output |
 
-下面这些回调只通知，不返回值，也不能修改内容：
+还有一类是 fire-and-forget 回调：没有返回值，也改不了内容：
 
 - `on_tool_start`、`on_tool_end`
 - `on_llm_start`、`on_llm_end`
@@ -76,9 +76,9 @@ class ProjectHeaderPlugin(BasePlugin):
 - `on_compact_start`、`on_compact_complete`
 - `on_event`
 
-## 示例：工具守卫
+## 例子：tool guard
 
-阻止危险的 shell 命令。
+拦危险 shell 命令。
 
 ```python
 # plugins/tool_guard.py
@@ -114,9 +114,9 @@ plugins:
       deny_patterns: ["rm -rf /", "dd if=/dev/zero"]
 ```
 
-抛出 `PluginBlockError` 会中止这次操作，错误消息会变成工具结果。
+抛出 `PluginBlockError` 之后，这次操作就中止了，这个报错信息会变成 tool result。
 
-## 示例：token 记账
+## 例子：token 记账
 
 ```python
 class TokenAccountant(BasePlugin):
@@ -126,14 +126,14 @@ class TokenAccountant(BasePlugin):
         usage = response.usage or {}
         my_db.record(tokens_in=usage.get("prompt_tokens"),
                      tokens_out=usage.get("completion_tokens"))
-        return None   # don't replace the response
+        return None   # 不替换 response
 ```
 
-## 示例：无缝记忆（在插件里放一个 agent）
+## 例子：无感 memory（plugin 里套一个 agent）
 
-可以写一个 `pre_llm_call` 插件，取回相关的历史事件，再把它们插到消息前面。你也可以调用一个小型嵌套 agent 来判断哪些内容相关——插件就是普通 Python，所以里面用 agent 没问题。见 [agent-as-python-object（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/python-native/agent-as-python-object.md)。
+可以写一个 `pre_llm_call` plugin，先把相关的历史事件捞出来，再塞到 messages 前面。要判断哪些历史相关，也可以在 plugin 里调一个小的嵌套 agent。Plugin 本质上就是普通 Python，所以里面用 agent 没问题。见 [concepts/python-native/agent-as-python-object](../concepts/python-native/agent-as-python-object.md)。
 
-## 运行时管理插件
+## 运行时管理 plugin
 
 Slash 命令：
 
@@ -144,11 +144,11 @@ Slash 命令：
 /plugin toggle tool_guard
 ```
 
-插件只会在 agent 启动时加载一次；enable/disable 只是运行时开关，不会重新加载。改配置后要重启。
+Plugin 只会在 agent 启动时加载一次。enable / disable 只是运行时开关，不会重载。你改了配置，还是得重启。
 
-## 分发插件
+## 分发 plugins
 
-把插件打进一个 package：
+可以打进 package：
 
 ```yaml
 # my-pack/kohaku.yaml
@@ -159,7 +159,7 @@ plugins:
     class: ToolGuard
 ```
 
-使用方在自己的 creature 里启用：
+使用方在自己的 creature 里启用它：
 
 ```yaml
 plugins:
@@ -168,19 +168,19 @@ plugins:
     options: { deny_patterns: [...] }
 ```
 
-见 [Packages（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/guides/packages.md)。
+见 [Packages](packages.md)。
 
 ## Hook 执行顺序
 
-当多个插件实现了同一个 hook：
+多个 plugin 都实现同一个 hook 时：
 
-- `pre_*` hook 按注册顺序运行；第一个返回非 `None` 的结果生效。
-- `post_*` hook 也按注册顺序运行；每个插件接收上一个插件的输出。
-- 只通知的 hook 都会执行完；报错会被记录日志，不会抛出。
+- `pre_*` hooks 按注册顺序执行；第一个返回非 `None` 的结果就算数。
+- `post_*` hooks 也按注册顺序执行，后一个拿到的是前一个处理后的输出。
+- fire-and-forget hooks 会全部执行；出错只记日志，不会往外抛。
 
-任何 `pre_*` hook 只要抛出 `PluginBlockError`，后面的插件都不会再继续处理这次操作。
+如果任意一个 `pre_*` hook 抛出 `PluginBlockError`，后面的 plugin 就都不跑了，这个操作直接短路。
 
-## 测试插件
+## 测试 plugins
 
 ```python
 from kohakuterrarium.testing.agent import TestAgentBuilder
@@ -198,14 +198,14 @@ assert any("Blocked" in act[1] for act in env.output.activities)
 
 ## 排错
 
-- **找不到插件类。** 检查 `class`，不是 `class_name`。插件这里用的是 `class`。配置加载器两种都接受，但 package manifest 用的是 `class`。
-- **Hook 一直没触发。** 先确认 hook 名字写对了；`pre_llm_call` 和 `pre_tool_execute` 这种拼错时不会报错，只会静默失效。
-- **抛了 `PluginBlockError`，调用还是执行了。** 这个错误是从 `post_*` hook 抛出来的。要拦截，得用 `pre_tool_execute`。
-- **依赖顺序的插件叠加不对。** `pre_*` hook 按注册顺序跑，去配置里的 `plugins:` 列表调整顺序。
+- **找不到 plugin class。** 检查 `class`，不是 `class_name`。虽然配置加载器两种都收，但 package manifest 里用的是 `class`。
+- **Hook 根本没触发。** 先确认 hook 名字写对了。`pre_llm_call` 和 `pre_tool_execute` 这种拼错，通常就是静悄悄没效果。
+- **`PluginBlockError` 抛了，调用还是照样执行。** 你是在 `post_*` hook 里抛的。要拦调用，用 `pre_tool_execute`。
+- **多个 plugin 叠起来顺序不对。** `pre_*` hooks 按注册顺序跑，去配置里的 `plugins:` 列表调顺序。
 
 ## 另见
 
-- [examples/plugins/（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/tree/main/examples/plugins) —— 每类 hook 都有一个示例。
-- [Custom Modules（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/guides/custom-modules.md) —— 插件围绕着它们工作。
-- [Reference / plugin hooks（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/reference/plugin-hooks.md) —— 所有 hook 签名。
-- [Concepts / plugin（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/modules/plugin.md) —— 设计原因。
+- [examples/plugins/](https://github.com/Kohaku-Lab/KohakuTerrarium/tree/main/examples/plugins) —— 每类 hook 都有一个示例。
+- [Custom Modules](custom-modules.md) —— plugin 挂着的那些模块怎么自己写。
+- [Reference / plugin hooks](../reference/plugin-hooks.md) —— 全部 hook 签名。
+- [Concepts / plugin](../concepts/modules/plugin.md) —— 设计思路。

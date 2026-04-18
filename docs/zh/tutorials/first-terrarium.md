@@ -1,20 +1,20 @@
 # 第一个 Terrarium
 
-**问题：**你想让两个 creature 协作：一个负责写，一个负责审稿；同时还能看到它们之间的消息怎么流转。
+你想让两个 creature 配合起来干活：writer 先写，reviewer 再提意见。你还想亲眼看到消息怎么在它们之间来回传。
 
-**完成后：**你会有一个 terrarium 配置，里面有两个 creatures、两条 channels，并且能在 TUI 里跑起来，直接看到消息从一个传到另一个。
+这篇做完，你手里会有一个 terrarium 配置：里面有两个 creatures、两个 channels，可以在 TUI 里跑起来，消息会从一个传到另一个。
 
-**前提：**先做过[第一个 Creature](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/tutorials/first-creature.md)（英文）。你需要已经安装 `kt-defaults`，并且能用 `kt run` 跑起单个 creature。
+前提是：先看过[第一个 Creature](first-creature.md)。你还得已经装好 `kt-defaults`，并且能用 `kt run` 跑单个 creature。
 
-Terrarium 只负责连线：它持有 channels，管理 creature 的生命周期。它自己没有 LLM。真正的智能仍然在各个 creature 里面。完整约定见 [terrarium 概念](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/multi-agent/terrarium.md)（英文）。
+terrarium 只管接线。它持有 channels，也负责 creatures 的生命周期；自己没有 LLM。真正做判断、出主意的，还是各个 creature。完整约定见 [Terrarium 概念](../concepts/multi-agent/terrarium.md)。
 
-## 第 1 步：创建目录
+## 第 1 步：建文件夹
 
 ```bash
 mkdir -p terrariums
 ```
 
-Terrarium 配置放哪都行。一般会在 creatures 旁边放一个 `terrariums/` 目录。
+terrarium 配置其实放哪都行。一般会放在和 creatures 并列的 `terrariums/` 目录里。
 
 ## 第 2 步：写 terrarium 配置
 
@@ -55,42 +55,42 @@ terrarium:
     feedback: { type: queue, description: "Review notes sent back" }
 ```
 
-这套连线在做什么：
+这套接线在做什么：
 
-- `listen` 会给 creature 注册一个 `ChannelTrigger`。消息一旦进入这些 channel，creature 就会被唤醒并看到消息。
-- `can_send` 列出 creature 的 `send_message` 工具允许写入哪些 channel。没列在这里的 channel，它发不过去。
-- Channels 只在 `channels:` 里声明一次。`queue` 会把每条消息发给一个消费者；`broadcast` 会发给所有监听者。
+- `listen` 会给 creature 挂上 `ChannelTrigger`。消息一到这些 channel，creature 就会被唤醒并看到这条消息。
+- `can_send` 列出这个 creature 的 `send_message` 工具允许写到哪些 channel。没列进去的 channel，它发不过去。
+- Channels 只在 `channels:` 里定义一次。`queue` 会把每条消息交给一个消费者；`broadcast` 会发给所有 listener。
 
-内联的 `system_prompt:` 会追加到继承来的基础 prompt 后面。教程里这样写，是为了把例子放在一个文件里。实际使用更建议用 `system_prompt_file:`。
+这里把 `system_prompt:` 直接写在配置里，是为了让教程放在一页里就能看完。真要长期用，还是更推荐 `system_prompt_file:`。
 
-## 第 3 步：检查拓扑（可选）
+## 第 3 步：看一眼拓扑图（可选）
 
 ```bash
 kt terrarium info terrariums/writer-team.yaml
 ```
 
-这条命令会打印 creatures、它们监听和发送的 channel 集合，以及 channel 定义。正式运行前先看一眼，能少踩点坑。
+它会打印出有哪些 creatures、各自监听和发送哪些 channels，以及 channel 的定义。正式跑之前先看一眼，比较稳妥。
 
-## 第 4 步：运行
+## 第 4 步：跑起来
 
 ```bash
 kt terrarium run terrariums/writer-team.yaml --mode tui --seed "write a one-paragraph product description for a smart kettle" --seed-channel tasks
 ```
 
-TUI 打开后，每个 creature 一个标签页，每个 channel 也有一个标签页。`--seed` 会在启动时把你的提示词注入到 `seed-channel` 指定的 channel 里，默认是 `seed`，这里改成了 `tasks`。接着 writer 被唤醒，写出草稿并发到 `review`；reviewer 被唤醒，给出审阅意见并发到 `feedback`；writer 再醒一次，继续修改。
+TUI 打开后，每个 creature 一页，每个 channel 也有一页。`--seed` 会在启动时把你的提示词塞到 `seed-channel` 指定的 channel 里；默认是 `seed`，这里我们改成了 `tasks`。接下来 writer 被唤醒，写出草稿，发到 `review`；reviewer 被唤醒，给出意见，发到 `feedback`；writer 再醒一次，继续改。
 
-你可以在 channel 标签页里看原始消息流，也可以在 creature 标签页里看各自的推理过程。
+你可以看 channel 标签页里的原始消息流，也可以看 creature 标签页里各自的推理过程。
 
-## 第 5 步：先知道它的限制
+## 第 5 步：先认清它现在的限制
 
-这种横向多 agent 结构有个很实际的问题：**能不能继续推进，取决于每个 creature 会不会把输出发到正确的 channel。** 如果模型忘了调用 `send_message`，对应 channel 就是空的，整个团队会卡住。
+横向多 agent 现在有个很实际的失败点：**每个 creature 得真的把输出发到对的 channel，流程才能往下走。** 如果模型忘了调用 `send_message`，那个 channel 就是空的，整组协作会卡住。
 
-现在常用的办法有两个：
+现在能用的办法主要有两个：
 
-1. **把提示写得更明确。** 直接告诉 creature 什么时候该往哪个 channel 发消息。上面的内联 prompt 就是这么做的。
-2. **加一个 root agent。** root creature 在 terrarium *外面*，它持有 terrarium 管理工具。它接收用户输入、给团队下种子、观察 channels，也会在 creatures 卡住时推一把。可以看看 `@kt-defaults/creatures/root` 和 `swe_team` terrarium 这个完整例子。模式说明见 [root agent 概念](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/multi-agent/root-agent.md)（英文）。
+1. **把提示词写得更硬一点。** 直接告诉 creature 该往哪个 channel 发、什么时候发。上面那段内联 prompt 就是在干这个。
+2. **加一个 root agent。** root creature 在 terrarium 外面，手里有管理 terrarium 的工具。它接收用户输入，给团队播种子，观察各个 channel，哪个 creature 卡住了就推一把。可以看 `@kt-defaults/creatures/root` 和 `swe_team` 这个 terrarium。具体模式见 [Root agent 概念](../concepts/multi-agent/root-agent.md)。
 
-例子：加一个 root：
+例子：加一个 root
 
 ```yaml
 terrarium:
@@ -100,22 +100,22 @@ terrarium:
   # ... creatures and channels as before
 ```
 
-这样一来，TUI 会把 root agent 挂到主标签页上，你直接和它对话；它再通过 terrarium tools 去调度 writer 和 reviewer。
+这样一来，TUI 主标签页挂的就是 root agent。你直接和它说话，它再通过 terrarium 工具去调度 writer 和 reviewer。
 
-## 第 6 步：Terrarium 后面会补什么
+## 第 6 步：terrarium 接下来会补什么
 
-自动路由（可配置，例如“creature 的最后一条消息总是发到 channel X”）、root 的生命周期观察，以及动态 creature 管理，都在路线图里。现在这些能力还没落地，所以只要事情比较重要，还是优先用显式 prompt，或者上 root creature。完整说明见 [ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md)（英文）里的 terrarium 部分。
+自动路由（可配置成“creature 的最后一条消息总是发到 channel X”）、root 的生命周期观察、动态 creature 管理，这些都在路线图里。现在它们还没落地，所以只要事情重要，最好还是用明确 prompt，或者直接上 root creature。完整说明见 [ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md) 里的 terrarium 部分。
 
-## 你学到的内容
+## 你学到了什么
 
-- Terrarium 负责连线，不负责智能。
-- Creatures 仍然是独立的；terrarium 只规定谁能听到什么、谁能往哪发消息。
-- 横向多 agent 这套是能工作的，但路由要靠明确提示，当前最常见的问题就是卡住。
-- 如果你想要一个面向用户的统一协调者，实用做法是加一个 root creature。
+- terrarium 只负责接线，不负责思考。
+- creatures 还是各自独立；terrarium 只是规定谁能听见什么、谁能往哪发消息。
+- 横向多 agent 现在能用，但不自动；路由主要靠 prompt，常见故障就是卡住不动。
+- 如果你想要一个面向用户的总控，实用做法还是加一个 root creature。
 
 ## 接下来可以看什么
 
-- [Terrarium 概念](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/multi-agent/terrarium.md)（英文）—— 约定和边界。
-- [Root agent 概念](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/multi-agent/root-agent.md)（英文）—— 面向用户的 creature。
-- [Terrariums 指南](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/guides/terrariums.md)（英文）—— 实际用法参考。
-- [Channel 概念](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/modules/channel.md)（英文）—— `queue` 和 `broadcast` 的区别、observers，以及 channels 如何跨模块边界。
+- [Terrarium 概念](../concepts/multi-agent/terrarium.md) —— terrarium 的约定边界。
+- [Root agent 概念](../concepts/multi-agent/root-agent.md) —— 面向用户的那个 creature。
+- [Terrariums 指南](../guides/terrariums.md) —— 更偏实操的参考文档。
+- [Channel 概念](../concepts/modules/channel.md) —— `queue` 和 `broadcast` 的区别、observers，以及 channel 怎么跨模块。

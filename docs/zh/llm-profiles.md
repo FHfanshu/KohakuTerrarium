@@ -4,17 +4,43 @@
 
 这篇讲清楚一个很多人搞混的事：`llm_profiles.yaml` 里 backends、presets、profiles 到底是什么关系。
 
+## 配置文件在哪
+
+默认位置：
+
+```text
+~/.kohakuterrarium/llm_profiles.yaml
+```
+
+如果你是 Windows 用户，通常就是：
+
+```text
+C:\Users\你的用户名\.kohakuterrarium\llm_profiles.yaml
+```
+
+想直接打开这个目录，可以在资源管理器地址栏里输入：
+
+```text
+%USERPROFILE%\.kohakuterrarium
+```
+
+也可以在 PowerShell 里这样打开：
+
+```powershell
+explorer $env:USERPROFILE\.kohakuterrarium
+```
+
 ## 三层结构
 
 用一个比喻就明白了：
 
-| 层 | 字段 | 比喻 | 存什么 |
+| 层 | 字段 | 作用 | 存什么 |
 |----|------|------|--------|
-| 第一层 | `backends` | 电话号码簿 | 怎么连到服务器（地址、密钥名、协议类型） |
-| 第二层 | `presets` | 联系人名片 | 用哪个模型、上下文多长、推理力度多大 |
-| 第三层 | `profiles` | 运行时配置 | 把 preset 和 backend 合并后的完整信息 |
+| 第一层 | `backends` | 定义连接方式 | 怎么连到模型服务，例如地址、协议类型、密钥环境变量名 |
+| 第二层 | `presets` | 定义模型预设 | 用哪个模型、上下文多长、推理力度多大，以及附加参数 |
+| 第三层 | `profiles` | 兼容视图 | 由 `presets` 同步生成，表示合并后的完整配置 |
 
-**关键点**：`profiles` 是 `presets` 的镜像，框架每次保存都会同步。你只需要关注 `backends` 和 `presets` 就行。
+**关键点**：`profiles` 不是一套要单独维护的配置，它只是 `presets` 自动同步生成的兼容视图。保存时框架会一起更新，所以你实际只需要关注 `backends` 和 `presets`。
 
 ## backends：连接信息
 
@@ -170,13 +196,7 @@ extra_body:
 
 > 注意：上下文窗口是模型理论最大值。Codex OAuth 等某些渠道可能有更低的实际限制（如 GPT-5.4 只给 272K budget） 而且上下文窗口大小不等于模型实际注意力能力范围。
 
-## 配置文件在哪
-
-```text
-~/.kohakuterrarium/llm_profiles.yaml
-```
-
-手动编辑也行，用命令也行：
+## 手动编辑还是用命令
 
 ```powershell
 # 登录 provider

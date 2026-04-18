@@ -45,9 +45,10 @@
 ## 示例位置
 
 - 默认 SWE：`@kt-defaults/creatures/swe`
-- 本地扩展：`examples/agent-apps/swe_bio_agent`
-- 强约束插件：`examples/agent-apps/swe_bio_agent/custom/guard_plugin.py`
-- 审计插件：`examples/agent-apps/swe_bio_agent/custom/audit_plugin.py`
+- 本地扩展 package：`examples/agent-apps/swe_bio_agent`
+- 实际 creature：`examples/agent-apps/swe_bio_agent/creatures/swe_bio_agent`
+- 强约束插件：`examples/agent-apps/swe_bio_agent/creatures/swe_bio_agent/custom/guard_plugin.py`
+- 审计插件：`examples/agent-apps/swe_bio_agent/creatures/swe_bio_agent/custom/audit_plugin.py`
 
 ## 前提
 

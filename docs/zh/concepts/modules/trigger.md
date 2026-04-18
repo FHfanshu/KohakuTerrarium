@@ -1,60 +1,60 @@
-# Trigger（触发器）
+# Trigger
 
 ## 它是什么
 
-**Trigger** 是任何不靠用户显式输入、却能唤醒 controller 的东西。定时器、空闲检测器、webhook 接收器、channel 监听器、监控条件，都算 trigger。每个 trigger 都以后台任务运行，在满足触发条件时把 `TriggerEvent` 推到事件队列里。
+**trigger** 是一切不用显式用户输入、也能把 controller 叫醒的东西。timer、idle detector、webhook receiver、channel listener、monitor condition，都算 trigger。每个 trigger 都作为后台 task 运行；一旦满足触发条件，就往事件队列里推 `TriggerEvent`。
 
-## 为什么需要它
+## 为什么要有它
 
-只靠输入驱动的 agent，只有用户在场时才能工作。现实里的 agent 不是这样。它需要：
+一个只靠 input 驱动的 agent，只有用户在旁边时才能工作。但真 agent 往往需要：
 
-- 在没人盯着时继续跑 `/loop` 这种周期性计划；
-- 对另一个 creature 发来的 channel 消息作出反应；
-- 在最后一个事件过去 N 秒后醒来，做摘要；
-- 接收外部服务发来的 webhook；
-- 轮询某个资源，在条件变化时触发。
+- 没人盯着时也能跑 `/loop` 这类周期性计划；
+- 收到另一个 creature 的 channel 消息就醒；
+- 在最后一个事件过去 N 秒后醒来做总结；
+- 接外部服务打来的 webhook；
+- 轮询某个资源，等条件翻转时触发。
 
-你当然可以把这些都写成临时拼上的代码。这个框架的看法更直接：它们本质上都是一回事，都是事件源，所以应该用同一个抽象。
+你当然可以把这些全都各写一套特判代码。但框架的看法更干脆：它们本质上都是事件源，应该共享一层抽象。
 
-## 我们怎么定义它
+## 怎么定义它
 
-一个 trigger 需要实现：
+一个 trigger 会实现：
 
-- 异步生成器 `fire()`，用于产出 `TriggerEvent`；
-- `to_resume_dict()` / `from_resume_dict()`，这样 trigger 才能跨 session 持久化和恢复；
-- `trigger_id`，用于寻址，这样工具才能列出或取消它。
+- 异步生成器 `fire()`，不断 yield `TriggerEvent`
+- `to_resume_dict()` / `from_resume_dict()`，这样 trigger 才能跨 session 保存和恢复
+- 一个 `trigger_id`，方便按地址列出或取消
 
-trigger manager 会为每个已注册的 trigger 启动一个后台任务。每个任务都会循环调用 `fire()`，然后把事件推入队列。
+trigger manager 会给每个已注册 trigger 起一个后台 task。每个 task 都循环调用 `fire()`，再把产出的事件推进去。
 
-## 我们怎么实现它
+## 怎么实现它
 
-内置 trigger 类型有：
+内置 trigger 类型包括：
 
-- **`timer`** — 每隔 N 秒触发一次，或按 cron 调度触发。
-- **`idle`** — 如果 N 秒内没有任何事件，就触发。
-- **`channel`** — 监听一个具名 channel；收到消息时触发。
-- **`webhook` / `http`** — 接收 POST 请求。
-- **`monitor`** — 当作用在 scratchpad / context 上的谓词返回 true 时触发。
+- **`timer`** —— 每 N 秒触发一次，或者按 cron schedule 触发。
+- **`idle`** —— 如果连续 N 秒没有任何事件，就触发。
+- **`channel`** —— 监听某个具名 channel；一有消息就触发。
+- **`webhook` / `http`** —— 接收 POST 请求。
+- **`monitor`** —— 当某个针对 scratchpad / context 的谓词变成 true 时触发。
 
-`TriggerManager`（`core/trigger_manager.py`）负责管理这些运行中的任务，把完成事件接到 agent 的事件回调上，并把 trigger 状态持久化到 session store，这样 `kt resume` 就能重新创建它们。
+`TriggerManager`（`core/trigger_manager.py`）负责这些运行中的 task，把完成事件接回 agent 的事件回调里，并把 trigger 状态持久化到 session store，这样 `kt resume` 才能把它们重新建起来。
 
-配置阶段的 trigger 写在 `config.triggers[]` 里。运行时 trigger 也可以由 agent 自己安装：每个通用 trigger 类（`universal = True` 加 `setup_*` 元数据）都会被包装成独立工具，比如 `add_timer`、`watch_channel`、`add_schedule`。creature 会在 `tools: [{ name: add_timer, type: trigger }]` 下面声明它们。也可以通过 `agent.add_trigger(...)` 以编程方式添加。
+配置期 trigger 写在 `config.triggers[]` 里。运行时 trigger 也可以由 agent 自己安装——每个通用 trigger 类（`universal = True` 并带 `setup_*` 元数据）都会被包成自己的 tool，比如 `add_timer`、`watch_channel`、`add_schedule`。只要 creature 在 `tools: [{ name: add_timer, type: trigger }]` 里列出来，LLM 就能自己装。程序里也可以直接 `agent.add_trigger(...)`。
 
-## 所以你能做什么
+## 你能拿它做什么
 
-- **周期性 agent。** 每小时触发一次的 `timer`，可以让 creature 定时刷新自己对文件系统或一组指标的视图。
-- **跨 creature 连线。** `channel` trigger 是 [terrarium](/concepts/multi-agent/terrarium.md)（英文）真正运转起来的机制。
-- **按空闲生成摘要。** 一个在静默两分钟后触发的 `idle`，可以派发 `summarize` sub-agent，再把结果发到日志 channel。
-- **接收外部信号。** `webhook` trigger 能让 creature 接收 CI hook、部署事件或上游产品流量。
-- **自适应 watcher。** 自定义 trigger 的 `fire()` 可以运行一个小型嵌套 agent，不按固定规则，而是靠判断决定*什么时候*唤醒外层 creature。见 [patterns](/concepts/patterns.md)（英文）。
+- **周期性 agent。** 配一个每小时触发的 `timer`，让 creature 定时刷新文件系统视图或一组指标。
+- **跨 creature 连线。** `channel` trigger 是 [terrarium](/zh/concepts/multi-agent/terrarium.md) 真正能跑起来的关键机制。
+- **空闲后总结。** 配一个两分钟静默后触发的 `idle`，让它去调 `summarize` sub-agent，再把结果发到日志 channel。
+- **接外部信号。** `webhook` trigger 能把 creature 变成 CI hook、部署事件或上游产品流量的接收端。
+- **自适应 watcher。** 你可以写一个自定义 trigger，让它的 `fire()` 里再跑一个小 nested agent，由判断来决定**什么时候**唤醒外层 creature，而不是硬编码规则。见 [patterns](/zh/concepts/patterns.md)。
 
-## 不要被它限制
+## 别把它当铁律
 
-一个 creature 可以没有 trigger。也可以只有 trigger，没有 input。框架不会给这些配置排高低，只是都支持。还有一点，trigger 本身也是 Python 对象，所以你可以把一个 agent 放进 trigger 里：让 watcher 先“想一想”要不要触发，而不是照着手写规则执行。这样的模式让“agent 式环境行为”更容易搭起来。
+creature 可以一个 trigger 都没有。也可以只有 trigger，没有 input。框架不偏袒哪种配置，反正都支持。而且因为 trigger 本身也是 Python 对象，你完全可以把 agent 塞进去——让 watcher 先“想一想”，再决定要不要触发，而不是照着固定规则走。这也是 agentic ambient behaviour 比较便宜就能搭出来的原因。
 
 ## 另见
 
-- [Input](/concepts/modules/input.md)（英文）— 用户内容这个特例 trigger。
-- [Channel](/concepts/modules/channel.md)（英文）— 支撑多智能体通信的 trigger 类型。
-- [reference/builtins.md — Triggers](/reference/builtins.md)（英文）— 完整清单。
-- [patterns.md — adaptive watcher](/concepts/patterns.md)（英文）— trigger 里嵌 agent。
+- [Input](/zh/concepts/modules/input.md) —— 面向用户内容的那个特殊 trigger。
+- [Channel](/zh/concepts/modules/channel.md) —— 支撑 multi-agent 通信的 trigger 类型。
+- [reference/builtins.md — Triggers](/zh/reference/builtins.md) —— 完整列表。
+- [patterns.md — adaptive watcher](/zh/concepts/patterns.md) —— trigger 里套 agent 的做法。
