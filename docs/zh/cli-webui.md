@@ -103,7 +103,7 @@ kt search "read rule file" --mode semantic
 
 ```powershell
 # 1. 启动后端
-kt serve start
+kt serve start 
 
 # 2. 看看有没有跑起来
 kt serve status
@@ -111,7 +111,7 @@ kt serve status
 # 3. 看日志
 kt serve logs
 
-# 4. 打开界面
+# 或者直接打开web界面（不用kt serve，适合本地开发场景（？）
 kt web
 ```
 
@@ -154,7 +154,7 @@ kt app
 |----------|--------|
 | 快速试一下功能 | `kt run ... --mode cli` |
 | 想完整交互面板 | `--mode tui` |
-| 长期运行、多人协作 | `kt serve` + `kt web` |
+| 长期运行、多人协作 | `kt serve` |
 | 想桌面应用体验 | `kt app` |
 | 脚本自动化 | `--mode plain` |
 
