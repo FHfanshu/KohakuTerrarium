@@ -15,9 +15,33 @@
 
 ---
 
+## 先说清楚：KT 的 skill 和其他框架的 skill 不是一回事
+
+很多人第一次看到这个名字，会把它当成“可调用的能力单元”——像其他框架那样，一个 skill 对应一个 Python 函数 + JSON Schema。
+
+在 KohakuTerrarium 里，它不是这个意思。
+
+简单对比：
+
+| | 其他框架的 skill | KohakuTerrarium 的 skill |
+|---|---|---|
+| **是什么** | 可调用的能力单元 | 给模型看的说明文档 |
+| **具体内容** | Python 函数 + JSON Schema（name、description、parameters） | `builtin_skills/` 下的 `.md` 文件 |
+| **谁用** | LLM 通过 ReAct / Planning 决定是否调用 | 模型通过 `info` 按需读取，或被框架注入进 prompt |
+| **存哪** | 代码仓库里的 Python 模块 | `src/kohakuterrarium/builtin_skills/tools/*.md`、`subagents/*.md` |
+| **例子** | 一个天气查询函数 | `read.md`：告诉模型 read 工具什么时候用、参数怎么传、有什么限制 |
+
+你可以把 KT 的 skill 理解成：
+- 每个工具或子智能体的 **使用说明书**
+- 一份“技能卡”，告诉模型怎么正确使用某个能力
+
+所以这一篇讲的 skills，都是“文档层”，不是“可调用能力本身”。
+
+---
+
 ## 先把名字理解对
 
-这里的 skill，不要想成“训练出来的一项神秘能力”。
+这里的 skill，不要把它想成“训练出来的一项神秘能力”。
 
 在 KohakuTerrarium 里，它更接近：
 
@@ -53,7 +77,7 @@ src/kohakuterrarium/builtin_skills/
 
 它们是框架默认的说明书来源之一。
 
-例如内建工具和子智能体的文档，就会从这里来。
+例如内建工具和子智能体的文档，就来自这里。
 
 你可以把 `builtin_skills` 理解成：
 
@@ -68,7 +92,7 @@ src/kohakuterrarium/builtin_skills/
 
 `info` 是一个内建工具，用来按名称读取完整说明。
 
-它不只是“查帮助”那么简单。
+它不只是“查帮助”这么简单。
 
 在 `skill_mode: dynamic` 的情况下，`info` 实际上是模型补读完整手册的重要入口。
 
@@ -126,11 +150,11 @@ skill_mode: static
 
 `static` 的思路是：
 
-- 一开始就把完整工具文档直接塞进系统提示词
+- 一开始就把完整工具文档直接放进系统提示词
 
 优点：
 
-- 模型开局就看到全部说明
+- 模型开局就能看到全部说明
 - 少一次按需读取
 
 代价：
@@ -146,7 +170,7 @@ skill_mode: static
 
 不对。
 
-这些理解都不对：
+下面这些理解都不对：
 
 - `skill_mode: static` 才算开启 skills
 - `skill_mode: dynamic` 会关闭某些工具
@@ -176,7 +200,7 @@ skill_mode: static
 
 package 是分发单位；skills 是说明文档层。
 
-package 里可以带工具，工具可以有文档，但这不等于两者是一个概念。
+package 里可以带工具，工具也可以有文档，但这不等于两者是一个概念。
 
 ---
 

@@ -2,7 +2,7 @@
 
 这篇只讲 package 和 `kt install`。
 
-很多人第一次用 KohakuTerrarium，会把下面几件事混在一起：
+很多人第一次用 KohakuTerrarium 时，会把下面几件事混在一起：
 
 - `kt install`
 - `@pkg/path`
@@ -29,7 +29,7 @@
 
 它本质上是一个 **分发和复用单位**。
 
-也就是说，package 解决的问题不是“模型怎么理解工具”，而是：
+也就是说，package 解决的不是“模型怎么理解工具”，而是：
 
 - 一套 creature 配置怎么共享
 - 自定义工具和插件怎么复用
@@ -86,7 +86,7 @@ kt run @kt-defaults/creatures/swe
 你可以把它理解成：
 
 - 先找到安装的 package
-- 再在 package 目录里定位对应 creature / terrarium / 配置路径
+- 再在 package 目录里定位对应的 creature / terrarium / 配置路径
 
 所以它更接近“包资源引用”，不是“能力类型”。
 
@@ -117,12 +117,12 @@ kt run @kt-defaults/creatures/swe
 
 ## 什么时候优先想 package
 
-这些场景优先想 package：
+这些场景更适合先想到 package：
 
 - 想复用别人写好的 creature
 - 想把团队内部的一套 agent 模板发给别人
 - 想共享一组自定义 plugin / tool / preset
-- 想让 `base_config` 可以继承一套稳定基座
+- 想让 `base_config` 继承一套稳定基座
 
 典型例子就是官方的 `kt-defaults`。
 
@@ -200,7 +200,7 @@ kt run @my-pack/creatures/helper
 - **package**：把一套内容发给别人
 - **MCP**：把外部系统能力接进 agent
 
-一个 package 里当然可以包含 MCP 相关配置模板；但那只是“package 带着配置走”，不等于 package 本身变成 MCP。
+一个 package 里当然可以包含 MCP 相关配置模板；但那只是“package 带着配置走”，不等于 package 本身变成了 MCP。
 
 ---
 
@@ -209,9 +209,9 @@ kt run @my-pack/creatures/helper
 也可以这样区分：
 
 - **package**：负责内容分发
-- **skills**：负责把工具/子智能体说明交给模型
+- **skills**：负责把工具 / 子智能体说明交给模型
 
-一个 package 里的自定义 tool 最终当然也可能有自己的说明文档；但那是“这个 package 里包含了某些可被模型读取的文档”，不是“package = skill”。
+一个 package 里的自定义 tool 最终当然也可能有自己的说明文档；但那只是“这个 package 里包含了某些可被模型读取的文档”，不是“package = skill”。
 
 ---
 
