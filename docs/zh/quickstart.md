@@ -4,14 +4,13 @@
 
 ## 环境
 
-| 依赖 | 版本 | 查 | 装 |
+| 依赖 | 版本 | 检查安装 | 去哪里安装 |
 |------|------|----|----|
 | Python | 3.10+ | `python --version` | [python.org](https://python.org) 或 Anaconda |
 | git | 任意 | `git --version` | [git-scm.com](https://git-scm.com) |
 | uv | 建议装 | `uv --version` | `pip install uv` 或 [astral.sh/uv](https://astral.sh/uv) |
-| Node.js | WebUI才要 | `node --version` | [nodejs.org](https://nodejs.org) LTS |
+| Node.js | WebUI需要 | `node --version` | [nodejs.org](https://nodejs.org) LTS |
 
-Python 3.13 有些依赖不兼容，用 3.10-3.12。
 
 ## Windows PATH
 
