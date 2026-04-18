@@ -131,13 +131,13 @@ dir examples/agent-apps/swe_bio_agent/artifacts/audit/*.jsonl
 
 ## 常见问题
 
-**`kt` 命令找不到：**PATH 没配好。Windows 加：
+`kt` 命令找不到：PATH 没配好。Windows 加：
 ```powershell
 $env:PATH += ";$(python -m site --user-base)\Scripts"
 ```
 
-**kt install 超时：**网络问题。确认 git 装了，用代理，或手动 clone。
+kt install 超时：网络问题。确认 git 装了，用代理，或手动 clone。
 
-**Login 失败：**检查 API key、base URL、模型名。
+Login 失败时检查 API key、base URL、模型名。
 
-**找不到 session：**默认在 `~/.kohakuterrarium/sessions/`，用 `kt resume --list` 查。
+找不到 session 时，默认在 ~/.kohakuterrarium/sessions/，用 `kt resume --list` 查。
