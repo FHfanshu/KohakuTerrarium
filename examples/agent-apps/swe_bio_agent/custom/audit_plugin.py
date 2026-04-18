@@ -9,6 +9,7 @@ from typing import Any
 
 from kohakuterrarium.modules.plugin.base import BasePlugin, PluginContext
 from kohakuterrarium.modules.tool.base import resolve_tool_path
+
 DEFAULT_RULE_FILES = ["AGENTS.md", "CLAUDE.md", "CONTRIBUTING.md", "README.md"]
 
 

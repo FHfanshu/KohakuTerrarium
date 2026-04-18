@@ -161,9 +161,9 @@ class RulesGuardPlugin(BasePlugin):
                 agent = getattr(context, "agent", None)
                 session_store = getattr(agent, "session_store", None)
                 if session_store is not None:
-                    session_store.state[
-                        f"plugin:{self.name}:read_rule_files"
-                    ] = sorted(self._read_rules)
+                    session_store.state[f"plugin:{self.name}:read_rule_files"] = sorted(
+                        self._read_rules
+                    )
                 logger.info("Rule file read completed", path=str(candidate))
         return None
 
