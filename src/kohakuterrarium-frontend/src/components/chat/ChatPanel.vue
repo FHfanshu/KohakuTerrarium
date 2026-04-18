@@ -122,7 +122,7 @@
               <span class="i-carbon-image text-xs" />
             </button>
           </div>
-          <textarea ref="inputEl" v-model="inputText" rows="1" class="flex-1 bg-transparent border-none outline-none text-sm text-warm-800 dark:text-warm-200 placeholder-warm-400 dark:placeholder-warm-500 resize-none max-h-32 leading-relaxed py-1 min-w-0" style="min-height: 2em" :placeholder="inputPlaceholder" @keydown="onInputKeydown" @input="autoResize" />
+          <textarea ref="inputEl" v-model="inputText" rows="1" class="flex-1 bg-transparent border-none outline-none text-sm text-warm-800 dark:text-warm-200 placeholder-warm-400 dark:placeholder-warm-500 resize-none max-h-32 leading-relaxed py-1 min-w-0" style="min-height: 2em" :placeholder="inputPlaceholder" @keydown="onInputKeydown" @input="autoResize" @paste="onInputPaste" />
           <div class="flex items-center gap-1 shrink-0 mb-0.5">
             <button class="w-7 h-7 flex items-center justify-center rounded-md transition-colors text-warm-400 hover:text-iolite dark:hover:text-iolite-light hover:bg-iolite/10" :title="t('chat.compactContext')" :aria-label="t('chat.compactContext')" @click="triggerCompact">
               <span class="i-carbon-collapse-all text-xs" />
@@ -463,6 +463,34 @@ async function onFileChange(e, kind = "file") {
   const files = Array.from(e.target.files || [])
   for (const file of files) _pushAttachment(file, kind)
   e.target.value = ""
+}
+
+async function onInputPaste(e) {
+  if (props.readOnly) return
+  const clipboardItems = Array.from(e.clipboardData?.items || [])
+  const imageItems = clipboardItems.filter((item) => item.kind === "file" && item.type.startsWith("image/"))
+  if (!imageItems.length) return
+
+  let attachedCount = 0
+  for (const item of imageItems) {
+    const file = item.getAsFile()
+    if (!file) continue
+    const extension = file.type.split("/")[1] || "png"
+    const name = file.name && file.name.trim() ? file.name : `pasted-image-${Date.now()}.${extension}`
+    const pastedFile =
+      file.name === name
+        ? file
+        : new File([file], name, {
+            type: file.type,
+            lastModified: file.lastModified || Date.now(),
+          })
+    if (_pushAttachment(pastedFile, "image")) attachedCount++
+  }
+
+  if (attachedCount > 0) {
+    e.preventDefault()
+    ElMessage.success(t("chat.pastedImage", { count: attachedCount }))
+  }
 }
 
 // ── Drag-and-drop: routes dropped files through the same validation. ──

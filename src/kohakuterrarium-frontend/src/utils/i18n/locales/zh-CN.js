@@ -226,6 +226,7 @@ export default {
   "chat.clearContext": "清除上下文",
   "chat.stopGeneration": "停止生成",
   "chat.sendMessage": "发送消息",
+  "chat.pastedImage": ({ count }) => `已添加 ${count} 张粘贴图片。`,
   "chat.clearConfirm": "要清除对话上下文吗？聊天记录仍会保留在会话中。",
   "chat.cumulativeInputTokens": "累计输入 Token",
   "chat.cachedInputTokens": "缓存输入 Token",

@@ -267,6 +267,7 @@ export default {
   "chat.attachmentTooLarge": ({ name, size, limit }) =>
     `${name} is ${size}, over the ${limit} attachment limit.`,
   "chat.attachmentNotImage": ({ name }) => `${name} is not a recognised image.`,
+  "chat.pastedImage": ({ count }) => `Attached ${count} pasted image${count === 1 ? "" : "s"}.`,
   "chat.disconnected": "Disconnected — reconnecting…",
   "chat.dropToAttach": "Drop files to attach",
   "chat.queueShowMore": ({ count }) => `+${count} more queued`,

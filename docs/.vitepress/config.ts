@@ -7,7 +7,7 @@ export default defineConfig({
   base: '/KohakuTerrarium/',
   
   themeConfig: {
-    logo: '/logo.svg',
+    logo: '/kohaku-icon.png',
     siteTitle: 'KT Docs',
     
     nav: [
@@ -282,7 +282,7 @@ export default defineConfig({
   ignoreDeadLinks: true,
   
   head: [
-    ['link', { rel: 'icon', href: '/favicon.ico' }],
+    ['link', { rel: 'icon', href: '/KohakuTerrarium/kohaku-icon.png', type: 'image/png' }],
     ['meta', { name: 'theme-color', content: '#42b983' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:title', content: 'KohakuTerrarium Community Docs' }],
