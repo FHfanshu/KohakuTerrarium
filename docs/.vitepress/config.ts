@@ -203,6 +203,7 @@ export default defineConfig({
   
   // Build options
   cleanUrls: true,
+  ignoreDeadLinks: true,
   
   // Head elements
   head: [
