@@ -47,22 +47,22 @@ export default defineConfig({
           text: '指南',
           collapsed: true,
           items: [
-            { text: '总览', link: '/zh/guides/README' },
-            { text: '快速上手', link: '/zh/guides/getting-started' },
-            { text: '智能体', link: '/zh/guides/creatures' },
-            { text: '会话', link: '/zh/guides/sessions' },
-            { text: '配置', link: '/zh/guides/configuration' },
-            { text: '插件', link: '/zh/guides/plugins' },
-            { text: 'MCP', link: '/zh/guides/mcp' },
-            { text: '包', link: '/zh/guides/packages' },
-            { text: '自定义模块', link: '/zh/guides/custom-modules' },
-            { text: '服务部署', link: '/zh/guides/serving' },
-            { text: '记忆', link: '/zh/guides/memory' },
-            { text: '组合', link: '/zh/guides/composition' },
-            { text: '容器', link: '/zh/guides/terrariums' },
-            { text: '以代码方式使用', link: '/zh/guides/programmatic-usage' },
-            { text: '前端布局', link: '/zh/guides/frontend-layout' },
-            { text: '示例', link: '/zh/guides/examples' }
+            { text: '总览', link: '/zh/guides-README' },
+            { text: '快速上手', link: '/zh/getting-started' },
+            { text: '智能体', link: '/zh/creatures' },
+            { text: '会话', link: '/zh/sessions' },
+            { text: '配置', link: '/zh/configuration' },
+            { text: '插件', link: '/zh/plugins' },
+            { text: 'MCP', link: '/zh/mcp' },
+            { text: '包', link: '/zh/packages' },
+            { text: '自定义模块', link: '/zh/custom-modules' },
+            { text: '服务部署', link: '/zh/serving' },
+            { text: '记忆', link: '/zh/memory' },
+            { text: '组合', link: '/zh/composition' },
+            { text: '容器', link: '/zh/terrariums' },
+            { text: '以代码方式使用', link: '/zh/programmatic-usage' },
+            { text: '前端布局', link: '/zh/frontend-layout' },
+            { text: '示例', link: '/zh/examples' }
           ]
         },
         {
@@ -246,7 +246,7 @@ export default defineConfig({
         nav: [
           { text: '首页', link: '/zh/' },
           { text: '英文', link: '/' },
-          { text: '指南', link: '/zh/guides/' },
+          { text: '指南', link: '/zh/guides-README' },
           { text: '官方仓库', link: 'https://github.com/Kohaku-Lab/KohakuTerrarium' },
           { text: '第三方文档源码', link: 'https://github.com/FHfanshu/KohakuTerrarium' }
         ],
