@@ -10,15 +10,15 @@ export default defineConfig({
   // Theme config
   themeConfig: {
     logo: '/banner.png',
-    siteTitle: 'KohakuTerrarium 中文文档',
+    siteTitle: 'KohakuTerrarium',
     
-    // Navigation
+    // Navigation - 指向官方仓库
     nav: [
       { text: 'Home', link: '/' },
       { text: '中文', link: '/zh/' },
       { text: 'Guides', link: '/guides/' },
       { text: 'Reference', link: '/reference/' },
-      { text: 'GitHub', link: 'https://github.com/FHfanshu/KohakuTerrarium' }
+      { text: '官方仓库', link: 'https://github.com/Kohaku-Lab/KohakuTerrarium' }
     ],
     
     // Sidebar - organized by sections
@@ -113,9 +113,9 @@ export default defineConfig({
       ]
     },
     
-    // Social links
+    // Social links - 指向官方仓库
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/FHfanshu/KohakuTerrarium' }
+      { icon: 'github', link: 'https://github.com/Kohaku-Lab/KohakuTerrarium' }
     ],
     
     // Search - local search
@@ -123,16 +123,16 @@ export default defineConfig({
       provider: 'local'
     },
     
-    // Footer
+    // Footer - 正确声明版权
     footer: {
-      message: '中文文档由第三方维护者 FHfanshu 编写，非官方文档。',
-      copyright: 'Copyright © 2024-present FHfanshu'
+      message: '框架基于 MIT License 发布。中文文档由第三方维护者 FHfanshu 编写。',
+      copyright: '框架 Copyright © Kohaku Lab | 中文文档 © 2024 FHfanshu'
     },
     
-    // Edit link
+    // Edit link - 中文文档编辑指向你的 fork
     editLink: {
       pattern: 'https://github.com/FHfanshu/KohakuTerrarium/edit/main/docs/:path',
-      text: 'Edit this page on GitHub'
+      text: '编辑此页 (中文文档)'
     }
   },
   
@@ -160,15 +160,16 @@ export default defineConfig({
           { text: '首页', link: '/zh/' },
           { text: '英文', link: '/' },
           { text: '指南', link: '/zh/quickstart' },
-          { text: 'GitHub', link: 'https://github.com/FHfanshu/KohakuTerrarium' }
+          { text: '官方仓库', link: 'https://github.com/Kohaku-Lab/KohakuTerrarium' },
+          { text: '文档源码', link: 'https://github.com/FHfanshu/KohakuTerrarium' }
         ],
         editLink: {
           pattern: 'https://github.com/FHfanshu/KohakuTerrarium/edit/main/docs/:path',
-          text: '在 GitHub 上编辑此页'
+          text: '编辑此页'
         },
         footer: {
-          message: '中文文档由第三方维护者编写，非官方文档',
-          copyright: '版权所有 © 2024至今 FHfanshu'
+          message: '框架基于 MIT License 发布。本站中文文档由第三方维护者编写，非官方文档。',
+          copyright: '框架 © Kohaku Lab | 中文文档 © 2024 FHfanshu'
         },
         docFooter: {
           prev: '上一页',
@@ -196,7 +197,7 @@ export default defineConfig({
     ['link', { rel: 'icon', href: '/banner.png', type: 'image/png' }],
     ['meta', { name: 'theme-color', content: '#42b983' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:title', content: 'KohakuTerrarium | Build Real Agents' }],
-    ['meta', { property: 'og:description', content: 'A framework for building real agents, not just LLM wrappers' }]
+    ['meta', { property: 'og:title', content: 'KohakuTerrarium 中文文档' }],
+    ['meta', { property: 'og:description', content: 'KohakuTerrarium 框架的中文入门指南（第三方维护）' }]
   ]
 })
