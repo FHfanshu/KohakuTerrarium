@@ -18,6 +18,10 @@ subagents:
     type: custom
     module: ./custom/humanizer_docs.py
     config: HUMANIZER_DOCS_CONFIG
+  - name: doc_reviewer
+    type: custom
+    module: ./custom/doc_reviewer.py
+    config: DOC_REVIEWER_CONFIG
 
 plugins:
   - name: rules_guard
