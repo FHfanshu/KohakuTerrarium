@@ -9,8 +9,8 @@ export default defineConfig({
   
   // Theme config
   themeConfig: {
-    logo: '/logo.svg',
-    siteTitle: 'KohakuTerrarium',
+    logo: '/banner.png',
+    siteTitle: 'KohakuTerrarium 中文文档',
     
     // Navigation
     nav: [
@@ -18,7 +18,7 @@ export default defineConfig({
       { text: '中文', link: '/zh/' },
       { text: 'Guides', link: '/guides/' },
       { text: 'Reference', link: '/reference/' },
-      { text: 'GitHub', link: 'https://github.com/Kohaku-Lab/KohakuTerrarium' }
+      { text: 'GitHub', link: 'https://github.com/FHfanshu/KohakuTerrarium' }
     ],
     
     // Sidebar - organized by sections
@@ -115,7 +115,7 @@ export default defineConfig({
     
     // Social links
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/Kohaku-Lab/KohakuTerrarium' }
+      { icon: 'github', link: 'https://github.com/FHfanshu/KohakuTerrarium' }
     ],
     
     // Search - local search
@@ -125,13 +125,13 @@ export default defineConfig({
     
     // Footer
     footer: {
-      message: 'Released under the MIT License.',
-      copyright: 'Copyright © 2024-present Kohaku Lab'
+      message: '中文文档由第三方维护者 FHfanshu 编写，非官方文档。',
+      copyright: 'Copyright © 2024-present FHfanshu'
     },
     
     // Edit link
     editLink: {
-      pattern: 'https://github.com/Kohaku-Lab/KohakuTerrarium/edit/main/docs/:path',
+      pattern: 'https://github.com/FHfanshu/KohakuTerrarium/edit/main/docs/:path',
       text: 'Edit this page on GitHub'
     }
   },
@@ -160,15 +160,15 @@ export default defineConfig({
           { text: '首页', link: '/zh/' },
           { text: '英文', link: '/' },
           { text: '指南', link: '/zh/quickstart' },
-          { text: 'GitHub', link: 'https://github.com/Kohaku-Lab/KohakuTerrarium' }
+          { text: 'GitHub', link: 'https://github.com/FHfanshu/KohakuTerrarium' }
         ],
         editLink: {
-          pattern: 'https://github.com/Kohaku-Lab/KohakuTerrarium/edit/main/docs/:path',
+          pattern: 'https://github.com/FHfanshu/KohakuTerrarium/edit/main/docs/:path',
           text: '在 GitHub 上编辑此页'
         },
         footer: {
-          message: '基于 MIT 许可发布',
-          copyright: '版权所有 © 2024至今 Kohaku Lab'
+          message: '中文文档由第三方维护者编写，非官方文档',
+          copyright: '版权所有 © 2024至今 FHfanshu'
         },
         docFooter: {
           prev: '上一页',
@@ -193,7 +193,7 @@ export default defineConfig({
   
   // Head elements
   head: [
-    ['link', { rel: 'icon', href: '/logo.svg', type: 'image/svg+xml' }],
+    ['link', { rel: 'icon', href: '/banner.png', type: 'image/png' }],
     ['meta', { name: 'theme-color', content: '#42b983' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:title', content: 'KohakuTerrarium | Build Real Agents' }],
