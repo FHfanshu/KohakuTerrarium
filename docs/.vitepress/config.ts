@@ -25,16 +25,31 @@ export default defineConfig({
     sidebar: {
       '/zh/': [
         {
-          text: '入门指南',
+          text: '先看这几篇',
           collapsed: false,
           items: [
             { text: '目录', link: '/zh/' },
             { text: '安装与快速开始', link: '/zh/quickstart' },
-            { text: 'CLI 与 WebUI', link: '/zh/cli-webui' },
+            { text: '模型与预设配置', link: '/zh/llm-profiles' },
+            { text: 'CLI 与 WebUI 使用', link: '/zh/cli-webui' }
+          ]
+        },
+        {
+          text: '用到再看',
+          collapsed: true,
+          items: [
             { text: '配置文件写法', link: '/zh/configuration' },
-            { text: '定制 SWE 智能体', link: '/zh/swe-bio-agent' },
             { text: '会话、审计与排错', link: '/zh/audit-and-sessions' },
-            { text: '模型与预设配置', link: '/zh/llm-profiles' }
+            { text: '定制 SWE 智能体', link: '/zh/swe-bio-agent' }
+          ]
+        },
+        {
+          text: '进阶专题',
+          collapsed: true,
+          items: [
+            { text: 'MCP 进阶', link: '/zh/mcp-advanced' },
+            { text: 'kt install 与 package 进阶', link: '/zh/packages-and-install-advanced' },
+            { text: 'skills、info 与 skill_mode 进阶', link: '/zh/skills-and-skill-mode-advanced' }
           ]
         }
       ],
