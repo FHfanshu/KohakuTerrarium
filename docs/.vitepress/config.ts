@@ -25,22 +25,109 @@ export default defineConfig({
     sidebar: {
       '/zh/': [
         {
-          text: '先看这几篇',
+          text: '入门',
           collapsed: false,
           items: [
             { text: '目录', link: '/zh/README' },
             { text: '安装与快速开始', link: '/zh/quickstart' },
             { text: '模型与预设配置', link: '/zh/llm-profiles' },
-            { text: 'CLI 与 WebUI 使用', link: '/zh/cli-webui' }
-          ]
-        },
-        {
-          text: '用到再看',
-          collapsed: true,
-          items: [
+            { text: 'CLI 与 WebUI 使用', link: '/zh/cli-webui' },
             { text: '配置文件写法', link: '/zh/configuration' },
             { text: '会话、审计与排错', link: '/zh/audit-and-sessions' },
             { text: '定制 SWE 智能体', link: '/zh/swe-bio-agent' }
+          ]
+        },
+        {
+          text: '教程',
+          collapsed: true,
+          items: [
+            { text: '总览', link: '/zh/tutorials/README' },
+            { text: '第一个 Creature', link: '/zh/tutorials/first-creature' },
+            { text: '第一个 Terrarium', link: '/zh/tutorials/first-terrarium' },
+            { text: '第一个 Python 嵌入示例', link: '/zh/tutorials/first-python-embedding' },
+            { text: '第一个自定义 Tool', link: '/zh/tutorials/first-custom-tool' },
+            { text: '第一个 Plugin', link: '/zh/tutorials/first-plugin' }
+          ]
+        },
+        {
+          text: '指南',
+          collapsed: true,
+          items: [
+            { text: '总览', link: '/zh/guides/README' },
+            { text: '快速上手', link: '/zh/guides/getting-started' },
+            { text: 'Creatures', link: '/zh/guides/creatures' },
+            { text: 'Sessions', link: '/zh/guides/sessions' },
+            { text: 'Configuration', link: '/zh/guides/configuration' },
+            { text: 'Plugins', link: '/zh/guides/plugins' },
+            { text: 'MCP', link: '/zh/guides/mcp' },
+            { text: 'Packages', link: '/zh/guides/packages' },
+            { text: 'Custom Modules', link: '/zh/guides/custom-modules' },
+            { text: 'Serving', link: '/zh/guides/serving' },
+            { text: 'Memory', link: '/zh/guides/memory' },
+            { text: 'Composition', link: '/zh/guides/composition' },
+            { text: 'Terrariums', link: '/zh/guides/terrariums' },
+            { text: 'Programmatic Usage', link: '/zh/guides/programmatic-usage' },
+            { text: 'Frontend Layout', link: '/zh/guides/frontend-layout' },
+            { text: 'Examples', link: '/zh/guides/examples' }
+          ]
+        },
+        {
+          text: '概念',
+          collapsed: true,
+          items: [
+            { text: '总览', link: '/zh/concepts/README' },
+            { text: 'Boundaries', link: '/zh/concepts/boundaries' },
+            { text: 'Glossary', link: '/zh/concepts/glossary' },
+            { text: 'Patterns', link: '/zh/concepts/patterns' },
+            { text: 'What is an Agent', link: '/zh/concepts/foundations/what-is-an-agent' },
+            { text: 'Why KohakuTerrarium', link: '/zh/concepts/foundations/why-kohakuterrarium' },
+            { text: 'Composing an Agent', link: '/zh/concepts/foundations/composing-an-agent' },
+            { text: 'Modules', link: '/zh/concepts/modules/README' },
+            { text: 'Controller', link: '/zh/concepts/modules/controller' },
+            { text: 'Tool', link: '/zh/concepts/modules/tool' },
+            { text: 'Sub-Agent', link: '/zh/concepts/modules/sub-agent' },
+            { text: 'Channel', link: '/zh/concepts/modules/channel' },
+            { text: 'Trigger', link: '/zh/concepts/modules/trigger' },
+            { text: 'Plugin', link: '/zh/concepts/modules/plugin' },
+            { text: 'Session and Environment', link: '/zh/concepts/modules/session-and-environment' },
+            { text: 'Memory and Compaction', link: '/zh/concepts/modules/memory-and-compaction' },
+            { text: 'Input', link: '/zh/concepts/modules/input' },
+            { text: 'Output', link: '/zh/concepts/modules/output' },
+            { text: 'Multi-Agent', link: '/zh/concepts/multi-agent/README' },
+            { text: 'Terrarium', link: '/zh/concepts/multi-agent/terrarium' },
+            { text: 'Root Agent', link: '/zh/concepts/multi-agent/root-agent' },
+            { text: 'Python Native', link: '/zh/concepts/python-native/README' },
+            { text: 'Agent as Python Object', link: '/zh/concepts/python-native/agent-as-python-object' },
+            { text: 'Composition Algebra', link: '/zh/concepts/python-native/composition-algebra' },
+            { text: '实现说明', link: '/zh/concepts/impl-notes/README' },
+            { text: 'Prompt Aggregation', link: '/zh/concepts/impl-notes/prompt-aggregation' },
+            { text: 'Session Persistence', link: '/zh/concepts/impl-notes/session-persistence' },
+            { text: 'Non-Blocking Compaction', link: '/zh/concepts/impl-notes/non-blocking-compaction' },
+            { text: 'Stream Parser', link: '/zh/concepts/impl-notes/stream-parser' }
+          ]
+        },
+        {
+          text: '参考',
+          collapsed: true,
+          items: [
+            { text: '总览', link: '/zh/reference/README' },
+            { text: 'CLI', link: '/zh/reference/cli' },
+            { text: 'Builtins', link: '/zh/reference/builtins' },
+            { text: 'Configuration', link: '/zh/reference/configuration' },
+            { text: 'Python API', link: '/zh/reference/python' },
+            { text: 'HTTP API', link: '/zh/reference/http' },
+            { text: 'Plugin Hooks', link: '/zh/reference/plugin-hooks' }
+          ]
+        },
+        {
+          text: '开发',
+          collapsed: true,
+          items: [
+            { text: '总览', link: '/zh/dev/README' },
+            { text: 'Internals', link: '/zh/dev/internals' },
+            { text: 'Testing', link: '/zh/dev/testing' },
+            { text: 'Dependency Graph', link: '/zh/dev/dependency-graph' },
+            { text: 'Frontend', link: '/zh/dev/frontend' }
           ]
         },
         {
