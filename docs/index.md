@@ -3,11 +3,11 @@ layout: home
 
 hero:
   name: KohakuTerrarium
-  text: Build Real Agents
-  tagline: A framework for building real agents, not just LLM wrappers
+  text: Community Documentation Site
+  tagline: Unofficial, community-maintained docs for a framework for building real agents
   image:
     src: /logo.svg
-    alt: KohakuTerrarium
+    alt: KohakuTerrarium community docs
   actions:
     - theme: brand
       text: Get Started
@@ -16,10 +16,13 @@ hero:
       text: 中文文档
       link: /zh/
     - theme: alt
-      text: View on GitHub
+      text: Official Repository
       link: https://github.com/Kohaku-Lab/KohakuTerrarium
 
 features:
+  - icon: 📌
+    title: Non-official site
+    details: This site is maintained by a third-party contributor. If anything here conflicts with upstream docs or source code, follow the official repository.
   - icon: 🤖
     title: Creature-First Design
     details: A creature is a standalone agent with its own controller, tools, sub-agents, triggers, memory, and I/O. Run it alone, inherit from another, or package and share.
@@ -35,7 +38,4 @@ features:
   - icon: 🛡️
     title: Plugins & Guardrails
     details: Intercept tool calls, enforce rules, and audit actions. Build safe agents that respect project conventions.
-  - icon: 🎨
-    title: Multiple Interfaces
-    details: CLI, TUI, WebUI, and desktop app. Choose the interface that fits your workflow.
 ---

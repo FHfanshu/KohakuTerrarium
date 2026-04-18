@@ -176,7 +176,7 @@ Prefer sub-agents (vertical delegation inside one creature) when a parent can do
 - **Root can't see what creatures are doing.** Root sees channels it listens to and `report_to_root`. Add `report_to_root` to relevant `can_send` lists.
 - **Slow startup with many creatures.** Each creature starts its own LLM provider and trigger manager; expect roughly linear startup time.
 
-Planned improvements (automatic round-output routing, root lifecycle observation, dynamic terrarium management) are tracked in [ROADMAP](../../ROADMAP.md).
+Planned improvements (automatic round-output routing, root lifecycle observation, dynamic terrarium management) are tracked in [ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md).
 
 ## See also
 

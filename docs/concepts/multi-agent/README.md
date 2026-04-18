@@ -61,7 +61,7 @@ a topology.
 The terrarium layer is still rough. Its current weakness: progress
 depends on creatures routing their own outputs correctly, and if a
 model misses an instruction the terrarium can stall. The
-[ROADMAP](../../../ROADMAP.md) describes the planned fixes
+[ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md) describes the planned fixes
 (configurable round routing, root lifecycle observation, dynamic
 management). This is experimental territory. Use sub-agents when you
 can.

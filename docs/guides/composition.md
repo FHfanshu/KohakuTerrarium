@@ -178,4 +178,4 @@ Pick composition when:
 - [Programmatic Usage](programmatic-usage.md) — the underlying `Agent` / `AgentSession` API.
 - [Concepts / composition algebra](../concepts/python-native/composition-algebra.md) — design rationale.
 - [Reference / Python API](../reference/python.md) — `compose.core`, `compose.agent`, operator signatures.
-- [examples/code/](../../examples/code/) — `review_loop.py`, `ensemble_voting.py`, `debate_arena.py`, `smart_router.py`, `pipeline_transforms.py`.
+- [examples/code/](https://github.com/Kohaku-Lab/KohakuTerrarium/tree/main/examples/code) — `review_loop.py`, `ensemble_voting.py`, `debate_arena.py`, `smart_router.py`, `pipeline_transforms.py`.

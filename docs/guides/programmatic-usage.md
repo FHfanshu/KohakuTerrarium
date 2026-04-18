@@ -238,4 +238,4 @@ assert env.llm.call_count == 2
 - [Composition](composition.md) — Python-side multi-agent pipelines.
 - [Custom Modules](custom-modules.md) — write the tools/inputs/outputs you wire in.
 - [Reference / Python API](../reference/python.md) — exhaustive signatures.
-- [examples/code/](../../examples/code/) — runnable scripts for each pattern.
+- [examples/code/](https://github.com/Kohaku-Lab/KohakuTerrarium/tree/main/examples/code) — runnable scripts for each pattern.

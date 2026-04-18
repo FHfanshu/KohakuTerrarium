@@ -106,7 +106,7 @@ progress depends on each creature routing its own output to the right
 channel. If a model ignores the instruction — which happens — the
 team can stall.
 
-The [ROADMAP](../../../ROADMAP.md) plans for:
+The [ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md) plans for:
 
 - **Configurable automatic round-output routing** — let users assign
   a channel that receives a creature's latest message for a round
@@ -134,4 +134,4 @@ across different runs — terrariums do not taint creatures.
 - [Multi-agent overview](README.md) — vertical vs horizontal.
 - [Root agent](root-agent.md) — the user-facing creature outside the team.
 - [Channel](../modules/channel.md) — the primitive terrariums are made of.
-- [ROADMAP](../../../ROADMAP.md) — where terrariums are going.
+- [ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md) — where terrariums are going.

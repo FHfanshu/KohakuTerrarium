@@ -139,7 +139,7 @@ Auto-routing (a configurable "creature's last message always goes to
 channel X"), root lifecycle observation, and dynamic creature
 management are on the roadmap. Until they land, prefer explicit
 prompting or a root creature for anything important. The full picture
-is in the [ROADMAP](../../ROADMAP.md) terrarium section.
+is in the [ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md) terrarium section.
 
 ## What you learned
 

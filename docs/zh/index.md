@@ -3,23 +3,26 @@ layout: home
 
 hero:
   name: KohakuTerrarium
-  text: 构建真正的智能体
-  tagline: 不是 LLM 包装器，而是完整的智能体框架
+  text: 非官方中文文档站
+  tagline: 这是第三方维护的社区中文文档，不代表官方立场
   image:
     src: /logo.svg
-    alt: KohakuTerrarium
+    alt: KohakuTerrarium community docs
   actions:
     - theme: brand
       text: 快速开始
       link: /zh/quickstart
     - theme: alt
-      text: 英文文档
-      link: /
-    - theme: alt
-      text: GitHub
+      text: 官方仓库
       link: https://github.com/Kohaku-Lab/KohakuTerrarium
+    - theme: alt
+      text: 第三方文档源码
+      link: https://github.com/FHfanshu/KohakuTerrarium
 
 features:
+  - icon: 📌
+    title: 先看这个说明
+    details: 本站是社区维护的第三方中文文档。如果内容与官方英文文档或源码行为不一致，请以官方仓库最新内容为准。
   - icon: 🤖
     title: 以 Creature 为核心
     details: Creature 是独立运行的智能体，有自己的控制器、工具、子智能体、触发器、记忆和 I/O。单独跑、继承别人、打包分享都可以。
@@ -35,7 +38,4 @@ features:
   - icon: 🛡️
     title: 插件与约束
     details: 拦截工具调用、强制规则、审计操作。构建安全、遵守项目约定的智能体。
-  - icon: 🎨
-    title: 多种交互界面
-    details: CLI、TUI、WebUI、桌面应用。选适合你的。
 ---

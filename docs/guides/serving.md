@@ -115,4 +115,4 @@ Full endpoint list: [Reference / HTTP API](../reference/http.md).
 - [Frontend Layout](frontend-layout.md) — what panels and presets are available in the UI.
 - [Reference / HTTP API](../reference/http.md) — REST + WebSocket endpoints.
 - [Reference / CLI](../reference/cli.md) — `kt web`, `kt app`, `kt serve` flags.
-- [ROADMAP](../../ROADMAP.md) — planned daemon-backed workflows.
+- [ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md) — planned daemon-backed workflows.

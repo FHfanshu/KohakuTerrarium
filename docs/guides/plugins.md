@@ -205,7 +205,7 @@ assert any("Blocked" in act[1] for act in env.output.activities)
 
 ## See also
 
-- [examples/plugins/](../../examples/plugins/) — one example per hook category.
+- [examples/plugins/](https://github.com/Kohaku-Lab/KohakuTerrarium/tree/main/examples/plugins) — one example per hook category.
 - [Custom Modules](custom-modules.md) — writing the modules plugins hook around.
 - [Reference / plugin hooks](../reference/plugin-hooks.md) — every hook signature.
 - [Concepts / plugin](../concepts/modules/plugin.md) — design rationale.

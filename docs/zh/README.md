@@ -14,7 +14,13 @@
 
 ## 先说明一件事
 
-这套中文文档里提到的 `swe_bio_agent` 是一个**本地扩展示例**，不是官方远端仓库当前默认自带的内容。
+这套中文文档是 **第三方维护的社区版本**，不是官方文档站。
+
+- 官方仓库：<https://github.com/Kohaku-Lab/KohakuTerrarium>
+- 本站源码：<https://github.com/FHfanshu/KohakuTerrarium>
+- 如果本文内容和官方英文文档、源码行为不一致，请以官方仓库最新内容为准
+
+另外，文档里提到的 `swe_bio_agent` 是一个**本地扩展示例**，不是官方远端仓库当前默认自带的内容。
 
 - 默认可直接使用的是 `@kt-defaults/creatures/swe`
 - `swe_bio_agent` 适合当作"如何在默认 `swe` 上继续定制"的参考
@@ -62,6 +68,6 @@
 
 中文文档覆盖入门内容。想看更多，这里有进阶：
 
-- [Concepts](/concepts/) — 核心概念和架构原理
-- [Guides](/guides/) — 更深入的使用指南
-- [Reference](/reference/) — CLI 和 API 参考
+- [Concepts](/concepts/README.md) — 核心概念和架构原理
+- [Guides](/guides/README.md) — 更深入的使用指南
+- [Reference](/reference/README.md) — CLI 和 API 参考

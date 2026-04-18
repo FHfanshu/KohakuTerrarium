@@ -230,13 +230,13 @@ python -m isort src/ tests/
 ```
 
 Ruff config lives in `pyproject.toml`. The `[dev]` extra installs all
-three. Import ordering follows [CLAUDE.md](../../CLAUDE.md) — built-in,
+three. Import ordering follows [CLAUDE.md](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/CLAUDE.md) — built-in,
 third-party, then `kohakuterrarium.*`, alphabetical within groups,
 `import` before `from`, shorter dotted paths before longer.
 
 ## Post-impl checklist
 
-Cross-check [CLAUDE.md](../../CLAUDE.md) §Post-impl tasks:
+Cross-check [CLAUDE.md](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/CLAUDE.md) §Post-impl tasks:
 
 1. No in-function imports (except optional deps or deliberate lazy
    loading for init-order issues).

@@ -185,7 +185,7 @@ plugins:
       deny_patterns: ["rm -rf", "dd if="]
 ```
 
-See [Plugins](plugins.md) for writing the plugin class and [examples/plugins/tool_guard.py](../../examples/plugins/tool_guard.py) for a reference implementation.
+See [Plugins](plugins.md) for writing the plugin class and [examples/plugins/tool_guard.py](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/examples/plugins/tool_guard.py) for a reference implementation.
 
 ## How do I register MCP servers?
 

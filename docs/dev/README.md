@@ -4,8 +4,8 @@ For contributors working on the framework itself. Not for users.
 
 ## Contributing workflow
 
-See the top-level [CONTRIBUTING.md](../../CONTRIBUTING.md) for setup,
-branch conventions, and PR flow. Read [CLAUDE.md](../../CLAUDE.md)
+See the top-level [CONTRIBUTING.md](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/CONTRIBUTING.md) for setup,
+branch conventions, and PR flow. Read [CLAUDE.md](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/CLAUDE.md)
 before touching code — it encodes the architecture rules (Creature vs
 Terrarium vs Root, controller-as-orchestrator, non-blocking tool
 dispatch) and the style conventions (modern type hints, no in-function
@@ -24,7 +24,7 @@ imports, logging instead of `print`).
 
 ## When to read what
 
-- Just landed? Start with [CONTRIBUTING.md](../../CONTRIBUTING.md),
+- Just landed? Start with [CONTRIBUTING.md](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/CONTRIBUTING.md),
   then skim [internals.md](internals.md) top-to-bottom.
 - Adding a tool, trigger, or module? Read the relevant concept doc
   under [../concepts/modules/](../concepts/modules/README.md) first.

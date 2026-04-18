@@ -53,7 +53,7 @@ Per-tier detail:
 - **`cli/`, `api/`** — top layer. One is an argparse entry point, the
   other a FastAPI app. Both consume `serving/`.
 
-See [`src/kohakuterrarium/README.md`](../../src/kohakuterrarium/README.md)
+See [`src/kohakuterrarium/README.md`](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/src/kohakuterrarium/README.md)
 for the ASCII dependency flow used as the source of truth.
 
 ## Why these rules
@@ -170,9 +170,9 @@ over with an in-function import. In-function imports are discouraged
 
 ## See also
 
-- [CLAUDE.md §Import Rules](../../CLAUDE.md) — the conventions this
+- [CLAUDE.md §Import Rules](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/CLAUDE.md) — the conventions this
   discipline enforces.
-- [`src/kohakuterrarium/README.md`](../../src/kohakuterrarium/README.md) —
+- [`src/kohakuterrarium/README.md`](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/src/kohakuterrarium/README.md) —
   the canonical ASCII flow diagram.
 - [internals.md](internals.md) — flow-by-flow map of what each
   subpackage is for.

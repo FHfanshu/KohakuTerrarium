@@ -132,7 +132,7 @@ collide with the `read` file-reader tool.
 A pure wiring layer that runs several creatures together. No LLM, no
 decisions — just a runtime and a set of shared channels. Creatures
 don't know they're in a terrarium; they still work standalone. Rough
-at the edges today; see the [roadmap](../../ROADMAP.md). Full:
+at the edges today; see the [roadmap](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md). Full:
 [terrarium](multi-agent/terrarium.md).
 
 ## Root agent

@@ -9,8 +9,8 @@ export default defineConfig({
   
   // Theme config
   themeConfig: {
-    logo: '/banner.png',
-    siteTitle: 'KohakuTerrarium',
+    logo: '/logo.svg',
+    siteTitle: 'KohakuTerrarium Community Docs',
     
     // Navigation - 指向官方仓库
     nav: [
@@ -125,8 +125,8 @@ export default defineConfig({
     
     // Footer - 正确声明版权
     footer: {
-      message: '框架基于 MIT License 发布。中文文档由第三方维护者 FHfanshu 编写。',
-      copyright: '框架 Copyright © Kohaku Lab | 中文文档 © 2024 FHfanshu'
+      message: 'This is a community-maintained documentation site. The framework belongs to Kohaku Lab. If anything here conflicts with upstream docs or source code, follow the official repository.',
+      copyright: 'Framework © Kohaku Lab | Community docs © FHfanshu'
     },
     
     // Edit link - 中文文档编辑指向你的 fork
@@ -161,15 +161,15 @@ export default defineConfig({
           { text: '英文', link: '/' },
           { text: '指南', link: '/zh/quickstart' },
           { text: '官方仓库', link: 'https://github.com/Kohaku-Lab/KohakuTerrarium' },
-          { text: '文档源码', link: 'https://github.com/FHfanshu/KohakuTerrarium' }
+          { text: '第三方文档源码', link: 'https://github.com/FHfanshu/KohakuTerrarium' }
         ],
         editLink: {
           pattern: 'https://github.com/FHfanshu/KohakuTerrarium/edit/main/docs/:path',
           text: '编辑此页'
         },
         footer: {
-          message: '框架基于 MIT License 发布。本站中文文档由第三方维护者编写，非官方文档。',
-          copyright: '框架 © Kohaku Lab | 中文文档 © 2024 FHfanshu'
+          message: '本站为第三方维护的社区中文文档，不代表官方立场。如与官方英文文档或源码行为不一致，请以官方仓库为准。',
+          copyright: '框架 © Kohaku Lab | 中文文档 © FHfanshu'
         },
         docFooter: {
           prev: '上一页',
@@ -197,7 +197,7 @@ export default defineConfig({
     ['link', { rel: 'icon', href: '/banner.png', type: 'image/png' }],
     ['meta', { name: 'theme-color', content: '#42b983' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:title', content: 'KohakuTerrarium 中文文档' }],
-    ['meta', { property: 'og:description', content: 'KohakuTerrarium 框架的中文入门指南（第三方维护）' }]
+    ['meta', { property: 'og:title', content: 'KohakuTerrarium Community Docs' }],
+    ['meta', { property: 'og:description', content: 'Community-maintained Chinese docs for KohakuTerrarium. Non-official.' }]
   ]
 })

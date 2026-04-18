@@ -74,7 +74,7 @@ fastest lookup.
 - **Derivations, not lists.** Every module earns its seat.
 - **No module is mandatory.** Each doc closes with *don't be bounded*.
 - **Honest about rough parts.** Where the framework is experimental,
-  docs say so and link the [ROADMAP](../../ROADMAP.md).
+  docs say so and link the [ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md).
 - **Teaching, not cataloguing.** For the catalogue, see
   [reference/](../reference/README.md).
 

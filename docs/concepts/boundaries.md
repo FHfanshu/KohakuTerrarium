@@ -102,4 +102,4 @@ cases describes you, the rest of the docs are for you.
   derivation this page lets you deviate from.
 - [Patterns](patterns.md) — ways to combine modules that break the
   "one module = one purpose" intuition on purpose.
-- [ROADMAP](../../ROADMAP.md) — where the rough parts are going.
+- [ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md) — where the rough parts are going.

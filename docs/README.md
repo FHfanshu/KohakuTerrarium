@@ -57,7 +57,7 @@ Mental models — why things are the way they are. The concept docs teach the mo
 - [Python-native](concepts/python-native/README.md) — agents as Python values, composition algebra.
 - [Patterns](concepts/patterns.md) — agent-inside-plugin, agent-inside-tool, and related uses.
 - [Boundaries](concepts/boundaries.md) — when to ignore the abstraction, when the framework doesn't fit.
-- [Implementation notes](concepts/impl-notes/) — stream parsing, prompt aggregation, and other internals.
+- [Implementation notes](concepts/impl-notes/README.md) — stream parsing, prompt aggregation, and other internals.
 
 ### Reference
 
