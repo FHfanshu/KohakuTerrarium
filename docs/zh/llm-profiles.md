@@ -185,7 +185,7 @@ kt login codex
 
 # 切换默认模型
 kt model default gpt-5.4
-kt model default buzzai-sonnet
+kt model default claude-3-5-sonnet-20241022
 
 # 查看当前配置
 kt model show
