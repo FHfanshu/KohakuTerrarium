@@ -4,8 +4,8 @@ export default defineConfig({
   title: 'KohakuTerrarium',
   description: 'A framework for building real agents, not just LLM wrappers',
   
-  // Base URL for deployment
-  base: '/',
+  // Base URL for GitHub Pages project site
+  base: '/KohakuTerrarium/',
   
   // Theme config
   themeConfig: {
