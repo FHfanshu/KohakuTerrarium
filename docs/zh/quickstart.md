@@ -1,6 +1,6 @@
 # 安装与快速开始
 
-从零开始，带你把 KohakuTerrarium 跑起来。
+从零开始，把 KohakuTerrarium 跑起来。
 
 ## 1. 装环境
 
@@ -9,7 +9,7 @@
 | 依赖 | 版本 | 怎么检查 | 怎么装 |
 |------|------|----------|--------|
 | Python | 3.10+ | `python --version` | [python.org](https://python.org) 下载安装包，或用 [Anaconda](https://anaconda.com) |
-| git | 随便哪个版本 | `git --version` | [git-scm.com](https://git-scm.com) 下载 |
+| git | 任意常见版本都可以 | `git --version` | [git-scm.com](https://git-scm.com) 下载 |
 | uv | 建议装，装包更快 | `uv --version` | `pip install uv` 或去 [astral.sh/uv](https://astral.sh/uv) |
 | Node.js | 只有 WebUI/桌面端才需要 | `node --version` | [nodejs.org](https://nodejs.org) 下载 LTS 版 |
 
@@ -34,7 +34,7 @@ python --version
 
 ### uv 是什么？
 
-uv 是一个超快的 Python 包管理器，比 pip 快 10-100 倍。不装也能用 pip，但装了体验更好。
+uv 是一个很快的 Python 包管理器。不装也能继续用 pip，但装上之后体验会更好。
 
 一条命令就能装：
 
@@ -52,7 +52,7 @@ cd KohakuTerrarium
 uv pip install -e ".[dev]"
 ```
 
-看到 `Successfully installed kohakuterrarium-x.x.x` 就对了。
+看到 `Successfully installed kohakuterrarium-x.x.x` 基本就说明装好了。
 
 如果要跑 WebUI 或桌面端，再加一步：
 
@@ -67,11 +67,11 @@ npm run build --prefix src/kohakuterrarium-frontend
 pip install kohakuterrarium
 ```
 
-同样看到 `Successfully installed` 就行。
+同样，看到 `Successfully installed` 基本就可以了。
 
 ## 3. 装官方默认 creature 包
 
-**这步不能跳过。** 后面用的默认 `swe` 要靠它，文档里提到的 `swe_bio_agent` 也是基于它继承出来的本地扩展示例。
+**这一步别跳过。** 后面用到的默认 `swe` 依赖它，文档里提到的 `swe_bio_agent` 也是在它的基础上做的本地扩展示例。
 
 ```powershell
 kt install https://github.com/Kohaku-Lab/kt-defaults.git
@@ -95,7 +95,7 @@ kt login codex
 kt model default gpt-5.4
 ```
 
-浏览器会弹出来，授权完显示 `Login successful` 就行。
+浏览器会弹出来。授权完成后，看到 `Login successful` 就可以了。
 
 ### 用其他 OpenAI 兼容的供应商
 
@@ -114,7 +114,7 @@ kt model default gpt-5.4
 kt run @kt-defaults/creatures/swe --mode cli
 ```
 
-看到这个就说明成功了：
+看到下面这样的输出，基本就说明成功了：
 
 ```
 Loading creature: @kt-defaults/creatures/swe
@@ -123,7 +123,7 @@ Ready. Type your message (Ctrl+C to exit):
 > 
 ```
 
-喜欢全屏界面的话：
+如果你更喜欢全屏界面：
 
 ```powershell
 kt run @kt-defaults/creatures/swe --mode tui
@@ -143,8 +143,8 @@ kt run examples/agent-apps/swe_bio_agent --mode cli
 
 它比默认 `swe` 多了两样东西：
 
-- **硬约束**：不读完仓库规则文件，就不让你改代码
-- **审计留痕**：所有操作都记 JSONL 日志，方便事后复盘
+- **硬约束**：不先读完仓库规则文件，就不能改代码
+- **审计留痕**：所有操作都会写入 JSONL 日志，方便事后复盘
 
 ## 7. 验证安装
 
@@ -161,7 +161,7 @@ kt run @kt-defaults/creatures/swe --mode cli
 dir ~/.kohakuterrarium/sessions/*.kohakutr
 ```
 
-都有的话，基础安装就完全没问题。
+都没问题的话，基础安装就完成了。
 
 如果你本地也有 `examples/agent-apps/swe_bio_agent`，可以额外验证：
 
@@ -187,7 +187,7 @@ $env:PATH += ";$(python -m site --user-base)\Scripts"
 
 ### `kt install` 超时或失败
 
-大概率是网络问题。你可以：
+大概率是网络问题。可以按下面几种方式排查：
 
 1. 确认 git 装了：`git --version`
 2. 网络受限的话用代理
@@ -217,7 +217,7 @@ kt model default gpt-5.4
 
 ### 找不到 session 文件
 
-session 默认存在 `~/.kohakuterrarium/sessions/`。你可以用 `kt resume --list` 看所有 session。
+session 默认保存在 `~/.kohakuterrarium/sessions/`。也可以用 `kt resume --list` 查看所有 session。
 
 ---
 

@@ -3,6 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from kohakuterrarium.core.config import load_agent_config
 from kohakuterrarium.modules.plugin.base import PluginBlockError, PluginContext
 
 PLUGIN_DIR = (
@@ -154,3 +155,13 @@ async def test_audit_logger_writes_jsonl(tmp_path: Path):
     assert "agent_start" in content
     assert "tool_start" in content
     assert "tool_end" in content
+
+
+def test_swe_bio_agent_config_includes_humanizer_docs():
+    config = load_agent_config("examples/agent-apps/swe_bio_agent")
+    names = [s.name for s in config.subagents]
+    assert "humanizer_docs" in names
+    humanizer = next(s for s in config.subagents if s.name == "humanizer_docs")
+    assert humanizer.type == "custom"
+    assert humanizer.module == "./custom/humanizer_docs.py"
+    assert humanizer.config_name == "HUMANIZER_DOCS_CONFIG"

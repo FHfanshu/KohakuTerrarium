@@ -13,6 +13,12 @@ output:
   type: stdout
   controller_direct: true
 
+subagents:
+  - name: humanizer_docs
+    type: custom
+    module: ./custom/humanizer_docs.py
+    config: HUMANIZER_DOCS_CONFIG
+
 plugins:
   - name: rules_guard
     type: custom

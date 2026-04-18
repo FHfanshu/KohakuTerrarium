@@ -1,6 +1,6 @@
 # CLI 与 WebUI 使用
 
-三种方式跟 KohakuTerrarium 交互：命令行、Web 界面、桌面应用。看完这篇你就都会了。
+KohakuTerrarium 常见的交互方式有三种：命令行、Web 界面和桌面应用。这篇主要讲怎么上手使用它们。
 
 ## 命令速查
 
@@ -36,7 +36,7 @@ kt model show gpt-5.4
 # 基本用法
 kt run @kt-defaults/creatures/swe --mode cli
 
-# 跑本地扩展示例（要在项目根目录，且该目录必须真实存在）
+# 跑本地扩展示例（需要在项目根目录下，且该目录确实存在）
 kt run examples/agent-apps/swe_bio_agent --mode cli
 
 # 全屏界面
@@ -146,7 +146,7 @@ kt serve status -v   # 详细状态
 kt app
 ```
 
-本质就是把 WebUI 包了一层桌面窗口，不用手动启服务。有系统托盘图标。
+本质上就是把 WebUI 包成了桌面窗口，不用手动启动服务，也会带系统托盘图标。
 
 ## 选哪个？
 
@@ -161,7 +161,7 @@ kt app
 ## 新手推荐路径
 
 1. `kt run @kt-defaults/creatures/swe --mode cli` — 先熟悉默认行为
-2. 如果你本地有扩展示例，再跑 `kt run examples/agent-apps/swe_bio_agent --mode cli` — 体验强约束版
+2. 如果你本地有扩展示例，再跑 `kt run examples/agent-apps/swe_bio_agent --mode cli` — 体验带强约束的版本
 3. `kt serve start` + `kt web` — 试试 WebUI
 
 ## 常见问题
@@ -180,7 +180,7 @@ kt serve start --port 8080
 
 ### TUI 界面显示乱码
 
-用 Windows Terminal 或 iTerm2 之类的现代终端。或者干脆用 `--mode cli`。
+尽量用 Windows Terminal 或 iTerm2 这类现代终端；如果还是不理想，就直接改用 `--mode cli`。
 
 ---
 

@@ -1,6 +1,6 @@
 # 配置文件写法
 
-creature 就是一个目录，里面有个 `config.yaml`，再加些 prompt 文件和插件脚本。
+creature 通常就是一个目录，里面放 `config.yaml`，再配上 prompt 文件和插件脚本。
 
 ## 最小结构
 
@@ -47,21 +47,21 @@ plugins:
 > 这个 `swe_bio_agent` 是本地扩展示例，不是官方远端仓库当前默认自带内容。
 > 真正稳定可直接引用的基座是 `@kt-defaults/creatures/swe`。
 
-别被吓到，下面逐个讲。
+别担心，下面逐个说明。
 
 ## `name`
 
-就是智能体的名字，用在 session 命名和日志里。取个清楚的名字就行。
+就是智能体的名字，会用在 session 命名和日志里。清楚、好认就行。
 
 ## `base_config`
 
-**这个字段最实用。** 填了它，你就不需要把默认 `swe` 的配置抄一遍了。
+**这个字段很实用。** 填了它，就不用把默认 `swe` 的配置整份复制过来了。
 
 ```yaml
 base_config: "@kt-defaults/creatures/swe"
 ```
 
-意思是：先加载默认 `swe` 的全部配置，再把你自己的覆盖上去。工具、子智能体、prompt layering 这些全都继承了。
+意思是：先加载默认 `swe` 的整套配置，再用你自己的内容覆盖。工具、子智能体和 prompt layering 这些都会继承下来。
 
 > 新手最容易犯的错：不用 `base_config`，把默认配置整个复制一遍然后改。这样默认 `swe` 升级了你就收不到了。
 
@@ -112,7 +112,7 @@ output:
 
 ## `plugins`
 
-**最重要的扩展点。** 通过插件你可以拦截工具调用、记录日志、加限制。
+**最重要的扩展点之一。** 通过插件，你可以拦截工具调用、记录日志、增加限制。
 
 ```yaml
 plugins:
@@ -175,7 +175,7 @@ subagents:
 
 ### `compact` — 上下文压缩
 
-会话太长时自动压缩，避免 token 爆掉：
+会话太长时可以自动压缩上下文，避免 token 超限：
 
 ```yaml
 compact:
@@ -207,7 +207,7 @@ termination:
 kt info my-creature/
 ```
 
-配对了会显示：
+配置没问题时会显示类似下面的内容：
 
 ```
 Name: my_creature
@@ -218,7 +218,7 @@ Subagents: 5
 Plugins: 2
 ```
 
-配错了会告诉你哪里有问题：
+如果有问题，也会直接告诉你出在哪：
 
 ```
 Name: my_creature

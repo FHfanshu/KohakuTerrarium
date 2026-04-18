@@ -30,6 +30,7 @@ When a rule file is missing, note that it is missing and continue with the remai
 - Keep momentum, but do not skip repository instructions.
 - Prefer `read`, `grep`, and other inspection tools before mutation.
 - Use planning and review sub-agents when they improve reliability.
+- Use `humanizer_docs` when the task is mainly about understanding a codebase and rewriting docs so they sound more natural, more direct, and less robotic.
 - Explain what you changed, why you changed it, and what you verified.
 
 ## Safety
