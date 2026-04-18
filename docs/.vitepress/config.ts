@@ -10,7 +10,7 @@ export default defineConfig({
   // Theme config
   themeConfig: {
     logo: '/logo.svg',
-    siteTitle: 'KohakuTerrarium Community Docs',
+    siteTitle: 'KT Docs',
     
     // Navigation - 指向官方仓库
     nav: [
@@ -93,16 +93,13 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Overview', link: '/concepts/' },
-            { text: 'Agents', link: '/concepts/agents' },
-            { text: 'Terrariums', link: '/concepts/terrariums' },
-            { text: 'Channels', link: '/concepts/channels' },
-            { text: 'Execution Model', link: '/concepts/execution' },
-            { text: 'Prompt System', link: '/concepts/prompts' },
-            { text: 'Plugins', link: '/concepts/plugins' },
-            { text: 'Composition Algebra', link: '/concepts/composition-algebra' },
-            { text: 'Serving Layer', link: '/concepts/serving' },
-            { text: 'Environment & Session', link: '/concepts/environment' },
-            { text: 'Tool Formats', link: '/concepts/tool-formats' }
+            { text: 'Boundaries', link: '/concepts/boundaries' },
+            { text: 'Glossary', link: '/concepts/glossary' },
+            { text: 'Patterns', link: '/concepts/patterns' },
+            { text: 'Foundations', link: '/concepts/foundations/' },
+            { text: 'Modules', link: '/concepts/modules/' },
+            { text: 'Multi-Agent', link: '/concepts/multi-agent/' },
+            { text: 'Python Native', link: '/concepts/python-native/' }
           ]
         },
         {
