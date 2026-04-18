@@ -1,4 +1,4 @@
-# Channel
+# Channel（通道）
 
 ## 它是什么
 

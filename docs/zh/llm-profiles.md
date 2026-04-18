@@ -168,7 +168,7 @@ extra_body:
 | **MiniMax M2.7** | 200K | 16K | `thinking: {type: adaptive}` |
 | **MiniMax M2.5** | 197K | 16K | 同上 |
 
-> 注意：上下文窗口是模型理论最大值。Codex OAuth 等某些渠道可能有更低的实际限制（如 GPT-5.4 Codex 只给 272K budget）。
+> 注意：上下文窗口是模型理论最大值。Codex OAuth 等某些渠道可能有更低的实际限制（如 GPT-5.4 只给 272K budget） 而且上下文窗口大小不等于模型实际注意力能力范围。
 
 ## 配置文件在哪
 
@@ -183,9 +183,9 @@ extra_body:
 kt login openai
 kt login codex
 
-# 切换默认模型
+# 切换默认模型 (如模型配置项存在)
 kt model default gpt-5.4
-kt model default claude-3-5-sonnet-20241022
+kt model default claude-4-6-sonnet
 
 # 查看当前配置
 kt model show

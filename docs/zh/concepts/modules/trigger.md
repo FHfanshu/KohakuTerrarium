@@ -1,4 +1,4 @@
-# Trigger
+# Trigger（触发器）
 
 ## 它是什么
 

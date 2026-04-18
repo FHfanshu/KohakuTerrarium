@@ -1,4 +1,4 @@
-# Packages
+# Package
 
 给需要在多个项目之间共享 creature、terrarium、tool 或 plugin 的读者。
 

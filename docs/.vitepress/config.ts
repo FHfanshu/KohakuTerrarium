@@ -4,15 +4,12 @@ export default defineConfig({
   title: 'KohakuTerrarium',
   description: 'A framework for building real agents, not just LLM wrappers',
   
-  // Base URL for GitHub Pages project site
   base: '/KohakuTerrarium/',
   
-  // Theme config
   themeConfig: {
     logo: '/logo.svg',
     siteTitle: 'KT Docs',
     
-    // Navigation - 指向官方仓库
     nav: [
       { text: 'Home', link: '/' },
       { text: '中文', link: '/zh/' },
@@ -21,7 +18,6 @@ export default defineConfig({
       { text: '官方仓库', link: 'https://github.com/Kohaku-Lab/KohakuTerrarium' }
     ],
     
-    // Sidebar - organized by sections
     sidebar: {
       '/zh/': [
         {
@@ -38,15 +34,15 @@ export default defineConfig({
           ]
         },
         {
-          text: '教程',
+          text: '官方文档教程（机翻）',
           collapsed: true,
           items: [
             { text: '总览', link: '/zh/tutorials/README' },
-            { text: '第一个 Creature', link: '/zh/tutorials/first-creature' },
-            { text: '第一个 Terrarium', link: '/zh/tutorials/first-terrarium' },
+            { text: '第一个 Creature（智能体）', link: '/zh/tutorials/first-creature' },
+            { text: '第一个 Terrarium（容器）', link: '/zh/tutorials/first-terrarium' },
             { text: '第一个 Python 嵌入示例', link: '/zh/tutorials/first-python-embedding' },
-            { text: '第一个自定义 Tool', link: '/zh/tutorials/first-custom-tool' },
-            { text: '第一个 Plugin', link: '/zh/tutorials/first-plugin' }
+            { text: '第一个自定义工具', link: '/zh/tutorials/first-custom-tool' },
+            { text: '第一个插件', link: '/zh/tutorials/first-plugin' }
           ]
         },
         {
@@ -55,20 +51,20 @@ export default defineConfig({
           items: [
             { text: '总览', link: '/zh/guides/README' },
             { text: '快速上手', link: '/zh/guides/getting-started' },
-            { text: 'Creatures', link: '/zh/guides/creatures' },
-            { text: 'Sessions', link: '/zh/guides/sessions' },
-            { text: 'Configuration', link: '/zh/guides/configuration' },
-            { text: 'Plugins', link: '/zh/guides/plugins' },
+            { text: '智能体', link: '/zh/guides/creatures' },
+            { text: '会话', link: '/zh/guides/sessions' },
+            { text: '配置', link: '/zh/guides/configuration' },
+            { text: '插件', link: '/zh/guides/plugins' },
             { text: 'MCP', link: '/zh/guides/mcp' },
-            { text: 'Packages', link: '/zh/guides/packages' },
-            { text: 'Custom Modules', link: '/zh/guides/custom-modules' },
-            { text: 'Serving', link: '/zh/guides/serving' },
-            { text: 'Memory', link: '/zh/guides/memory' },
-            { text: 'Composition', link: '/zh/guides/composition' },
-            { text: 'Terrariums', link: '/zh/guides/terrariums' },
-            { text: 'Programmatic Usage', link: '/zh/guides/programmatic-usage' },
-            { text: 'Frontend Layout', link: '/zh/guides/frontend-layout' },
-            { text: 'Examples', link: '/zh/guides/examples' }
+            { text: '包', link: '/zh/guides/packages' },
+            { text: '自定义模块', link: '/zh/guides/custom-modules' },
+            { text: '服务部署', link: '/zh/guides/serving' },
+            { text: '记忆', link: '/zh/guides/memory' },
+            { text: '组合', link: '/zh/guides/composition' },
+            { text: '容器', link: '/zh/guides/terrariums' },
+            { text: '以代码方式使用', link: '/zh/guides/programmatic-usage' },
+            { text: '前端布局', link: '/zh/guides/frontend-layout' },
+            { text: '示例', link: '/zh/guides/examples' }
           ]
         },
         {
@@ -76,34 +72,34 @@ export default defineConfig({
           collapsed: true,
           items: [
             { text: '总览', link: '/zh/concepts/README' },
-            { text: 'Boundaries', link: '/zh/concepts/boundaries' },
-            { text: 'Glossary', link: '/zh/concepts/glossary' },
-            { text: 'Patterns', link: '/zh/concepts/patterns' },
-            { text: 'What is an Agent', link: '/zh/concepts/foundations/what-is-an-agent' },
-            { text: 'Why KohakuTerrarium', link: '/zh/concepts/foundations/why-kohakuterrarium' },
-            { text: 'Composing an Agent', link: '/zh/concepts/foundations/composing-an-agent' },
-            { text: 'Modules', link: '/zh/concepts/modules/README' },
-            { text: 'Controller', link: '/zh/concepts/modules/controller' },
-            { text: 'Tool', link: '/zh/concepts/modules/tool' },
-            { text: 'Sub-Agent', link: '/zh/concepts/modules/sub-agent' },
-            { text: 'Channel', link: '/zh/concepts/modules/channel' },
-            { text: 'Trigger', link: '/zh/concepts/modules/trigger' },
-            { text: 'Plugin', link: '/zh/concepts/modules/plugin' },
-            { text: 'Session and Environment', link: '/zh/concepts/modules/session-and-environment' },
-            { text: 'Memory and Compaction', link: '/zh/concepts/modules/memory-and-compaction' },
-            { text: 'Input', link: '/zh/concepts/modules/input' },
-            { text: 'Output', link: '/zh/concepts/modules/output' },
-            { text: 'Multi-Agent', link: '/zh/concepts/multi-agent/README' },
-            { text: 'Terrarium', link: '/zh/concepts/multi-agent/terrarium' },
-            { text: 'Root Agent', link: '/zh/concepts/multi-agent/root-agent' },
-            { text: 'Python Native', link: '/zh/concepts/python-native/README' },
-            { text: 'Agent as Python Object', link: '/zh/concepts/python-native/agent-as-python-object' },
-            { text: 'Composition Algebra', link: '/zh/concepts/python-native/composition-algebra' },
+            { text: '边界', link: '/zh/concepts/boundaries' },
+            { text: '术语表', link: '/zh/concepts/glossary' },
+            { text: '模式', link: '/zh/concepts/patterns' },
+            { text: '什么是智能体', link: '/zh/concepts/foundations/what-is-an-agent' },
+            { text: '为什么会有 KohakuTerrarium', link: '/zh/concepts/foundations/why-kohakuterrarium' },
+            { text: '组合智能体', link: '/zh/concepts/foundations/composing-an-agent' },
+            { text: '模块', link: '/zh/concepts/modules/README' },
+            { text: '控制器', link: '/zh/concepts/modules/controller' },
+            { text: '工具', link: '/zh/concepts/modules/tool' },
+            { text: '子智能体', link: '/zh/concepts/modules/sub-agent' },
+            { text: '通道', link: '/zh/concepts/modules/channel' },
+            { text: '触发器', link: '/zh/concepts/modules/trigger' },
+            { text: '插件', link: '/zh/concepts/modules/plugin' },
+            { text: '会话与环境', link: '/zh/concepts/modules/session-and-environment' },
+            { text: '记忆与压缩', link: '/zh/concepts/modules/memory-and-compaction' },
+            { text: '输入', link: '/zh/concepts/modules/input' },
+            { text: '输出', link: '/zh/concepts/modules/output' },
+            { text: '多智能体', link: '/zh/concepts/multi-agent/README' },
+            { text: 'Terrarium（容器环境）', link: '/zh/concepts/multi-agent/terrarium' },
+            { text: 'Root Agent（根智能体）', link: '/zh/concepts/multi-agent/root-agent' },
+            { text: 'Python 原生', link: '/zh/concepts/python-native/README' },
+            { text: '智能体作为 Python 对象', link: '/zh/concepts/python-native/agent-as-python-object' },
+            { text: '组合代数', link: '/zh/concepts/python-native/composition-algebra' },
             { text: '实现说明', link: '/zh/concepts/impl-notes/README' },
-            { text: 'Prompt Aggregation', link: '/zh/concepts/impl-notes/prompt-aggregation' },
-            { text: 'Session Persistence', link: '/zh/concepts/impl-notes/session-persistence' },
-            { text: 'Non-Blocking Compaction', link: '/zh/concepts/impl-notes/non-blocking-compaction' },
-            { text: 'Stream Parser', link: '/zh/concepts/impl-notes/stream-parser' }
+            { text: 'Prompt 聚合', link: '/zh/concepts/impl-notes/prompt-aggregation' },
+            { text: '会话持久化', link: '/zh/concepts/impl-notes/session-persistence' },
+            { text: '非阻塞压缩', link: '/zh/concepts/impl-notes/non-blocking-compaction' },
+            { text: '流解析器', link: '/zh/concepts/impl-notes/stream-parser' }
           ]
         },
         {
@@ -112,11 +108,11 @@ export default defineConfig({
           items: [
             { text: '总览', link: '/zh/reference/README' },
             { text: 'CLI', link: '/zh/reference/cli' },
-            { text: 'Builtins', link: '/zh/reference/builtins' },
-            { text: 'Configuration', link: '/zh/reference/configuration' },
+            { text: '内建项', link: '/zh/reference/builtins' },
+            { text: '配置', link: '/zh/reference/configuration' },
             { text: 'Python API', link: '/zh/reference/python' },
             { text: 'HTTP API', link: '/zh/reference/http' },
-            { text: 'Plugin Hooks', link: '/zh/reference/plugin-hooks' }
+            { text: '插件钩子', link: '/zh/reference/plugin-hooks' }
           ]
         },
         {
@@ -124,10 +120,10 @@ export default defineConfig({
           collapsed: true,
           items: [
             { text: '总览', link: '/zh/dev/README' },
-            { text: 'Internals', link: '/zh/dev/internals' },
-            { text: 'Testing', link: '/zh/dev/testing' },
-            { text: 'Dependency Graph', link: '/zh/dev/dependency-graph' },
-            { text: 'Frontend', link: '/zh/dev/frontend' }
+            { text: '框架内部结构', link: '/zh/dev/internals' },
+            { text: '测试', link: '/zh/dev/testing' },
+            { text: '依赖图', link: '/zh/dev/dependency-graph' },
+            { text: '前端', link: '/zh/dev/frontend' }
           ]
         },
         {
@@ -212,30 +208,25 @@ export default defineConfig({
       ]
     },
     
-    // Social links - 指向官方仓库
     socialLinks: [
       { icon: 'github', link: 'https://github.com/Kohaku-Lab/KohakuTerrarium' }
     ],
     
-    // Search - local search
     search: {
       provider: 'local'
     },
     
-    // Footer - 正确声明版权
     footer: {
       message: 'This is a community-maintained documentation site. The framework belongs to Kohaku Lab. If anything here conflicts with upstream docs or source code, follow the official repository.',
       copyright: 'Framework © Kohaku Lab | Community docs © FHfanshu'
     },
     
-    // Edit link - 中文文档编辑指向你的 fork
     editLink: {
       pattern: 'https://github.com/FHfanshu/KohakuTerrarium/edit/main/docs/:path',
-      text: '编辑此页 (中文文档)'
+      text: 'Edit this page'
     }
   },
   
-  // Markdown config
   markdown: {
     theme: {
       light: 'github-light',
@@ -244,7 +235,6 @@ export default defineConfig({
     lineNumbers: false
   },
   
-  // Locales for i18n
   locales: {
     root: {
       label: 'English',
@@ -288,11 +278,9 @@ export default defineConfig({
     }
   },
   
-  // Build options
   cleanUrls: true,
   ignoreDeadLinks: true,
   
-  // Head elements
   head: [
     ['link', { rel: 'icon', href: '/banner.png', type: 'image/png' }],
     ['meta', { name: 'theme-color', content: '#42b983' }],

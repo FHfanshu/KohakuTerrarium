@@ -1,4 +1,4 @@
-# Sessions
+# Session
 
 给需要保存、恢复或归档 agent 运行记录的人看。
 

@@ -1,4 +1,4 @@
-# Terrariums
+# Terrarium
 
 给需要让多个 creature 协作的人看。
 

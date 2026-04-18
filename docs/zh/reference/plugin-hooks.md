@@ -1,4 +1,4 @@
-# Plugin hooks
+# 插件钩子
 
 这里列出插件可用的全部 hook：生命周期、LLM、工具、sub-agent 和回调。hook 定义在 `kohakuterrarium.modules.plugin` 的 `Plugin` 协议里；`BasePlugin` 提供默认的 no-op 实现。接线位置在 `bootstrap/plugins.py`。
 

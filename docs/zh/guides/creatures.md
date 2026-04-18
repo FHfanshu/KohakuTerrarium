@@ -1,4 +1,4 @@
-# Creatures
+# Creature
 
 写、定制或打包独立 agent。
 

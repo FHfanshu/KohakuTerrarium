@@ -1,6 +1,6 @@
 # CLI 与 WebUI 使用
 
-KohakuTerrarium 常见的交互方式有三种：命令行、Web 界面和桌面应用。这篇主要讲怎么上手使用它们。
+KohakuTerrarium 常见的交互方式有三种：命令行、Web 界面和桌面应用。这篇主要讲怎么上手使用它们。(TUI和CLI差不多，如果你想拥有类似OpenCode类似的交互体验就用TUI)
 
 ## 命令速查
 
