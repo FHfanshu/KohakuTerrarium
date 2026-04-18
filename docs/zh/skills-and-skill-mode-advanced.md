@@ -1,210 +1,45 @@
-# skills、`info` 和 `skill_mode` 进阶：模型到底看到了什么
+# skills、info 与 skill_mode 进阶
 
-这篇只讲 skills 这一层。
+KT 的 skill 和其他框架不一样。
 
-如果你已经知道：
-
-- package 是通过 `kt install` 安装的分发单位
-- MCP 是把外部能力接进来的协议
-
-那接下来最容易混淆的，就是 skills。
-
-在这个项目里，skills 更接近：
-
-> **给模型看的工具 / 子智能体说明文档。**
-
----
-
-## 先说清楚：KT 的 skill 和其他框架的 skill 不是一回事
-
-很多人第一次看到这个名字，会把它当成“可调用的能力单元”——像其他框架那样，一个 skill 对应一个 Python 函数 + JSON Schema。
-
-在 KohakuTerrarium 里，它不是这个意思。
-
-简单对比：
-
-| | 其他框架的 skill | KohakuTerrarium 的 skill |
+| | 其他框架 | KohakuTerrarium |
 |---|---|---|
-| **是什么** | 可调用的能力单元 | 给模型看的说明文档 |
-| **具体内容** | Python 函数 + JSON Schema（name、description、parameters） | `builtin_skills/` 下的 `.md` 文件 |
-| **谁用** | LLM 通过 ReAct / Planning 决定是否调用 | 模型通过 `info` 按需读取，或被框架注入进 prompt |
-| **存哪** | 代码仓库里的 Python 模块 | `src/kohakuterrarium/builtin_skills/tools/*.md`、`subagents/*.md` |
-| **例子** | 一个天气查询函数 | `read.md`：告诉模型 read 工具什么时候用、参数怎么传、有什么限制 |
+| 是什么 | 可调用能力单元 | 给模型看的说明文档 |
+| 内容 | Python 函数 + JSON Schema | `builtin_skills/` 下的 `.md` 文件 |
+| 用法 | ReAct/Planning 调用 | `info` 按需读取或框架注入 |
+| 位置 | Python 模块 | `src/kohakuterrarium/builtin_skills/tools/*.md` |
 
-你可以把 KT 的 skill 理解成：
-- 每个工具或子智能体的 **使用说明书**
-- 一份“技能卡”，告诉模型怎么正确使用某个能力
+skill 是工具/子智能体的使用说明书。不是能力本身。
 
-所以这一篇讲的 skills，都是“文档层”，不是“可调用能力本身”。
+## builtin_skills
 
----
+`src/kohakuterrarium/builtin_skills/tools/` 和 `subagents/` 下的 `.md` 文件。框架自带的手册库，不是要装的 package。
 
-## 先把名字理解对
+## info
 
-这里的 skill，不要把它想成“训练出来的一项神秘能力”。
+按名称读取完整说明的工具。不是"查帮助"——在 dynamic 模式下，它是模型补读手册的入口。
 
-在 KohakuTerrarium 里，它更接近：
+## skill_mode
 
-- tool manual
-- tool docs
-- sub-agent manual
-
-也就是一份面向模型的使用说明。
-
-这些说明会告诉模型：
-
-- 这个工具是干什么的
-- 什么时候该用，什么时候别用
-- 参数怎么传
-- 有哪些限制
-- 常见调用方式是什么
-
-所以 skills 这一层解决的是：
-
-**模型怎么知道自己手里的能力该怎么用。**
-
----
-
-## `builtin_skills` 是什么
-
-框架源码里自带了一批内建说明文档，目录在：
-
-```text
-src/kohakuterrarium/builtin_skills/
-  tools/
-  subagents/
-```
-
-它们是框架默认的说明书来源之一。
-
-例如内建工具和子智能体的文档，就来自这里。
-
-你可以把 `builtin_skills` 理解成：
-
-- 框架自带的说明书目录
-- 默认手册库
-
-它不是让你单独去安装的 package，也不是一个需要你手动打开的独立功能模块。
-
----
-
-## `info` 在这里负责什么
-
-`info` 是一个内建工具，用来按名称读取完整说明。
-
-它不只是“查帮助”这么简单。
-
-在 `skill_mode: dynamic` 的情况下，`info` 实际上是模型补读完整手册的重要入口。
-
-可以把这套关系理解成：
-
-- prompt 里先给模型一个简短版介绍
-- 模型如果需要更多细节，就调用 `info`
-- `info` 再把完整文档读回来
-
-所以 `info` 不是技能本身，而是 **读取 skill 文档的统一入口**。
-
----
-
-## `skill_mode` 到底控制什么
-
-`skill_mode` 控制的是：
-
-> **工具说明文档如何进入模型上下文**
-
-不是：
-
-- 工具能不能用
-- MCP 能不能连
-- package 能不能被发现
-
-现有配置里常见的是两种：
+控制文档怎么进 prompt。不是开关工具、不是连 MCP、不是发现 package。
 
 ```yaml
-skill_mode: dynamic
-# 或
-skill_mode: static
+skill_mode: dynamic  # 默认：短描述进 prompt，info 补读
+skill_mode: static   # 完整文档直接进系统提示词
 ```
 
-### `dynamic`
+dynamic：prompt短，省上下文，多一次 info 调用。
+static：开局看到全部，prompt变大。
 
-默认是 `dynamic`。
+## 误解
 
-它的思路是：
+`skill_mode` 是功能开关？不是。工具能不能用取决于 creature 暴露、MCP 连接、package 安装。skill_mode 只管文档注入。
 
-- 先把工具的一行短描述放进 prompt
-- 真要细看，再调用 `info`
+`info` 只是查帮助？在 dynamic 下它直接影响调用质量，"先读文档再动手"的任务流靠它。
 
-优点：
+skills 等于 package？package 是分发，skills 是文档。两个概念。
 
-- prompt 更短
-- 初始上下文更省
-- 工具多的时候更实用
-
-代价：
-
-- 可能多一次 `info` 调用
-- 有时会多一个回合
-
-### `static`
-
-`static` 的思路是：
-
-- 一开始就把完整工具文档直接放进系统提示词
-
-优点：
-
-- 模型开局就能看到全部说明
-- 少一次按需读取
-
-代价：
-
-- prompt 会明显变大
-- 工具多时上下文压力更高
-
----
-
-## 最容易误会的点
-
-### 误解 1：`skill_mode` 是功能开关
-
-不对。
-
-下面这些理解都不对：
-
-- `skill_mode: static` 才算开启 skills
-- `skill_mode: dynamic` 会关闭某些工具
-- 切成 `static` 之后 MCP 才能用
-
-都不是。
-
-**工具是否可用**，取决于：
-
-- creature 有没有暴露它
-- MCP server 有没有连上
-- package 有没有正确安装并声明
-
-`skill_mode` 只影响文档注入方式。
-
-### 误解 2：`info` 只是查帮助，不影响运行
-
-也不完全对。
-
-在动态模式下，模型往往就是靠 `info` 来补读某个工具或子智能体的完整手册。
-
-对于要求“先读文档再动手”的任务流，这一步甚至会直接影响后续调用质量。
-
-### 误解 3：skills 等于 package
-
-不对。
-
-package 是分发单位；skills 是说明文档层。
-
-package 里可以带工具，工具也可以有文档，但这不等于两者是一个概念。
-
----
-
-## 一个最小示例
+## 示例
 
 ```yaml
 name: docs-aware-agent
@@ -219,68 +54,31 @@ tools:
   - grep
 ```
 
-配一个简单系统提示词：
-
+提示词：
 ```md
-如果你不确定某个工具的参数或限制，先调用 info 读取完整说明，再继续。
+不确定工具参数时先调用 info。
 ```
 
-这个例子表达的重点是：
+改成 `skill_mode: static`，文档给法变了，工具集合没变。
 
-- `read` / `grep` 是能力
-- `skill_mode: dynamic` 决定文档先给短版
-- `info` 负责在需要时补读完整版
+## 什么时候用 static
 
-如果你把它改成：
+工具不多、要开局完整说明、需要固定可审计 prompt 时。
 
-```yaml
-skill_mode: static
-```
+工具多、上下文紧、按需加载时用 dynamic。
 
-变化只是：文档给模型的方式变了；不是工具集合变了。
+## 三层关系
 
----
+MCP：能力从外部来
+package：内容从安装包来
+skills：把能力说明交给模型
 
-## 什么时候考虑改成 `static`
+分开"能力来源"和"文档暴露"就清楚了。
 
-默认情况下，先用 `dynamic` 就够了。
+## 参考
 
-这些情况可以考虑 `static`：
-
-- 你的工具数量不多
-- 你想让模型开局就拿到完整说明
-- 你更在意 prompt 的固定性和可审计性
-
-这些情况更适合继续保留 `dynamic`：
-
-- 工具很多
-- 上下文预算紧
-- 你更想把详细文档按需加载
-
----
-
-## 把这一层和前两层连起来
-
-可以这样一起看：
-
-- **MCP**：能力从外部 server 来
-- **package / `kt install`**：内容从安装包来
-- **skills / `skill_mode` / `info`**：把这些能力的说明交给模型
-
-只要把“能力来源”和“文档暴露”分开，skill 这一层就不难理解。
-
----
-
-## 推荐继续读什么
-
-- [英文 Configuration 指南](../guides/configuration.md)
-- [英文 Creatures 指南](../guides/creatures.md)
+- [英文 Configuration](../guides/configuration.md)
+- [英文 Creatures](../guides/creatures.md)
 - [内建工具参考](../reference/builtins.md)
 - [MCP 进阶](mcp-advanced)
-- [packages 与安装进阶](packages-and-install-advanced)
-
----
-
-## 一句话总结
-
-**skills 是面向模型的说明书层；`skill_mode` 决定说明是一次给全，还是靠 `info` 按需补读。**
+- [packages 进阶](packages-and-install-advanced)
