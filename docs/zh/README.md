@@ -1,60 +1,48 @@
-# KohakuTerrarium 中文手册
+# 指南
 
-[English](/) | **中文**
+面向任务的文档：运行、构建、扩展 KohakuTerrarium。
 
-## 说明
+想看心智模型去[概念](/concepts/README.md)。
+想查字段、参数、签名去[参考](/reference/README.md)。
+想看引导式入门去[教程](/tutorials/README.md)。
 
-这套文档是第三方维护的中文版本。如果内容和官方英文文档或源码不一致，以官方仓库为准：
+## 从这里开始
 
-- 官方：<https://github.com/Kohaku-Lab/KohakuTerrarium>
-- 本站：<https://github.com/FHfanshu/KohakuTerrarium>
+- [快速开始](getting-started.md) — 安装、认证、跑第一个 creature、resume、开 Web UI。
+- [Creatures](/guides/creatures.md)（英文） — 结构、继承、prompt 文件、tool/subagent 连接、打包。
+- [Sessions](/guides/sessions.md)（英文） — `.kohakutr` 文件、resume、compaction。
 
-文档里提到的 `swe_bio_agent` 是本地扩展示例，不在官方仓库默认内容里。默认用的是 `@kt-defaults/creatures/swe`。
+## 构建和配置
 
-## 术语
+- [配置](/guides/configuration.md)（英文） — "怎么配置 X" 的任务式配方。
+- [Creatures](/guides/creatures.md)（英文） — 编写独立 agent。
+- [Plugins](/guides/plugins.md)（英文） — prompt 和生命周期插件。
+- [自定义模块](/guides/custom-modules.md)（英文） — 写 tools、inputs、outputs、triggers、sub-agents。
+- [MCP](/guides/mcp.md)（英文） — per-agent 或全局注册 MCP server。
+- [Packages](/guides/packages.md)（英文） — `kohaku.yaml` manifest、安装模式、发布。
 
-| 英文 | 中文 | 解释 |
-|------|------|------|
-| creature | 智能体 | 独立运行的 agent |
-| terrarium | 容器 | 多智能体环境 |
-| session | 会话 | 运行记录 |
-| plugin | 插件 | 扩展模块 |
-| tool | 工具 | 可调用能力 |
-| subagent | 子智能体 | 分派出去的智能体 |
+## 多智能体和组合
 
-## 文档
+- [Terrariums](/guides/terrariums.md)（英文） — channels、root agents、hot-plug、observer。
+- [组合](/guides/composition.md)（英文） — Python 里 `>>`、`&`、`|`、`*` pipeline。
+- [编程式用法](/guides/programmatic-usage.md)（英文） — 嵌入 `Agent`、`AgentSession`、`TerrariumRuntime`、`KohakuManager`。
 
-**先装好再往下看：**
+## 持久化和搜索
 
-- [安装](quickstart)
-- [模型配置](llm-profiles)
-- [操作方式](cli-webui)
+- [Sessions](/guides/sessions.md)（英文） — 持久化模型和 resume。
+- [Memory](/guides/memory.md)（英文） — embedding 供应商、FTS 和向量搜索、`search_memory` tool。
 
-**自己写 creature 时再看：**
+## 部署
 
-- [配置写法](configuration)
-- [排错](audit-and-sessions)
-- [本地扩展示例](swe-bio-agent)
+- [Serving](/guides/serving.md)（英文） — `kt web`、`kt app`、`kt serve` daemon。
+- [前端布局](/guides/frontend-layout.md)（英文） — Web dashboard panels 和 presets。
 
-**进阶：**
+## 从代码学习
 
-- [MCP](mcp-advanced)
-- [package 与 install](packages-and-install-advanced)
-- [skills 与 skill_mode](skills-and-skill-mode-advanced)
+- [示例](/guides/examples.md)（英文） — `examples/` 下每个文件夹展示什么。
 
-## 示例位置
+## 参考
 
-- 默认 SWE：`@kt-defaults/creatures/swe`
-- 本地扩展 package：`examples/agent-apps/swe_bio_agent`
-- 实际 creature：`examples/agent-apps/swe_bio_agent/creatures/swe_bio_agent`
-- 强约束插件：`examples/agent-apps/swe_bio_agent/creatures/swe_bio_agent/custom/guard_plugin.py`
-- 审计插件：`examples/agent-apps/swe_bio_agent/creatures/swe_bio_agent/custom/audit_plugin.py`
-
-## 前提
-
-装 KohakuTerrarium，装 `kt-defaults`，就能跑默认 `swe`。有本地 `swe_bio_agent` 才看扩展部分。
-
-想深入看英文文档：
-- [Concepts](/concepts/README.md)
-- [Guides](/guides/README.md)
-- [Reference](/reference/README.md)
+- [概念](/concepts/README.md) — 为什么这样设计。
+- [参考](/reference/README.md) — 穷举式查表。
+- [开发](/dev/README.md)（英文） — 给框架本身贡献。

@@ -81,7 +81,7 @@
 - [Trigger](../modules/trigger.md) —— 世界怎么把 agent 唤醒
 - [Output](../modules/output.md) —— agent 怎么把东西送回外部世界
 - [Tool](../modules/tool.md) —— agent 的手
-- [Sub-agent](../modules/sub-agent.md) —— 受上下文范围约束的委托者
+- [Sub-agent](../modules/sub-agent.md) —— 带着局部上下文去处理事情的子 agent
 
 还有两块是横切的，不适合压在某一个模块上讲，所以单列出来：
 

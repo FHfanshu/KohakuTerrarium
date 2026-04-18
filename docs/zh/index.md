@@ -2,7 +2,7 @@
 layout: home
 
 hero:
-  name: KohakuTerrarium
+  name: KohakuTerrarium<br>琥珀生态瓶
   text: 非官方中文文档站
   tagline: 这是第三方维护的中文文档，不代表官方文档权威
   image:

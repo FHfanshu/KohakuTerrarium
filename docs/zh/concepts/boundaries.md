@@ -21,7 +21,7 @@
 
 这不是漏洞，本来就是这样设计的。
 
-**例子：channel。** channel 不是从 chat-bot → agent 那条推导线里直接长出来的。它是为了 multi-agent 场景加上的通信层。最简单的实现就是：一个 tool 写消息；消息一到，trigger 就触发。一个概念横跨两个模块，没什么问题，这反而最顺。硬要再造一个新原语，也没多大意义。
+**例子：channel。** channel 不是从 chat-bot → agent 那条主线里直接讲出来的。它是为了 multi-agent 场景补上的通信层。最简单的实现就是：一个 tool 写消息，消息一到，trigger 就触发。一个概念横跨两个模块没关系，这样反而更顺。硬要再造一个新原语，意义不大。
 
 **例子：root agent。** root 可以理解成“一个带着特定 toolset 和特定监听接线方式的 creature”。从结构上看，它跟别的 creature 没差别；但从概念上看，它站的位置就是不一样。我们把它单独拎出来说，是因为这样更好理解，不是因为框架硬性规定了一个特殊类型。
 
@@ -38,7 +38,7 @@
 ## 什么情况下它不合适
 
 - 你已经**满意手头在用的 agent 产品**，而且需求也**比较稳定**。如果 Claude Code、OpenClaw，或者你们内部现成工具已经够用，之后大概也不会大改，那迁过来只是多一笔切换成本。
-- 你的**心智模型跟这个框架对不上**。如果你理解 agent 的方式，根本套不到 controller / tools / triggers / sub-agents / channels 这一套上，硬套只会更别扭。那就换别的，或者自己写一套更合适的框架。
+- 你的**理解方式跟这个框架对不上**。如果你脑子里那套 agent 模型，根本套不到 controller / tools / triggers / sub-agents / channels 这一套上，那就别硬上。换别的，或者自己写一套更合适的。
 - 你的负载对**超低延迟**有硬要求，比如单次操作得压到 50 ms 以下。KohakuTerrarium 优先的是正确性和灵活性；asyncio 开销、事件队列、output router、session 持久化，都会带来一点成本。大多数场景没问题，但有些场景就是不行。
 - 你就是**不想用它**。这也完全算理由。一个框架不该待在维护者本来就烦它的代码库里。
 
@@ -53,6 +53,6 @@
 ## 另见
 
 - [Why KohakuTerrarium](foundations/why-kohakuterrarium.md) —— 这个框架为什么会这样设计。
-- [What is an agent](foundations/what-is-an-agent.md) —— 这页偏离的，就是那套标准推导。
+- [What is an agent](foundations/what-is-an-agent.md) —— 这页讲的是那条主线。这里说的偏离，就是偏离它。
 - [模式](patterns.md) —— 有些模块组合会故意打破“一个模块只做一件事”的直觉。
 - [ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md) —— 现在还比较粗糙的地方，以及后面准备怎么改。

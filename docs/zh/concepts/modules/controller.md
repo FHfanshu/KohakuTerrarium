@@ -52,7 +52,7 @@ loop:
 - **重跑上一轮。** `regenerate_last_response()` 会让 controller 用当前状态重新执行上一次 LLM 调用。
 - **从任何地方塞事件。** 所有东西都走事件队列，所以 plugin、tool、外部 Python 代码都可以调用 `agent.inject_event(...)`，controller 会按顺序处理。
 
-## 别把它当铁律
+## 别把它看得太死
 
 没有 controller 的 creature 说不通，agent 总得有循环。但循环的**形状**不是写死的。`pre_llm_call`、`post_llm_call`、`pre_tool_execute` 这些 plugin hook，足够你从外面改写循环里的每一步，不用去碰 controller 类本身。见 [plugin](/zh/concepts/modules/plugin.md)。
 

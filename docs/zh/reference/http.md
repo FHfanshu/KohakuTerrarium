@@ -1,7 +1,7 @@
 # HTTP 与 WebSocket API
 
-这里列出包内 FastAPI 服务器暴露的所有 REST endpoint 和 WebSocket 通道（`kt web`、`kt serve`、`python -m kohakuterrarium.api.main`）。
-API 用来驱动 Vue SPA，也适合任何想从进程外控制 agent 和 terrarium 的客户端。
+这里是包里 FastAPI 服务器对外开的所有 REST endpoint 和 WebSocket 通道（`kt web`、`kt serve`、`python -m kohakuterrarium.api.main`）。
+API 一方面给 Vue SPA 用，另一方面也适合那些想从进程外控制 agent 和 terrarium 的客户端。
 
 服务层和 session 存储的结构，见[会话持久化](/concepts/impl-notes/session-persistence.md)（英文）。
 如果你更关心面向任务的用法，见[程序化使用](/guides/programmatic-usage.md)（英文）和[前端布局](/guides/frontend-layout.md)（英文）。
@@ -9,11 +9,11 @@ API 用来驱动 Vue SPA，也适合任何想从进程外控制 agent 和 terrar
 ## 服务器配置
 
 - 默认 host：`0.0.0.0`。
-- 默认端口：`8001`（在 `kt web` 下如果端口被占用，会自动递增）。
+- 默认端口：`8001`（如果用 `kt web`，端口被占了就继续往上试）。
 - 可通过 `python -m kohakuterrarium.api.main --host 127.0.0.1 --port 8080 [--reload]` 覆盖。
 - `KT_SESSION_DIR` 会覆盖默认的 session 目录。
 - CORS 完全开放：`allow_origins=["*"]`，允许所有方法和所有 headers。
-- 没有认证。把这个服务器当作受信任的本地服务使用。
+- 没有认证。把这个服务器当成本机可信服务来用。
 - 版本字符串：`0.1.0`。URL 没有 `/v1/` 前缀。
 - FastAPI 自动文档：`/docs`（Swagger UI）、`/redoc`（ReDoc）。
 
@@ -21,11 +21,11 @@ API 用来驱动 Vue SPA，也适合任何想从进程外控制 agent 和 terrar
 
 - `/assets/*` — 带哈希的构建资源。
 - `/{path}` — SPA 回退路由，任何未匹配路径都返回 `index.html`。
-- `/api/*` 和 WebSocket 路由优先。
+- `/api/*` 和 WebSocket 路由优先匹配。
 
 ## 响应约定
 
-- 状态码：`200` 成功，`400` 输入错误，`404` 资源不存在，`500` 服务器错误。不使用 `201`。
+- 状态码：`200` 表示成功，`400` 是输入有问题，`404` 是资源不存在，`500` 是服务器错误。不用 `201`。
 - 除非另有说明，payload 都是 JSON。
 - 错误使用 FastAPI 的 `HTTPException`，格式为 `{"detail": "<message>"}`。
 
@@ -75,14 +75,14 @@ API 用来驱动 Vue SPA，也适合任何想从进程外控制 agent 和 terrar
 
 ### `POST /api/terrariums/{terrarium_id}/chat/{target}`
 
-非流式聊天。`target` 可以是 `"root"` 或某个 creature 名称。
+非流式聊天。`target` 可以写成 `"root"`，也可以写某个 creature 名。
 
 - 请求体：`AgentChat`（`message` 或 `content`）。
 - 响应：`{"response": <full text>}`。
 
 ### `GET /api/terrariums/{terrarium_id}/history/{target}`
 
-读取对话和事件日志。`target` 可以是 `"root"`、某个 creature 名称，或者用于 channel 历史的 `"ch:<channel_name>"`。优先读取 SessionStore，不行就回退到内存日志。
+读对话和事件日志。`target` 可以是 `"root"`、某个 creature 名，或者 channel 历史用的 `"ch:<channel_name>"`。会先读 SessionStore，读不到再回退到内存日志。
 
 - 响应：`{"terrarium_id", "target", "messages": [...], "events": [...]}`。
 
@@ -97,7 +97,7 @@ API 用来驱动 Vue SPA，也适合任何想从进程外控制 agent 和 terrar
 
 ### `GET /api/terrariums/{terrarium_id}/triggers/{target}`
 
-列出当前启用的远程 triggers：
+列出当前启用的远程 trigger：
 `[{"trigger_id", "trigger_type", "running", "created_at"}]`。
 
 ### `GET /api/terrariums/{terrarium_id}/plugins/{target}`
@@ -110,7 +110,7 @@ API 用来驱动 Vue SPA，也适合任何想从进程外控制 agent 和 terrar
 
 ### `GET /api/terrariums/{terrarium_id}/env/{target}`
 
-返回 `{"pwd", "env"}`，其中 env 的键名只要包含 `secret`、`key`、`token`、`password`、`pass`、`private`、`auth`、`credential`（不区分大小写）都会被过滤掉。
+返回 `{"pwd", "env"}`。env 里只要键名带 `secret`、`key`、`token`、`password`、`pass`、`private`、`auth`、`credential`（大小写不敏感），就会被过滤掉。
 
 ### `GET /api/terrariums/{terrarium_id}/system-prompt/{target}`
 

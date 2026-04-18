@@ -4,7 +4,7 @@
 
 **channel** 就是一条带类型的消息管道。一头发，另一头或多头收。它可以放在某个 creature 的私有 session 里，也可以放在多个 creature 共用的 environment 里。
 
-它不算 creature 的“标准模块”。从 chat-bot 推到 agent 的那条线里，本来没有它。它更像通信底座：没有它，tool 和 trigger 很难在多个 agent 之间顺顺当当地接起来。
+它不算 creature 的“核心模块”。从 chat-bot 一路讲到 agent 时，本来没有它。它更像通信底层：没有它，tool 和 trigger 在多个 agent 之间就很难接得顺。
 
 ## 为什么要有它
 
@@ -42,9 +42,9 @@ channel 都放在 `ChannelRegistry` 里。creature 的私有 session 有一个 r
 - **不打断的调试。** 用 `ChannelObserver` 旁听一个队列，真正的消费者照常消费。
 - **跨 creature 会合。** 两个 creature 同时监听一个共享 channel，就可以轮流处理里面的条目。
 
-## 别把它当铁律
+## 别把它看得太死
 
-单独跑的 creature 完全可以没有 channel。它的 tool 不会 `send_message`，它的 trigger 也不用监听。channel 不是那条推导线里的一级模块；它只是框架顺手提供的一种约定。只是很多 multi-agent 场景兜一圈，最后都会回到它。
+单独跑的 creature 完全可以没有 channel。它的 tool 不发 `send_message`，trigger 也不用监听。channel 不是那条主线里的一级模块，只是框架给你准备好的一种约定。很多 multi-agent 场景转一圈，最后还是会用到它。
 
 这也是“框架会故意掰弯自己的抽象”最明显的例子。channel 在六模块分类之外，而“agent A 告诉 agent B 一件事”却被实现成“tool 写入，trigger 触发”。层次就是故意混着来的。见 [boundaries](/zh/concepts/boundaries.md)。
 

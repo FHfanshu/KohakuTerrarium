@@ -104,7 +104,7 @@
 
 ### Tools
 
-工具列表。每一项可以是一个 dict，也可以是简写字符串（表示同名 builtin）。
+工具列表。每一项可以写成一个 dict，也可以直接写字符串简写，表示同名 builtin。
 
 | 字段 | 类型 | 默认值 | 说明 |
 |---|---|---|---|
@@ -309,7 +309,7 @@ Terrarium 字段汇总：
 | 字段 | 类型 | 默认值 | 说明 |
 |---|---|---|---|
 | `name` | str | — | Terrarium 名称。 |
-| `root` | object | `null` | 可选的 root-agent 配置。会强制获得 terrarium 管理工具。 |
+| `root` | object | `null` | 可选的 root-agent 配置。这个 agent 会被强制加上 terrarium 管理工具。 |
 | `creatures` | list | `[]` | 在 terrarium 内运行的 creatures。 |
 | `channels` | dict | `{}` | 共享 channel 声明。 |
 
@@ -449,7 +449,7 @@ python_dependencies:
 
 ## API key 存储（`~/.kohakuterrarium/api_keys.yaml`）
 
-由 `kt login` 和 `kt config key set` 管理。格式：
+这部分由 `kt login` 和 `kt config key set` 管。格式如下：
 
 ```yaml
 openai: sk-...

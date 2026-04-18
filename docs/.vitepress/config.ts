@@ -13,9 +13,7 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: '中文', link: '/zh/' },
-      { text: 'Guides', link: '/guides/' },
-      { text: 'Reference', link: '/reference/' },
-      { text: '官方仓库', link: 'https://github.com/Kohaku-Lab/KohakuTerrarium' }
+      { text: 'Official Repo', link: 'https://github.com/Kohaku-Lab/KohakuTerrarium' }
     ],
     
     sidebar: {
@@ -248,7 +246,7 @@ export default defineConfig({
         nav: [
           { text: '首页', link: '/zh/' },
           { text: '英文', link: '/' },
-          { text: '指南', link: '/zh/quickstart' },
+          { text: '指南', link: '/zh/guides/' },
           { text: '官方仓库', link: 'https://github.com/Kohaku-Lab/KohakuTerrarium' },
           { text: '第三方文档源码', link: 'https://github.com/FHfanshu/KohakuTerrarium' }
         ],

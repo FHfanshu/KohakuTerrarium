@@ -2,7 +2,7 @@
 
 ## 它是什么
 
-**input** 模块是外部世界把活交给 creature 的入口。在那套标准推导里，它位于 controller 前面，负责发出第一个事件。真到实现里看，它其实就是一种特定的 trigger，只不过按约定把它叫作“用户输入”。
+**input** 模块就是外部世界把事情交给 creature 的入口。放到整体流程里看，它在 controller 前面，负责发出第一个事件。真到实现时，它其实就是一种特定的 trigger，只是大家习惯把它叫“用户输入”。
 
 ## 为什么要有它
 
@@ -33,7 +33,7 @@
 - **传感器式输入。** 接文件系统 watcher、Discord listener 或 MQTT consumer 都行。对 creature 来说，差别不大。
 - **把 input 当策略层。** input 模块可以在内容到达 controller 之前先处理一遍，比如翻译、审核，或者去掉敏感信息。
 
-## 别把它当铁律
+## 别把它看得太死
 
 input 不是必需的。一个 Discord bot creature，如果根本没有“坐在终端前的人”，完全可以不配 input，只靠 HTTP WebSocket trigger 驱动。反过来也一样，一个 creature 可以同时有几个实际的输入面：用户在 CLI 里打字，webhook 往里推事件，旁边 timer 也在触发。
 

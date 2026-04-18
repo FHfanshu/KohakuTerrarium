@@ -98,4 +98,4 @@ triggers:
   [Channel](/zh/concepts/modules/channel.md)、[Plugin](/zh/concepts/modules/plugin.md)
   — 这些模式就是拿这些积木拼出来的。
 - [边界](/zh/concepts/boundaries.md)
-  — 抽象是默认做法，不是死规定；有些模式本来就会有意跨过去。
+  — 这些抽象只是默认做法，不是死规定；有些模式本来就会故意跨过去。

@@ -51,7 +51,7 @@ Session（每个 creature 一个）
 - **单个 creature 的状态总线。** 同一个 creature 里的几个 tool，可以把 scratchpad 当 KV 会合点用。
 - **environment 级自定义上下文。** 驱动 terrarium 的 HTTP 应用，可以把 user-id、request-id 之类的信息塞进 environment 的 `context` dict，再让 plugin 去取。
 
-## 别把它当铁律
+## 别把它看得太死
 
 单独运行的 creature 不一定需要 environment。纯 trigger creature 也不一定非要 scratchpad。这个框架只在真有必要的地方坚持私有 / 共享分离；如果你只有一个 creature，它也很乐意把整个状态都当成一个单独 session 来看。
 

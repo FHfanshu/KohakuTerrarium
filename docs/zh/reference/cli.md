@@ -1,14 +1,14 @@
 # CLI 参考
 
-这里列出 `kt` 的所有命令、子命令和参数。CLI 是这个框架给操作者用的入口：启动 creature、启动 terrarium、管理包、配置 LLM、启动 Web UI、搜索保存下来的 session。
+这里是 `kt` 的完整命令表：命令、子命令、参数都在这。你可以用它来启动 creature、启动 terrarium、管包、配 LLM、开 Web UI、查保存下来的 session。
 
-如果你想先弄清 creature、terrarium 和 root agent 是怎么回事，先看[概念 / 边界](../concepts/boundaries.md)。如果你是按任务来找做法，可以看[快速开始](../guides/getting-started.md)和[creature](../guides/creatures.md)。
+如果你想先弄明白 creature、terrarium 和 root agent 到底是什么，先看[概念 / 边界](../concepts/boundaries.md)。如果你是来找具体做法的，可以看[快速开始](../guides/getting-started.md)和[creature](../guides/creatures.md)。
 
 ## 入口
 
 - `kt` — 安装后的控制台脚本。
 - `python -m kohakuterrarium` — 和上面等价。
-- 如果调用时没有子命令（比如通过 Briefcase 双击启动），`kt` 会自动打开桌面应用。
+- 如果启动时没带子命令（比如用 Briefcase 双击打开），`kt` 会直接拉起桌面应用。
 
 ## 全局参数
 
@@ -38,7 +38,7 @@ kt run <agent_path> [flags]
 | 参数 | 类型 | 默认值 | 说明 |
 |---|---|---|---|
 | `--log-level` | `DEBUG\|INFO\|WARNING\|ERROR` | `INFO` | 根 logger 的级别。 |
-| `--session` | path | auto | 要写入的 session 文件；可以是绝对路径，也可以是 `~/.kohakuterrarium/sessions/` 下面的名字。 |
+| `--session` | path | auto | session 文件写到哪里。可以给绝对路径，也可以只写 `~/.kohakuterrarium/sessions/` 下面的名字。 |
 | `--no-session` | flag | — | 完全关闭 session 持久化。 |
 | `--llm` | str | — | 覆盖 LLM profile，例如 `gpt-5.4`、`claude-opus-4.6`。 |
 | `--mode` | `cli\|plain\|tui` | auto | 交互模式。TTY 下默认是 `cli`，否则默认是 `plain`。 |
@@ -46,8 +46,8 @@ kt run <agent_path> [flags]
 行为：
 
 - `@package/...` 路径会解析到 `~/.kohakuterrarium/packages/<pkg>/...`，可编辑安装时会跟随 `.link` 指针。
-- 除非设置了 `--no-session`，否则会自动在 `~/.kohakuterrarium/sessions/` 下创建一个 `.kohakutr` 扩展名的 session。
-- 退出时会打印一条 `kt resume <name>` 提示。
+- 不加 `--no-session` 的话，会自动在 `~/.kohakuterrarium/sessions/` 下建一个 `.kohakutr` session。
+- 退出时会顺手提示你一条 `kt resume <name>`。
 - 按 Ctrl+C 会走优雅关闭流程。
 
 ### `kt resume`
@@ -74,7 +74,7 @@ kt resume [session] [flags]
 
 行为：
 
-- 接受 `.kohakutr` 和旧版 `.kt` 扩展名，解析时会自动去掉。
+- 支持 `.kohakutr` 和旧的 `.kt` 扩展名，解析时会自动去掉。
 - 如果前缀匹配到多个结果，会弹出选择器。
 
 ### `kt list`
@@ -91,7 +91,7 @@ kt list [--path agents]
 
 ### `kt info`
 
-打印 creature 配置的名称、描述、模型、工具、sub-agent 和文件。
+打印 creature 配置里的名称、描述、模型、工具、sub-agent 和文件列表。
 
 ```
 kt info <agent_path>
@@ -103,7 +103,7 @@ kt info <agent_path>
 
 ### `kt terrarium run`
 
-运行一个多 agent terrarium。
+跑一个多 agent terrarium。
 
 ```
 kt terrarium run <terrarium_path> [flags]
@@ -129,13 +129,13 @@ kt terrarium run <terrarium_path> [flags]
 
 行为：
 
-- `tui` 会显示多标签页：root + 每个 creature + 每个 channel。
+- `tui` 会开出多个标签页：root、每个 creature、还有每个 channel。
 - `cli` 会在 RichCLI 里挂载 root（如果有）；没有 root 就挂第一个 creature。
 - `plain` 会把被观察到的 channel 消息直接输出到 stdout。
 
 ### `kt terrarium info`
 
-打印 terrarium 名称、creature、监听/发送的 channel，以及 channel 列表。
+打印 terrarium 的名字、creature、收发哪些 channel，还有 channel 列表。
 
 ```
 kt terrarium info <terrarium_path>
@@ -156,9 +156,9 @@ kt install <source> [-e|--editable] [--name <name>]
 | 参数 | 类型 | 默认值 | 说明 |
 |---|---|---|---|
 | `-e`, `--editable` | flag | — | 不复制文件，而是写一个指向源码的 `<name>.link`。 |
-| `--name` | str | 从 URL/路径推导 | 覆盖安装后的包名。 |
+| `--name` | str | 从 URL/路径推导 | 改掉安装后的包名。 |
 
-`<source>` 可以是：
+`<source>` 可以这样写：
 
 - git URL（会 clone 到 `~/.kohakuterrarium/packages/<name>`）
 - 本地目录（直接复制，或者配合 `-e` 建立链接）
@@ -199,11 +199,11 @@ kt edit <target>
 
 ### `kt config show`
 
-打印 CLI 会用到的所有配置文件路径。
+列出 CLI 会用到的所有配置文件路径。
 
 ### `kt config path`
 
-打印以下某一个路径：`home`、`llm_profiles`、`api_keys`、`mcp_servers`、`ui_prefs`。
+输出下面这些路径里的某一个：`home`、`llm_profiles`、`api_keys`、`mcp_servers`、`ui_prefs`。
 
 ```
 kt config path [name]
@@ -219,11 +219,11 @@ kt config edit [name]
 
 ### `kt config provider`（别名：`kt config backend`）
 
-管理 LLM provider（backend）。
+管 LLM provider（backend）。
 
 #### `kt config provider list`
 
-显示每个 provider 的 Name、Backend Type 和 Base URL。
+列出每个 provider 的 Name、Backend Type 和 Base URL。
 
 #### `kt config provider add`
 
@@ -249,15 +249,15 @@ kt config provider delete <name>
 
 ### `kt config llm`（别名：`kt config model`、`kt config preset`）
 
-管理 LLM preset。
+管 LLM preset。
 
 #### `kt config llm list`
 
-显示 Name、Provider、Model 和默认标记。
+列出 Name、Provider、Model 和默认标记。
 
 #### `kt config llm show`
 
-打印完整 preset：provider、model、max_context、max_output、base_url、api_key_env、temperature、reasoning_effort、service_tier、extra_body。
+把完整 preset 打出来：provider、model、max_context、max_output、base_url、api_key_env、temperature、reasoning_effort、service_tier、extra_body。
 
 ```
 kt config llm show <name>

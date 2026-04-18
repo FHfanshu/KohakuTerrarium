@@ -1,6 +1,6 @@
 # 插件钩子
 
-这里列出插件可用的全部 hook：生命周期、LLM、工具、sub-agent 和回调。hook 定义在 `kohakuterrarium.modules.plugin` 的 `Plugin` 协议里；`BasePlugin` 提供默认的 no-op 实现。接线位置在 `bootstrap/plugins.py`。
+这里把插件能用的 hook 都列出来了：生命周期、LLM、工具、sub-agent，还有各种回调。hook 定义在 `kohakuterrarium.modules.plugin` 里的 `Plugin` 协议中；`BasePlugin` 给的是默认 no-op 实现。真正接到系统里的地方在 `bootstrap/plugins.py`。
 
 想先看整体模型，读 [concepts/modules/plugin（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/modules/plugin.md)。
 想看按任务展开的用法，读 [guides/plugins（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/guides/plugins.md) 和 [guides/custom-modules（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/guides/custom-modules.md)。

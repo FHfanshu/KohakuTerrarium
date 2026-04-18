@@ -8,6 +8,8 @@ hero:
   image:
     src: /logo.svg
     alt: KohakuTerrarium community docs
+    width: 360
+    height: 360
   actions:
     - theme: brand
       text: Get Started

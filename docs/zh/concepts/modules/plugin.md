@@ -62,7 +62,7 @@
 - **聪明护栏。** 写一个 `pre_tool_execute` plugin，里面再跑一个小型 nested agent，判断这次动作该不该放行。plugin 是 Python，agent 也是 Python，所以这事完全合法。见 [patterns](/zh/concepts/patterns.md)。
 - **拼 prompt。** 写一个 prompt plugin，根据 scratchpad 状态或 session 元数据动态生成指令。
 
-## 别把它当铁律
+## 别把它看得太死
 
 plugin 不是必需品。没有 plugin 的 creature 也能跑得很好。但只要你开始冒出这种念头——“我想在整个循环的很多地方都加同一种行为”——那答案十有八九是 plugin，不是新模块。
 

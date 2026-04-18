@@ -1,0 +1,7 @@
+name: swe-bio-agent
+version: "0.1.0"
+description: "Custom SWE bio agent example"
+
+creatures:
+  - name: swe_bio_agent
+    path: creatures/swe_bio_agent

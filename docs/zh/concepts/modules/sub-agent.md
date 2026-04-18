@@ -43,7 +43,7 @@ sub-agent = 一份 creature 配置 + 父级 registry。拉起来之后：
 - **嵌套 terrarium。** sub-agent 自己还能用 `terrarium_create` 拉起一个 terrarium。底层并不在意。
 - **纵向套横向。** terrarium 里的某个 creature 自己又用 sub-agent。两种 multi-agent 轴线可以混着来。
 
-## 别把它当铁律
+## 别把它看得太死
 
 sub-agent 不是必需的。很多短任务，只有 tool 也完全够用。而且“sub-agent”本来就在概念上很像“一个实现恰好是完整 agent 的 tool”。边界有时会变得很模糊：某个 Python tool 里自己起一个 agent，从 LLM 的视角看，这和直接调 sub-agent 几乎没区别。
 

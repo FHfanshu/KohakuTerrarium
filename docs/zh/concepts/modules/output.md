@@ -41,7 +41,7 @@
 - **后处理文本。** 把 `controller_direct` 设成 `false`，再加一个自定义 output，对 controller 产出的文本做清洗、翻译或加水印。
 - **和传输方式解耦。** 同一个 creature 可以跑在 CLI、web 或桌面环境，因为 output 层把传输细节挡住了。
 
-## 别把它当铁律
+## 别把它看得太死
 
 没有 output 的 creature 也说得通：有些 trigger 只是引发副作用，比如写文件、发邮件。反过来，output 也可以做得很重。一个 Python output 模块完全可以自己再跑个 mini-agent，决定每个 chunk 怎么格式化。听上去有点夸张，实际也确实有点夸张，但不是不行。
 

@@ -72,7 +72,7 @@ embedding provider（`kt embedding`）有这些：
 - **长时间后台运行。** creature 连跑几天也不一定撞墙；compaction 会让滚动摘要压在最近 N 个 turn 上面。
 - **跨 session 记忆。** 更复杂的配置可以把 session store 路径提出来，让一组相关 creature 共用。
 
-## 别把它当铁律
+## 别把它看得太死
 
 session 持久化可以关掉（`--no-session`）。embeddings 是可选的。compaction 也是按 creature 选择开启或关闭。一个 creature 完全可以什么都不用；memory 是方便，不是前提。
 

@@ -1,124 +1,131 @@
 # 依赖规则
 
-这个包的 import 方向是严格单向的。规则靠约定执行，也会用 `scripts/dep_graph.py` 校验。当前运行时没有循环依赖，别把它弄回去。
+这个项目的 import 只能单向走。平时靠大家自觉，真要查就跑 `scripts/dep_graph.py`。现在运行时没有 import 环，别改着改着又绕回去了。
 
-## 一段话讲清规则
+## 先记住这几句
 
-`utils/` 是叶子层。所有地方都可以 import 它，但它自己不能反向 import 框架里的东西。`modules/` 只放协议定义。`core/` 是运行时，能 import `modules/` 和 `utils/`，但**绝不能** import `builtins/`、`terrarium/` 或 `bootstrap/`。`bootstrap/` 和 `builtins/` 可以 import `core/` + `modules/`。`terrarium/` 和 `serving/` 站在更上层，依赖 `core/` + `bootstrap/`。`cli/` 和 `api/` 则位于最上层，依赖 `serving/` + `terrarium/`。
+`utils/` 是最底层，谁都能 import 它，但它不能反过来 import 框架里的东西。`modules/` 只放协议和基类。`core/` 是运行时核心，可以 import `modules/` 和 `utils/`，但**不能** import `builtins/`、`terrarium/`、`bootstrap/`。`bootstrap/` 和 `builtins/` 可以站在 `core/` 上面。`terrarium/` 和 `serving/` 再往上一层。最上面才是 `cli/` 和 `api/`。
 
 ## 分层
 
-从最底层叶子到最上层传输层：
+从底往上看，大概是这样：
 
 ```
-  cli/, api/                    <- transport
-  serving/, terrarium/          <- orchestration
-  bootstrap/, builtins/         <- assembly + implementations
-  core/                         <- runtime engine
-  modules/                      <- protocols（以及少量基类）
-  parsing/, prompt/, llm/, …    <- support packages
-  testing/                      <- 依赖整个栈，仅供测试使用
-  utils/                        <- leaf
+  cli/, api/                    <- transport 层
+  serving/, terrarium/          <- orchestration 层
+  bootstrap/, builtins/         <- 装配 + 实现层
+  core/                         <- 运行时引擎
+  modules/                      <- 协议层（带一点基类）
+  parsing/, prompt/, llm/, …    <- 支撑包
+  testing/                      <- 依赖整套栈，只给测试用
+  utils/                        <- 叶子层
 ```
 
-逐层说明：
+各层干的事：
 
-- **`utils/`** —— 日志、异步辅助、文件保护。这里不能 import 任何框架内部包。只要往这里加框架依赖，基本就是错的。
-- **`modules/`** —— 协议和基类定义。比如 `BaseTool`、`BaseOutputModule`、`BaseTrigger`。这里不放实现，方便上层都能依赖它。
-- **`core/`** —— `Agent`、`Controller`、`Executor`、`Conversation`、`Environment`、`Session`、channels、events、registry。这里才是运行时本体。`core/` 绝不能 import `terrarium/`、`builtins/`、`bootstrap/`、`serving/`、`cli/` 或 `api/`，否则循环依赖会重新出现。
-- **`bootstrap/`** —— 工厂函数层，把配置装配成 `core/` 组件（LLM、tools、IO、subagents、triggers）。会 import `core/` 和 `builtins/`。
-- **`builtins/`** —— 各种内置 tool、sub-agent、input、output、TUI、user command。内部目录如 `tool_catalog`、`subagent_catalog` 属于叶子模块，用 deferred loader 延迟装载。
-- **`terrarium/`** —— 多智能体运行时。依赖 `core/`、`bootstrap/`、`builtins/`。这些层都不该反向依赖它。
-- **`serving/`** —— `KohakuManager`、`AgentSession`。依赖 `core/` 和 `terrarium/`，但不关心具体传输协议。
-- **`cli/`、`api/`** —— 最上层。一个是 argparse 入口，一个是 FastAPI 应用，二者都消费 `serving/`。
+- **`utils/`** — 日志、异步小工具、文件保护。这里不该 import 任何框架代码。真加了，八成是分层放错了。
+- **`modules/`** — 协议和基类，比如 `BaseTool`、`BaseOutputModule`、`BaseTrigger`。这里只定义接口，不放具体实现。
+- **`core/`** — `Agent`、`Controller`、`Executor`、`Conversation`、`Environment`、`Session`、channel、event、registry，运行时主体都在这。`core/` 不能 import `terrarium/`、`builtins/`、`bootstrap/`、`serving/`、`cli/`、`api/`。一旦这么干，循环依赖很快就回来。
+- **`bootstrap/`** — 按配置把 `core/` 组起来，LLM、tools、IO、subagents、triggers 这些都从这里接上。
+- **`builtins/`** — 内建 tool、sub-agent、input、output、TUI、user command。像 `tool_catalog`、`subagent_catalog` 这种 catalog 自己也要尽量保持叶子化。
+- **`terrarium/`** — 多 agent 运行时。它可以 import `core/`、`bootstrap/`、`builtins/`，反过来不行。
+- **`serving/`** — `KohakuManager`、`AgentSession` 这些对外服务包装层。依赖 `core/` 和 `terrarium/`，但不绑死某种传输方式。
+- **`cli/`、`api/`** — 最上层入口。一个走 argparse，一个走 FastAPI，都建立在 `serving/` 之上。
 
-可把 [`src/kohakuterrarium/README.md`](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/src/kohakuterrarium/README.md)（英文）里的 ASCII 依赖图当成权威版本。
+源码树里的 ASCII 依赖图在 [`src/kohakuterrarium/README.md`](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/src/kohakuterrarium/README.md)，要对图，以那份为准。
 
-## 为什么要这样分
+## 为什么要这么分
 
-主要是三个目的：
+主要就三件事：
 
-1. **没有环。** 循环依赖会带来初始化顺序脆弱、partial import 报错，以及启动期副作用。
-2. **方便测试。** 只要 `core/` 不 import `terrarium/`，就能单测 controller，而不用把多智能体运行时整个拉起来。只要 `modules/` 只放协议，实现就能随时替换。
-3. **改动范围清晰。** 改 `utils/`，影响面最大；改 `cli/`，几乎不会向下波及。分层之后，影响范围是可预期的。
+1. **别有环。** 一旦有环，初始化顺序会变得很脆，partial import 和各种 side effect 会一起冒出来。
+2. **好测试。** `core/` 不去 import `terrarium/`，测 controller 时就不用把整套多 agent runtime 一起拉起来。
+3. **改动范围好判断。** 你改 `utils/`，影响可能很大；你改 `cli/`，一般就只在上层打转。
 
-历史上曾经有一条循环链：
-`builtins.tools.registry → terrarium.runtime → core.agent → builtins.tools.registry`。
-后来通过引入 `tool_catalog` 这个叶子模块，再配合 deferred loader，把这条环拆掉了。细节可以去翻 git 历史里 [`internals.md`](/dev/internals.md)（英文）的 legacy notes。现在只有两处延迟 import 是被允许的：`core/__init__.py` 用 `__getattr__` 避开 `core.agent` 的初始化顺序问题；`terrarium/tool_registration.py` 会把 terrarium tool 的注册延后到第一次查找时。
+以前出过这样一条环：
+`builtins.tools.registry → terrarium.runtime → core.agent → builtins.tools.registry`
 
-## 工具：`scripts/dep_graph.py`
+后来是拆出 `tool_catalog` 这种叶子模块，再配合 deferred loader 才解开的。现在还留着两处算合理的 lazy import：`core/__init__.py` 用 `__getattr__` 处理 `core.agent` 的初始化顺序；`terrarium/tool_registration.py` 会把 terrarium tool 的注册拖到第一次查找时再做。
 
-这是个静态 AST 分析器。它会遍历 `src/kohakuterrarium/` 下的所有 `.py` 文件，解析 `import` / `from ... import`，并把每条边分成三类：
+## 检查工具：`scripts/dep_graph.py`
 
-- **runtime** —— 顶层 import，模块加载时就会执行
-- **TYPE_CHECKING** —— 放在 `if TYPE_CHECKING:` 里，不计入运行时依赖图
-- **lazy** —— 写在函数体内部的 import，不计入运行时依赖图
+这是个静态 AST 分析器，会扫 `src/kohakuterrarium/` 下所有 `.py`，把 import 边分成三类：
 
-只有 runtime 边会参与循环检测。
+- **runtime** — 顶层 import，模块一加载就会跑。
+- **TYPE_CHECKING** — 写在 `if TYPE_CHECKING:` 里，不算进 runtime 图。
+- **lazy** — 写在函数体里，也不算进 runtime 图。
+
+只有 runtime 边会拿去查环。
 
 ### 命令
 
 ```bash
-# 摘要统计 + 跨分组依赖计数（默认）
+# 概览统计 + 跨组边数量（默认）
 python scripts/dep_graph.py
 
-# 检查 runtime SCC 循环
+# 检查 runtime SCC cycle
 python scripts/dep_graph.py --cycles
 
-# 输出 Graphviz DOT（可接 `dot -Tsvg`）
+# 输出 Graphviz DOT（可接到 `dot -Tsvg`）
 python scripts/dep_graph.py --dot > deps.dot
 
-# 用 matplotlib 把分组图和模块图渲染到 plans/
+# 用 matplotlib 画 group + module 图，输出到 plans/
 python scripts/dep_graph.py --plot
 
-# 上面全部都做
+# 上面全跑一遍
 python scripts/dep_graph.py --all
 ```
 
-关键输出包括：
+重点看这些输出：
 
-- **Top fan-out** —— import 别人的模块最多的是谁。通常是装配代码，比如 `bootstrap/`、`core/agent.py`。
-- **Top fan-in** —— 被 import 次数最多的是谁。一般会看到 `utils/`、`modules/base`、`core/events.py` 靠前。
-- **Cross-group edges** —— 跨包边数量，类似条形图。如果突然出现 `core/` 指向 `terrarium/` 的新边，就该查。
-- **SCCs** —— 理想状态下一直为空。只要 Tarjan 算法找到了非平凡 SCC，运行时依赖图里就有环。
+- **Top fan-out** — import 别人最多的文件，常见是装配代码，比如 `bootstrap/`、`core/agent.py`。
+- **Top fan-in** — 被 import 最多的模块，通常是 `utils/`、`modules/base`、`core/events.py`。
+- **Cross-group edges** — 跨包边数量。要是突然多出一条 `core/` 指到 `terrarium/` 的边，就得查。
+- **SCCs** — 正常应该是空的。只要 Tarjan 算法找出了非平凡 SCC，说明 runtime 图里有环。
 
-`--plot` 会写出 `plans/dep-graph.png`（分组级、环形布局）和 `plans/dep-graph-detailed.png`（模块级、同心圆布局）。做大重构时，这两张图很适合放到 PR 里辅助审查。
+`--plot` 会写出 `plans/dep-graph.png` 和 `plans/dep-graph-detailed.png`。大改完之后，把这两张图贴进 PR 里很有用。
 
 ### 什么时候跑
 
-- 提交一个新增子包的 PR 之前
-- 怀疑有循环 import 时（典型症状是启动时报 `ImportError`，提示 partially initialized module）
-- 做完大规模重构之后，拿来做一次 sanity check
+- PR 要加新子包之前。
+- 你怀疑有循环 import 的时候，比如启动时报 `ImportError`，还提到 partially initialized module。
+- 大重构之后，顺手做个检查。
 
-跑 `python scripts/dep_graph.py --cycles`，确认输出是：
+至少跑一下：
 
-```text
+```bash
+python scripts/dep_graph.py --cycles
+```
+
+正常输出应该是：
+
+```
 None found. The runtime import graph is acyclic.
 ```
 
-如果不是，就先把环拆掉，再谈合并。
+不是这个结果，就先拆环，再合并。
 
-## 新增包时怎么放
+## 新增 package 往哪放
 
-先选对层级，问自己几个问题：
+先想清楚几件事：
 
-- **它有运行时行为，还是只放基类 / 协议？** 只放协议就进 `modules/`；有运行时行为，就放 `core/` 或更高层的专用子包。
-- **它需不需要 `core.Agent`？** 如果需要，它就在 `core/` 上层，不该塞进 `core/` 里面。
-- **它是 KT 自带能力，还是扩展包？** 内置功能进 `builtins/`；扩展功能应放在独立包里，通过 package manifest 接入。
+- **它是协议，还是运行时逻辑？** 协议放 `modules/`，运行时逻辑放 `core/` 或更上层。
+- **它要不要依赖 `core.Agent`？** 要的话，它就不该塞进 `core/` 里。
+- **它是内建的，还是扩展？** 内建放 `builtins/`，扩展放独立 package，再用 manifest 接进来。
 
-选好层之后，继续遵守这层的 import 规则：
+然后守住这一层自己的 import 规则：
 
-- `utils/` 不 import 框架内部任何东西。
-- `modules/` 只 import `utils/` 和核心类型定义，不要再往上。
-- `core/` 只能 import `modules/`、`utils/`、`llm/`、`parsing/`、`prompt/`。
-  绝不能 import `terrarium/`、`serving/`、`builtins/`、`bootstrap/`。
+- `utils/` 不能 import 框架代码。
+- `modules/` 可以 import `utils/` 和 core typing，别的少碰。
+- `core/` 可以 import `modules/`、`utils/`、`llm/`、`parsing/`、`prompt/`。
+  不能 import `terrarium/`、`serving/`、`builtins/`、`bootstrap/`。
 - `bootstrap/` 和 `builtins/` 可以 import `core/` + `modules/`。
-- 其他所有层都放在它们之上。
+- 其他东西放在这些层之上。
 
-如果一条新依赖边看起来很别扭，通常说明它本来就不该存在。优先引入一个叶子辅助模块（比如 `tool_catalog`）来拆环，而不是先拿函数内 import 糊过去。函数内 import 在 [CLAUDE.md §Import Rules](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/CLAUDE.md)（英文）里本来就被视为最后手段，不是常规方案。
+如果你新加的一条边看着就不太对，通常就是真的不对。优先考虑拆一个叶子辅助模块，比如 `tool_catalog`，别第一反应就是往函数里塞 import。函数内 import 不是常规写法，只能当最后手段。
 
 ## 另见
 
-- [CLAUDE.md §Import Rules](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/CLAUDE.md)（英文）—— 这些约束对应的代码规范
-- [`src/kohakuterrarium/README.md`](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/src/kohakuterrarium/README.md)（英文）—— 权威 ASCII 依赖图
-- [internals.md](/dev/internals.md)（英文）—— 逐段说明每个子包的职责
+- [CLAUDE.md §Import Rules](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/CLAUDE.md) — 这里的规则和那边是一套东西。
+- [`src/kohakuterrarium/README.md`](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/src/kohakuterrarium/README.md) — 标准 ASCII 依赖图。
+- [internals.md](internals.md) — 按运行流程讲各个子包在干什么。

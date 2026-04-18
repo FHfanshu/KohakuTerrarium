@@ -48,7 +48,7 @@ trigger manager 会给每个已注册 trigger 起一个后台 task。每个 task
 - **接外部信号。** `webhook` trigger 能把 creature 变成 CI hook、部署事件或上游产品流量的接收端。
 - **自适应 watcher。** 你可以写一个自定义 trigger，让它的 `fire()` 里再跑一个小 nested agent，由判断来决定**什么时候**唤醒外层 creature，而不是硬编码规则。见 [patterns](/zh/concepts/patterns.md)。
 
-## 别把它当铁律
+## 别把它看得太死
 
 creature 可以一个 trigger 都没有。也可以只有 trigger，没有 input。框架不偏袒哪种配置，反正都支持。而且因为 trigger 本身也是 Python 对象，你完全可以把 agent 塞进去——让 watcher 先“想一想”，再决定要不要触发，而不是照着固定规则走。这也是 agentic ambient behaviour 比较便宜就能搭出来的原因。
 

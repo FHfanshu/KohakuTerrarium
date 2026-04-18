@@ -1,0 +1,9 @@
+.VPHero.has-image .image {
+  transform: translate(42px, 22px);
+}
+
+@media (max-width: 959px) {
+  .VPHero.has-image .image {
+    transform: none;
+  }
+}
