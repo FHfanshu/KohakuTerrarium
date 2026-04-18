@@ -31,7 +31,7 @@ kt run <agent_path> [flags]
 
 位置参数：
 
-- `agent_path` — 包含 `config.yaml` 的本地文件夹，或者像 `@kt-defaults/creatures/swe` 这样的包引用。
+- `agent_path` — 包含 `config.yaml` 的本地文件夹，或者像 `@kt-biome/creatures/swe` 这样的包引用。
 
 参数：
 

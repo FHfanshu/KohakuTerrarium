@@ -33,12 +33,12 @@ sub-agent = 一份 creature 配置 + 父级 registry。拉起来之后：
 
 深度会被 `max_subagent_depth`（配置级别）限制住，防止递归失控。取消是协作式的：父级可以调用 `stop_task` 去中断正在运行的 sub-agent。
 
-内置 sub-agent（来自 `kt-defaults` 和框架）包括：`worker`、`plan`、`explore`、`critic`、`response`、`research`、`summarize`、`memory_read`、`memory_write`、`coordinator`。
+内置 sub-agent（来自 `kt-biome` 和框架）包括：`worker`、`plan`、`explore`、`critic`、`response`、`research`、`summarize`、`memory_read`、`memory_write`、`coordinator`。
 
 ## 你能拿它做什么
 
 - **计划 / 实现 / 评审。** 父级挂三个 sub-agent。父级负责编排，每个 sub-agent 只盯自己那一段。
-- **安静的 controller。** 父级把 `response` sub-agent 设成 `output_to: external`。controller 自己不往外说话，真正到用户眼前的是 sub-agent 的回复。这也是很多 kt-defaults 聊天型 creature 的做法。
+- **安静的 controller。** 父级把 `response` sub-agent 设成 `output_to: external`。controller 自己不往外说话，真正到用户眼前的是 sub-agent 的回复。这也是很多 kt-biome 聊天型 creature 的做法。
 - **持续在线的专家。** 一个 `interactive: true` 的 reviewer，可以看见每个 turn，但只在真有话说的时候插嘴。
 - **嵌套 terrarium。** sub-agent 自己还能用 `terrarium_create` 拉起一个 terrarium。底层并不在意。
 - **纵向套横向。** terrarium 里的某个 creature 自己又用 sub-agent。两种 multi-agent 轴线可以混着来。

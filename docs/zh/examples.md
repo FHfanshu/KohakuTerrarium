@@ -16,7 +16,7 @@ kt run examples/agent-apps/<name>
 
 | Agent | 模式 | 展示内容 |
 |---|---|---|
-| `swe_agent` | 编码 agent | 一个重度依赖工具的 creature，风格接近 `kt-defaults/creatures/swe` |
+| `swe_agent` | 编码 agent | 一个重度依赖工具的 creature，风格接近 `kt-biome/creatures/swe` |
 | `discord_bot` | 群聊机器人 | 自定义 Discord I/O、ephemeral、原生 tool calling |
 | `planner_agent` | plan-execute-reflect | scratchpad 状态机 + critic 子 agent |
 | `monitor_agent` | 触发器驱动 | `input: none` + 定时触发器，不需要用户参与 |
@@ -87,5 +87,5 @@ kt terrarium run examples/terrariums/<name>
 ## 另见
 
 - [快速开始](getting-started.md) — 环境准备。
-- [`kt-defaults`](https://github.com/Kohaku-Lab/kt-defaults) — 展示用包；很多示例都沿用了它的写法。
+- [`kt-biome`](https://github.com/Kohaku-Lab/kt-biome) — 展示用包；很多示例都沿用了它的写法。
 - [教程](../tutorials/README.md) — 和这些示例配套的引导式文档。

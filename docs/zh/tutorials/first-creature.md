@@ -10,13 +10,13 @@ creature 本质上就是一个独立 agent：controller + input + output + tools
 
 ## 第 1 步：安装默认包
 
-先把自带的 creatures（`swe`、`general`、`reviewer`、`root` ……）装到本机，这样后面就能用 `@kt-defaults/...` 来引用。
+先把自带的 creatures（`swe`、`general`、`reviewer`、`root` ……）装到本机，这样后面就能用 `@kt-biome/...` 来引用。
 
 ```bash
-kt install https://github.com/Kohaku-Lab/kt-defaults.git
+kt install https://github.com/Kohaku-Lab/kt-biome.git
 ```
 
-`kt install` 可以接 git URL，也可以接本地路径。装完以后，包会放在 `~/.kohakuterrarium/packages/kt-defaults/`，配置里就能直接写 `@kt-defaults/...`。
+`kt install` 可以接 git URL，也可以接本地路径。装完以后，包会放在 `~/.kohakuterrarium/packages/kt-biome/`，配置里就能直接写 `@kt-biome/...`。
 
 可以检查一下：
 
@@ -24,7 +24,7 @@ kt install https://github.com/Kohaku-Lab/kt-defaults.git
 kt list
 ```
 
-你应该会看到 `kt-defaults`，还有里面那些 creatures：`swe`、`general`、`reviewer`、`root`、`researcher`、`ops`、`creative`。
+你应该会看到 `kt-biome`，还有里面那些 creatures：`swe`、`general`、`reviewer`、`root`、`researcher`、`ops`、`creative`。
 
 ## 第 2 步：登录 LLM
 
@@ -54,7 +54,7 @@ kt model default gpt-5.4
 先看一遍完整 creature 是怎么工作的，再动手改。
 
 ```bash
-kt run @kt-defaults/creatures/swe --mode cli
+kt run @kt-biome/creatures/swe --mode cli
 ```
 
 给它一个简单请求：
@@ -88,7 +88,7 @@ mkdir -p creatures/my-swe/prompts
 ```yaml
 name: my_swe
 version: "1.0"
-base_config: "@kt-defaults/creatures/swe"
+base_config: "@kt-biome/creatures/swe"
 
 system_prompt_file: prompts/system.md
 ```
@@ -117,7 +117,7 @@ House rules:
 ```yaml
 name: my_swe
 version: "1.0"
-base_config: "@kt-defaults/creatures/swe"
+base_config: "@kt-biome/creatures/swe"
 
 system_prompt_file: prompts/system.md
 

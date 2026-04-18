@@ -19,7 +19,7 @@
 
 ### 构建者（1小时）
 
-想构建不在 `kt-defaults` 的 creature。
+想构建不在 `kt-biome` 的 creature。
 
 1. 上面的评估者路径
 2. [模块概览](/concepts/modules/README.md)（英文） → 按需读每个模块

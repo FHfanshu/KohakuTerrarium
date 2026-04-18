@@ -149,7 +149,7 @@ kt model default my-gpt5
 ### 临时换个模型
 
 ```powershell
-kt run @kt-defaults/creatures/swe --llm another-preset
+kt run @kt-biome/creatures/swe --llm another-preset
 ```
 
 ### 查看当前配置

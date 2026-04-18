@@ -7,7 +7,7 @@
 先说明一下：它是一个**本地扩展示例**，不是官方远端仓库当前默认自带的 creature。
 
 - 如果你的工作区里有这个目录，这篇可以直接照着操作
-- 如果没有这个目录，这篇也可以当作“如何基于默认 `@kt-defaults/creatures/swe` 做增强版”的参考
+- 如果没有这个目录，这篇也可以当作“如何基于默认 `@kt-biome/creatures/swe` 做增强版”的参考
 
 这个示例是笔者让 GPT-5.4 在基础 SWE 智能体上改出来的。你也可以用同样的方式定制自己的 creature。它不是用来替代默认 `swe` 的，而是在默认 `swe` 之上补两类能力：
 
@@ -38,7 +38,7 @@ examples/agent-apps/swe_bio_agent/
 ### 1. 继承默认 `swe`
 
 ```yaml
-base_config: "@kt-defaults/creatures/swe"
+base_config: "@kt-biome/creatures/swe"
 ```
 
 这样做有几个直接的好处：
@@ -126,7 +126,7 @@ kt web
 如果你手头没有这份本地扩展示例，就先运行默认 SWE：
 
 ```powershell
-kt run @kt-defaults/creatures/swe --mode cli
+kt run @kt-biome/creatures/swe --mode cli
 ```
 
 ## 跑完后怎么看

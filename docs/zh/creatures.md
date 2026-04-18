@@ -44,7 +44,7 @@ tools:
 
 ```yaml
 name: my-swe
-base_config: "@kt-defaults/creatures/swe"
+base_config: "@kt-biome/creatures/swe"
 controller:
   reasoning_effort: high
 tools:
@@ -83,7 +83,7 @@ system_prompt_file: prompts/brand_new.md
 # creature 配置里的一个 sub-agent 条目
 subagents:
   - name: niche_responder
-    base_config: "@kt-defaults/subagents/response"
+    base_config: "@kt-biome/subagents/response"
     prompt_mode: replace
     system_prompt_file: prompts/niche_persona.md
 ```
@@ -92,7 +92,7 @@ subagents:
 # terrarium 里的 creature，把一个开箱即用 creature 改造成团队里的专职角色
 creatures:
   - name: reviewer
-    base_config: "@kt-defaults/creatures/critic"
+    base_config: "@kt-biome/creatures/critic"
     prompt_mode: replace
     system_prompt: |
       You are the team's lead reviewer. Speak only to approve or reject, with one-line reasoning.
@@ -105,7 +105,7 @@ creatures:
 只要 `name` 撞上，子项就赢：
 
 ```yaml
-base_config: "@kt-defaults/creatures/general"
+base_config: "@kt-biome/creatures/general"
 tools:
   - { name: bash, type: custom, module: ./tools/safe_bash.py, class: SafeBash }
 ```

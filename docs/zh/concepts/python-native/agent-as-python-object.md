@@ -22,7 +22,7 @@ KohakuTerrarium 把这几层压到了一起：你可以直接 `import kohakuterr
 ```python
 from kohakuterrarium.core.agent import Agent
 
-agent = Agent.from_path("@kt-defaults/creatures/swe")
+agent = Agent.from_path("@kt-biome/creatures/swe")
 agent.set_output_handler(lambda text: print(text, end=""), replace_default=True)
 
 await agent.start()
@@ -35,7 +35,7 @@ await agent.stop()
 ```python
 from kohakuterrarium.serving.agent_session import AgentSession
 
-session = AgentSession(Agent.from_path("@kt-defaults/creatures/swe"))
+session = AgentSession(Agent.from_path("@kt-biome/creatures/swe"))
 await session.start()
 async for event in session.send_input("What does this do?"):
     print(event)
@@ -48,7 +48,7 @@ Terrarium 也是差不多的形状：
 from kohakuterrarium.terrarium.runtime import TerrariumRuntime
 from kohakuterrarium.terrarium.config import load_terrarium_config
 
-runtime = TerrariumRuntime(load_terrarium_config("@kt-defaults/terrariums/swe_team"))
+runtime = TerrariumRuntime(load_terrarium_config("@kt-biome/terrariums/swe_team"))
 await runtime.start()
 await runtime.run()
 await runtime.stop()

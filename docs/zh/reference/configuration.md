@@ -242,7 +242,7 @@ Provider 选项：
 覆盖继承来的某个工具，不必替换整个列表：
 
 ```yaml
-base_config: "@kt-defaults/creatures/swe"
+base_config: "@kt-biome/creatures/swe"
 tools:
   - { name: bash, type: custom, module: ./tools/safe_bash.py, class: SafeBash }
 ```
@@ -250,7 +250,7 @@ tools:
 从空开始：完全丢弃继承来的工具。
 
 ```yaml
-base_config: "@kt-defaults/creatures/general"
+base_config: "@kt-biome/creatures/general"
 no_inherit: [tools]
 tools:
   - { name: think, type: builtin }
@@ -259,7 +259,7 @@ tools:
 为某个特化 persona 完全替换 prompt：
 
 ```yaml
-base_config: "@kt-defaults/creatures/general"
+base_config: "@kt-biome/creatures/general"
 prompt_mode: replace
 system_prompt_file: prompts/niche.md
 ```

@@ -104,7 +104,7 @@ npm run dev --prefix src/kohakuterrarium-frontend
 除了 Web 界面，你也可以直接在命令行运行智能体：
 
 ```bash
-kt run @kt-defaults/creatures/swe --mode cli
+kt run @kt-biome/creatures/swe --mode cli
 ```
 
 这会启动一个交互式命令行对话。你可以输入请求，智能体会在当前工作目录使用 shell、文件和编辑工具。Ctrl+C 退出时会打印恢复提示。
@@ -120,7 +120,7 @@ kt run @kt-defaults/creatures/swe --mode cli
 临时换模型：
 
 ```bash
-kt run @kt-defaults/creatures/swe --llm claude-opus-4.6
+kt run @kt-biome/creatures/swe --llm claude-opus-4.6
 ```
 
 ## 恢复会话

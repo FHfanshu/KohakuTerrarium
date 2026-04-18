@@ -206,7 +206,7 @@ package 更像“货是怎么送来的”，skill 更像“货到了以后附带
 ```yaml
 name: docs-aware-agent
 version: "1.0"
-base_config: "@kt-defaults/creatures/swe"
+base_config: "@kt-biome/creatures/swe"
 
 skill_mode: dynamic
 

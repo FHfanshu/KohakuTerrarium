@@ -70,7 +70,7 @@ resume 实际上做了这些事：
 ## 中断后再继续
 
 ```bash
-kt run @kt-defaults/creatures/swe
+kt run @kt-biome/creatures/swe
 # work... then Ctrl+C
 # later:
 kt resume --last
@@ -140,7 +140,7 @@ agent 自己也能通过 `search_memory` tool 去搜。完整说明看 [Memory](
 有时候你就是想跑一次性的：
 
 ```bash
-kt run @kt-defaults/creatures/swe --no-session
+kt run @kt-biome/creatures/swe --no-session
 ```
 
 这样不会生成 `.kohakutr`。同时 compaction 也没法再从磁盘恢复前面的轮次，不过它还是会在内存里照样 compact。

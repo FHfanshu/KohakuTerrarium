@@ -132,7 +132,7 @@ kt search swe "auth bug"
 ## 中断和恢复的典型流程
 
 ```powershell
-kt run @kt-defaults/creatures/swe
+kt run @kt-biome/creatures/swe
 # 干活... 然后 Ctrl+C 停掉
 # 过了一会：
 kt resume --last

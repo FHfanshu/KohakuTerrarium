@@ -2,7 +2,7 @@
 
 如果你还没跑过 KohakuTerrarium，照着这篇做，几分钟就能在自己机器上跑起一个 agent。
 
-KohakuTerrarium 本体是核心框架，另外还支持安装可复用的 creature/plugin 包。官方包 `kt-defaults` 里已经带了现成的 SWE agent、reviewer、researcher，还有几个 terrarium。想试用的话，不用先自己写东西。
+KohakuTerrarium 本体是核心框架，另外还支持安装可复用的 creature/plugin 包。官方包 `kt-biome` 里已经带了现成的 SWE agent、reviewer、researcher，还有几个 terrarium。想试用的话，不用先自己写东西。
 
 先补两个概念：[什么是 creature](../concepts/foundations/what-is-an-agent.md)、[为什么用这个框架](../concepts/foundations/why-kohakuterrarium.md)。
 
@@ -41,10 +41,10 @@ npm run build --prefix src/kohakuterrarium-frontend
 
 ## 2. 安装默认 creature 包
 
-`kt-defaults` 里有开箱即用的 creatures：`swe`、`reviewer`、`researcher`、`ops`、`creative`、`general`、`root`，还带几个 terrariums。
+`kt-biome` 里有开箱即用的 creatures：`swe`、`reviewer`、`researcher`、`ops`、`creative`、`general`、`root`，还带几个 terrariums。
 
 ```bash
-kt install https://github.com/Kohaku-Lab/kt-defaults.git
+kt install https://github.com/Kohaku-Lab/kt-biome.git
 kt list
 ```
 
@@ -74,7 +74,7 @@ kt model default <preset-name>
 ## 4. 运行一个 creature
 
 ```bash
-kt run @kt-defaults/creatures/swe --mode cli
+kt run @kt-biome/creatures/swe --mode cli
 ```
 
 运行后会进入 SWE agent 的交互界面。你输入请求，它会在当前工作目录里调用 shell、文件和编辑工具。按 Ctrl+C 可以正常退出，CLI 还会顺手给你一条 resume 提示。
@@ -88,7 +88,7 @@ kt run @kt-defaults/creatures/swe --mode cli
 如果只想这一次换个模型，可以这样：
 
 ```bash
-kt run @kt-defaults/creatures/swe --llm claude-opus-4.6
+kt run @kt-biome/creatures/swe --llm claude-opus-4.6
 ```
 
 ## 5. 恢复 session

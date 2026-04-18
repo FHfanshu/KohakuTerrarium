@@ -33,7 +33,7 @@ from kohakuterrarium.core.agent import Agent
 
 
 async def main() -> None:
-    agent = Agent.from_path("@kt-defaults/creatures/general")
+    agent = Agent.from_path("@kt-biome/creatures/general")
 
     await agent.start()
     try:
@@ -55,7 +55,7 @@ python demo.py
 
 默认的 stdout 输出模块会直接把回答打出来。这里有三点要注意：
 
-1. `Agent.from_path` 解析 `@kt-defaults/...` 的方式和 CLI 一样。
+1. `Agent.from_path` 解析 `@kt-biome/...` 的方式和 CLI 一样。
 2. `start()` 会初始化 controller、tools、triggers 和 plugins。
 3. `inject_input(...)` 就是代码版的“用户在 CLI 输入模块里敲了一条消息”。
 
@@ -72,7 +72,7 @@ from kohakuterrarium.core.agent import Agent
 async def main() -> None:
     parts: list[str] = []
 
-    agent = Agent.from_path("@kt-defaults/creatures/general")
+    agent = Agent.from_path("@kt-biome/creatures/general")
     agent.set_output_handler(
         lambda text: parts.append(text),
         replace_default=True,
@@ -106,7 +106,7 @@ from kohakuterrarium.serving.agent_session import AgentSession
 
 
 async def main() -> None:
-    agent = Agent.from_path("@kt-defaults/creatures/general")
+    agent = Agent.from_path("@kt-biome/creatures/general")
     session = AgentSession(agent)
 
     await session.start()
@@ -137,7 +137,7 @@ from kohakuterrarium.terrarium.runtime import TerrariumRuntime
 
 
 async def main() -> None:
-    config = load_terrarium_config("@kt-defaults/terrariums/swe_team")
+    config = load_terrarium_config("@kt-biome/terrariums/swe_team")
     runtime = TerrariumRuntime(config)
 
     await runtime.start()

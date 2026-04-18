@@ -4,7 +4,7 @@
 
 这篇做完，你手里会有一个 terrarium 配置：里面有两个 creatures、两个 channels，可以在 TUI 里跑起来，消息会从一个传到另一个。
 
-前提是：先看过[第一个 Creature](first-creature.md)。你还得已经装好 `kt-defaults`，并且能用 `kt run` 跑单个 creature。
+前提是：先看过[第一个 Creature](first-creature.md)。你还得已经装好 `kt-biome`，并且能用 `kt run` 跑单个 creature。
 
 terrarium 只管接线。它持有 channels，也负责 creatures 的生命周期；自己没有 LLM。真正做判断、出主意的，还是各个 creature。完整约定见 [Terrarium 概念](../concepts/multi-agent/terrarium.md)。
 
@@ -30,7 +30,7 @@ terrarium:
 
   creatures:
     - name: writer
-      base_config: "@kt-defaults/creatures/general"
+      base_config: "@kt-biome/creatures/general"
       system_prompt: |
         You are a concise writer. When you receive a message on
         `tasks`, write a short draft and send it to `review` using
@@ -40,7 +40,7 @@ terrarium:
         can_send:  [review]
 
     - name: reviewer
-      base_config: "@kt-defaults/creatures/reviewer"
+      base_config: "@kt-biome/creatures/reviewer"
       system_prompt: |
         You critique drafts. When you receive a message on `review`,
         reply with one or two concrete improvement suggestions on
@@ -88,7 +88,7 @@ TUI 打开后，每个 creature 一页，每个 channel 也有一页。`--seed` 
 现在能用的办法主要有两个：
 
 1. **把提示词写得更硬一点。** 直接告诉 creature 该往哪个 channel 发、什么时候发。上面那段内联 prompt 就是在干这个。
-2. **加一个 root agent。** root creature 在 terrarium 外面，手里有管理 terrarium 的工具。它接收用户输入，给团队播种子，观察各个 channel，哪个 creature 卡住了就推一把。可以看 `@kt-defaults/creatures/root` 和 `swe_team` 这个 terrarium。具体模式见 [Root agent 概念](../concepts/multi-agent/root-agent.md)。
+2. **加一个 root agent。** root creature 在 terrarium 外面，手里有管理 terrarium 的工具。它接收用户输入，给团队播种子，观察各个 channel，哪个 creature 卡住了就推一把。可以看 `@kt-biome/creatures/root` 和 `swe_team` 这个 terrarium。具体模式见 [Root agent 概念](../concepts/multi-agent/root-agent.md)。
 
 例子：加一个 root
 
@@ -96,7 +96,7 @@ TUI 打开后，每个 creature 一页，每个 channel 也有一页。`--seed` 
 terrarium:
   name: writer_team
   root:
-    base_config: "@kt-defaults/creatures/root"
+    base_config: "@kt-biome/creatures/root"
   # ... creatures and channels as before
 ```
 
