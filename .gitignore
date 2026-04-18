@@ -75,4 +75,10 @@ plans/
 src/kohakuterrarium-frontend/node_modules/
 src/kohakuterrarium/web_dist/
 
+# kt-defaults (installed separately)
 kt-defaults/
+
+# VitePress
+docs/.vitepress/cache/
+docs/.vitepress/deps_temp_*/
+docs/node_modules/
