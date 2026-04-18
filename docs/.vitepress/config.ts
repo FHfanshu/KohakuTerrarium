@@ -28,7 +28,7 @@ export default defineConfig({
           text: '先看这几篇',
           collapsed: false,
           items: [
-            { text: '目录', link: '/zh/' },
+            { text: '目录', link: '/zh/README' },
             { text: '安装与快速开始', link: '/zh/quickstart' },
             { text: '模型与预设配置', link: '/zh/llm-profiles' },
             { text: 'CLI 与 WebUI 使用', link: '/zh/cli-webui' }
