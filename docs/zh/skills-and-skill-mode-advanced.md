@@ -173,7 +173,6 @@ tools:
 
 ## 参考
 
-- [彻底搞懂 Skills 机制](/zh/skills-and-skill-mode-advanced)
 - [工具](/zh/concepts/modules/tool)
 - [子智能体](/zh/concepts/modules/sub-agent)
 - [MCP](/zh/mcp)
