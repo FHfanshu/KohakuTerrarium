@@ -4,7 +4,7 @@
 API 一方面给 Vue SPA 用，另一方面也适合那些想从进程外控制 agent 和 terrarium 的客户端。
 
 服务层和 session 存储的结构，见[会话持久化](/concepts/impl-notes/session-persistence.md)。
-如果你更关心面向任务的用法，见[程序化使用](/zh/programmatic-usage.md)和[前端布局](/zh/frontend-layout.md)。
+如果你更关心面向任务的用法，见[程序化使用](//zh/guides/programmatic-usage.md)和[前端布局](//zh/guides/frontend-layout.md)。
 
 ## 服务器配置
 

@@ -26,7 +26,7 @@ export default defineConfig({
             { text: '安装与快速开始', link: '/zh/quickstart' },
             { text: '模型与预设配置', link: '/zh/llm-profiles' },
             { text: 'CLI 与 WebUI 使用', link: '/zh/cli-webui' },
-            { text: '配置文件写法', link: '/zh/configuration' },
+            { text: '配置文件写法', link: '/zh/guides/configuration' },
             { text: '会话、审计与排错', link: '/zh/audit-and-sessions' },
             { text: '定制 SWE 智能体', link: '/zh/swe-bio-agent' }
           ]
@@ -47,22 +47,22 @@ export default defineConfig({
           text: '指南',
           collapsed: true,
           items: [
-            { text: '总览', link: '/zh/guides-README' },
-            { text: '快速上手', link: '/zh/getting-started' },
-            { text: '智能体', link: '/zh/creatures' },
-            { text: '会话', link: '/zh/sessions' },
-            { text: '配置', link: '/zh/configuration' },
-            { text: '插件', link: '/zh/plugins' },
-            { text: 'MCP', link: '/zh/mcp' },
-            { text: '包', link: '/zh/packages' },
-            { text: '自定义模块', link: '/zh/custom-modules' },
-            { text: '服务部署', link: '/zh/serving' },
-            { text: '记忆', link: '/zh/memory' },
-            { text: '组合', link: '/zh/composition' },
-            { text: '容器', link: '/zh/terrariums' },
-            { text: '以代码方式使用', link: '/zh/programmatic-usage' },
-            { text: '前端布局', link: '/zh/frontend-layout' },
-            { text: '示例', link: '/zh/examples' }
+            { text: '总览', link: '/zh/guides/README' },
+            { text: '快速上手', link: '/zh/guides/getting-started' },
+            { text: '智能体', link: '/zh/guides/creatures' },
+            { text: '会话', link: '/zh/guides/sessions' },
+            { text: '配置', link: '/zh/guides/configuration' },
+            { text: '插件', link: '/zh/guides/plugins' },
+            { text: 'MCP', link: '/zh/guides/mcp' },
+            { text: '包', link: '/zh/guides/packages' },
+            { text: '自定义模块', link: '/zh/guides/custom-modules' },
+            { text: '服务部署', link: '/zh/guides/serving' },
+            { text: '记忆', link: '/zh/guides/memory' },
+            { text: '组合', link: '/zh/guides/composition' },
+            { text: '容器', link: '/zh/guides/terrariums' },
+            { text: '以代码方式使用', link: '/zh/guides/programmatic-usage' },
+            { text: '前端布局', link: '/zh/guides/frontend-layout' },
+            { text: '示例', link: '/zh/guides/examples' }
           ]
         },
         {
@@ -128,9 +128,10 @@ export default defineConfig({
           text: '解惑与专项指南',
           collapsed: true,
           items: [
-            { text: '如何连接 MCP 服务器', link: '/zh/mcp-advanced' },
-            { text: '打包与分发 (kt install)', link: '/zh/packages-and-install-advanced' },
-            { text: '彻底搞懂 Skills 机制', link: '/zh/skills-and-skill-mode-advanced' }
+            { text: '常见解惑 (FAQ)', link: '/zh/advanced/faq' },
+            { text: '如何连接 MCP 服务器', link: '/zh/advanced/mcp-advanced' },
+            { text: '打包与分发 (kt install)', link: '/zh/advanced/packages-and-install-advanced' },
+            { text: '彻底搞懂 Skills 机制', link: '/zh/advanced/skills-and-skill-mode-advanced' }
           ]
         }
       ],
@@ -246,7 +247,7 @@ export default defineConfig({
         nav: [
           { text: '首页', link: '/zh/' },
           { text: '英文', link: '/' },
-          { text: '指南', link: '/zh/guides-README' },
+          { text: '指南', link: '/zh/guides/README' },
           { text: '官方仓库', link: 'https://github.com/Kohaku-Lab/KohakuTerrarium' },
           { text: '第三方文档源码', link: 'https://github.com/FHfanshu/KohakuTerrarium' }
         ],

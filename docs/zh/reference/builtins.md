@@ -3,7 +3,7 @@
 这里把 KohakuTerrarium 自带的工具、子代理、输入、输出、用户命令、框架命令、LLM provider 和 LLM preset 都列出来了。
 
 想了解工具和子代理各自的形态，见[工具](/concepts/modules/tool.md)和[子代理](/concepts/modules/sub-agent.md)。
-按任务查用法，见[creatures](/zh/creatures.md)和[custom modules](/zh/custom-modules.md)。
+按任务查用法，见[creatures](//zh/guides/creatures.md)和[custom modules](//zh/guides/custom-modules.md)。
 
 ## Tools
 
@@ -425,5 +425,5 @@ Python 接口：`kohakuterrarium.mcp` 中的 `MCPServerConfig`、`MCPClientManag
 ## See also
 
 - 概念：[tool](/concepts/modules/tool.md)、[sub-agent](/concepts/modules/sub-agent.md)、[channel](/concepts/modules/channel.md)、[patterns](/concepts/patterns.md)。
-- 指南：[creatures](/zh/creatures.md)、[custom modules](/zh/custom-modules.md)、[plugins](/zh/plugins.md)。
+- 指南：[creatures](//zh/guides/creatures.md)、[custom modules](//zh/guides/custom-modules.md)、[plugins](//zh/guides/plugins.md)。
 - 参考：[configuration](/reference/configuration.md)、[plugin-hooks](/reference/plugin-hooks.md)、[python](/reference/python.md)、[cli](/reference/cli.md)。

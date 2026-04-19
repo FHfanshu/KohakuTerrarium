@@ -4,7 +4,7 @@
 
 想看心智模型去[概念](/concepts/README.md)。
 想查字段、参数去[参考](/reference/README.md)。
-想看任务式配方去[指南](/zh/guides-README.md)。
+想看任务式配方去[指南](//zh/guides/README.md)。
 
 ## 开始
 
@@ -18,6 +18,6 @@
 
 ## 参考
 
-- [指南](/zh/guides-README.md) — 任务式文档。
+- [指南](//zh/guides/README.md) — 任务式文档。
 - [概念](/concepts/README.md) — 心智模型。
 - [参考](/reference/README.md) — 穷举式查表。

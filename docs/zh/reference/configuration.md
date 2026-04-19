@@ -2,7 +2,7 @@
 
 这里汇总了 creature、terrarium、LLM profile、MCP server 和 package manifest 的全部配置字段。文件格式支持 YAML（推荐）、JSON、TOML。所有文件都支持 `${VAR}` / `${VAR:default}` 环境变量插值，加载时生效。
 
-想看 creature 和 terrarium 的关系模型，见 [concepts/boundaries](/concepts/boundaries.md)。想看实际示例，见 [guides/configuration](/zh/configuration.md)和 [guides/creatures](/zh/creatures.md)。
+想看 creature 和 terrarium 的关系模型，见 [concepts/boundaries](/concepts/boundaries.md)。想看实际示例，见 [guides/configuration](//zh/guides/configuration.md)和 [guides/creatures](//zh/guides/creatures.md)。
 
 ## 路径解析
 
@@ -169,7 +169,7 @@ tools:
 
 ### 输出路由
 
-这是一个框架层的路由列表。每当 creature 一轮结束，框架都会构造一个 `creature_output` `TriggerEvent`，直接推到每个目标 creature 的事件队列里，完全绕过 channel。关于用法上的讨论，见 [Terrariums 指南里的输出路由](/zh/terrariums.md#输出路由) 和 [patterns.md 里的模式 1b](/zh/concepts/patterns.md)；这里主要讲配置本身。
+这是一个框架层的路由列表。每当 creature 一轮结束，框架都会构造一个 `creature_output` `TriggerEvent`，直接推到每个目标 creature 的事件队列里，完全绕过 channel。关于用法上的讨论，见 [Terrariums 指南里的输出路由](//zh/guides/terrariums.md#输出路由) 和 [patterns.md 里的模式 1b](/zh/concepts/patterns.md)；这里主要讲配置本身。
 
 每个条目的字段：
 
@@ -500,5 +500,5 @@ anthropic: sk-ant-...
 ## 另见
 
 - 概念：[boundaries](/concepts/boundaries.md)、[composing an agent](/concepts/foundations/composing-an-agent.md)、[multi-agent overview](/concepts/multi-agent/README.md)。
-- 指南：[configuration](/zh/configuration.md)、[creatures](/zh/creatures.md)、[terrariums](/zh/terrariums.md)。
+- 指南：[configuration](//zh/guides/configuration.md)、[creatures](//zh/guides/creatures.md)、[terrariums](//zh/guides/terrariums.md)。
 - 参考：[cli](/reference/cli.md)、[builtins](/reference/builtins.md)、[python](/reference/python.md)。

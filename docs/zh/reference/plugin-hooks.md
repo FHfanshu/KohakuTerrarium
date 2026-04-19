@@ -3,7 +3,7 @@
 这里把插件能用的 hook 都列出来了：生命周期、LLM、工具、sub-agent，还有各种回调。hook 定义在 `kohakuterrarium.modules.plugin` 里的 `Plugin` 协议中；`BasePlugin` 给的是默认 no-op 实现。真正接到系统里的地方在 `bootstrap/plugins.py`。
 
 想先看整体模型，读 [concepts/modules/plugin](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/modules/plugin.md)。
-想看按任务展开的用法，读 [guides/plugins](/zh/plugins.md) 和 [guides/custom-modules](/zh/custom-modules.md)。
+想看按任务展开的用法，读 [guides/plugins](//zh/guides/plugins.md) 和 [guides/custom-modules](//zh/guides/custom-modules.md)。
 
 ## 返回值语义
 
@@ -129,8 +129,8 @@ plugins:
   [plugin](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/modules/plugin.md)，
   [patterns](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/patterns.md)。
 - Guides:
-  [plugins](/zh/plugins.md)，
-  [custom modules](/zh/custom-modules.md)。
+  [plugins](//zh/guides/plugins.md)，
+  [custom modules](//zh/guides/custom-modules.md)。
 - Reference:
   [python](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/reference/python.md)，
   [configuration](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/reference/configuration.md)，

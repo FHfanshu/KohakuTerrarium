@@ -51,7 +51,7 @@ Channels 并不是 creatures 之间通信的唯一方式。现在还有一个并
 - **Channels** —— 适合条件分支（批准还是打回）、群聊、广播状态、晚点发也行/可选的消息流，以及旁听观察。是否发送、发去哪里，由 creature 自己决定。
 - **输出路由** —— 适合确定性的流水线边，比如“runner 的输出永远都要交给 analyzer”。它是声明式配置，回合结束自动触发。
 
-一个 terrarium 里完全可以两种一起用。详见 [terrarium](/zh/concepts/multi-agent/terrarium.md) 和 [terrariums 指南里的输出路由](/zh/terrariums.md#输出路由)。
+一个 terrarium 里完全可以两种一起用。详见 [terrarium](/zh/concepts/multi-agent/terrarium.md) 和 [terrariums 指南里的输出路由](//zh/guides/terrariums.md#输出路由)。
 
 ## 别把它看得太死
 

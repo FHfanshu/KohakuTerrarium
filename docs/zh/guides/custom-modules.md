@@ -315,7 +315,7 @@ python_dependencies:
 
 这样别的配置就可以写 `type: package`，框架会从 `my_pack.tools.my_tool:MyTool` 里取这个类。
 
-相关内容见 [Packages](/zh/packages-and-install-advanced.md)。
+相关内容见 [Packages](//zh/guides/packages-and-install-advanced.md)。
 
 ## 测试自定义模块
 
@@ -346,6 +346,6 @@ assert env.output.all_text == "..."
 ## 另见
 
 - [Plugins](plugins.md) —— 想改的是模块之间那层连接，而不是模块本身，就看这个。
-- [Packages](/zh/packages-and-install-advanced.md) —— 怎么把模块打包出去复用。
+- [Packages](//zh/guides/packages-and-install-advanced.md) —— 怎么把模块打包出去复用。
 - [Reference / Python API](/zh/reference/python.md) —— `BaseTool`、`BaseInputModule`、`BaseOutputModule`、`BaseTrigger`、`SubAgentConfig`。
 - [Concepts / 模块](/zh/concepts/modules/README.md) —— 每个模块一页。

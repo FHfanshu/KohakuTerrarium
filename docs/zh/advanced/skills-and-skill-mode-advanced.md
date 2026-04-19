@@ -175,6 +175,6 @@ tools:
 
 - [工具](/zh/concepts/modules/tool)
 - [子智能体](/zh/concepts/modules/sub-agent)
-- [MCP](/zh/mcp)
-- [配置](/zh/configuration)
+- [MCP](//zh/guides/mcp)
+- [配置](//zh/guides/configuration)
 - [CLI](/zh/reference/cli)
