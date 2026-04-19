@@ -32,7 +32,7 @@ export default defineConfig({
           ]
         },
         {
-          text: '官方文档教程（机翻）',
+          text: '官方教程（LLM翻译）',
           collapsed: true,
           items: [
             { text: '总览', link: '/zh/tutorials/README' },
@@ -125,12 +125,12 @@ export default defineConfig({
           ]
         },
         {
-          text: '进阶专题',
+          text: '解惑与专项指南',
           collapsed: true,
           items: [
-            { text: 'MCP 进阶', link: '/zh/mcp-advanced' },
-            { text: 'kt install 与 package 进阶', link: '/zh/packages-and-install-advanced' },
-            { text: 'skills、info 与 skill_mode 进阶', link: '/zh/skills-and-skill-mode-advanced' }
+            { text: '如何连接 MCP 服务器', link: '/zh/mcp-advanced' },
+            { text: '打包与分发 (kt install)', link: '/zh/packages-and-install-advanced' },
+            { text: '彻底搞懂 Skills 机制', link: '/zh/skills-and-skill-mode-advanced' }
           ]
         }
       ],

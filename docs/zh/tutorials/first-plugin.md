@@ -190,7 +190,7 @@ kt run creatures/tutorial-creature --mode cli
 - 子 agent：`pre_subagent_run`、`post_subagent_run`
 - 回调：`on_event`、`on_interrupt`、`on_task_promoted`、`on_compact_start`、`on_compact_end`
 
-`pre_*` hook 可以改输入，也可以抛出 `PluginBlockError` 直接中止。`post_*` hook 可以改结果。回调则只是观察，不拦截。完整签名和更多例子可以看[plugins 指南](../guides/plugins.md)，仓库里的 `examples/plugins/` 也有每种 hook 的完整示例。
+`pre_*` hook 可以改输入，也可以抛出 `PluginBlockError` 直接中止。`post_*` hook 可以改结果。回调则只是观察，不拦截。完整签名和更多例子可以看[plugins 指南](../plugins.md)，仓库里的 `examples/plugins/` 也有每种 hook 的完整示例。
 
 ## 你学到了什么
 
@@ -202,5 +202,5 @@ kt run creatures/tutorial-creature --mode cli
 ## 接着看
 
 - [Plugin 概念](../concepts/modules/plugin.md) —— 为什么要有 plugin，它能解决什么问题，包括把 agent 放进 plugin 里的模式。
-- [Plugins 指南](../guides/plugins.md) —— 完整的 hook 参考和示例。
+- [Plugins 指南](../plugins.md) —— 完整的 hook 参考和示例。
 - [组合模式](../concepts/patterns.md) —— 怎么把这些思路扩展成 “smart guard” 和 “seamless memory” 这类模式。

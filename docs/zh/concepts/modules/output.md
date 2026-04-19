@@ -50,4 +50,4 @@
 - [Sub-agent](/zh/concepts/modules/sub-agent.md) —— `output_to: external` 会直接通过 router 往外流。
 - [Controller](/zh/concepts/modules/controller.md) —— 真正喂给 router 的是谁。
 - [reference/builtins.md — Outputs](/zh/reference/builtins.md) —— 内置列表。
-- [guides/custom-modules.md](/zh/guides/custom-modules.md) —— 怎么自己写。
+- [guides/custom-modules.md](/zh/custom-modules.md) —— 怎么自己写。

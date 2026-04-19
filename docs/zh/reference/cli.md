@@ -2,7 +2,7 @@
 
 这里是 `kt` 的完整命令表：命令、子命令、参数都在这。你可以用它来启动 creature、启动 terrarium、管包、配 LLM、开 Web UI、查保存下来的 session。
 
-如果你想先弄明白 creature、terrarium 和 root agent 到底是什么，先看[概念 / 边界](../concepts/boundaries.md)。如果你是来找具体做法的，可以看[快速开始](../guides/getting-started.md)和[creature](../guides/creatures.md)。
+如果你想先弄明白 creature、terrarium 和 root agent 到底是什么，先看[概念 / 边界](../concepts/boundaries.md)。如果你是来找具体做法的，可以看[快速开始](../getting-started.md)和[creature](../creatures.md)。
 
 ## 入口
 
@@ -542,5 +542,5 @@ kt mcp list --agent <path>
 ## 另见
 
 - 概念：[边界](../concepts/boundaries.md)、[session 持久化](../concepts/impl-notes/session-persistence.md)
-- 指南：[快速开始](../guides/getting-started.md)、[sessions](../guides/sessions.md)、[terrariums](../guides/terrariums.md)
+- 指南：[快速开始](../getting-started.md)、[sessions](../sessions.md)、[terrariums](../terrariums.md)
 - 参考：[配置](configuration.md)、[内置项](builtins.md)、[HTTP](http.md)

@@ -215,7 +215,7 @@ API 签名见 `plans/inventory-python-api.md` 的 §Serving。
 
 `mcp/client.py:MCPClientManager.connect(cfg)` 会打开一个 stdio 或 HTTP/SSE session，调用 `session.initialize()`，再用 `list_tools` 找可用工具，并把结果缓存进 `self._servers[name]`。`disconnect(name)` 负责清理。
 
-agent 启动时，MCP 连好后会调 `_inject_mcp_tools_into_prompt()`，生成一个 “Available MCP Tools” 的 markdown 块，把每台 server、每个 tool 和参数集合列出来。agent 调 MCP tool 时，不是直接连 server，而是走内建元工具 `mcp_call(server, tool, args)`。另外还有 `mcp_list`、`mcp_connect`、`mcp_disconnect`。
+agent 启动时，MCP 连好后会调 `_inject_mcp_tools_into_prompt()`，生成一个 “Available MCP Tools” 的 markdown 块，把每台 server、每个 tool 和参数集合列出来。agent 调 MCP tool 时，不会直接连 server，而是走内建元工具 `mcp_call(server, tool, args)`。另外还有 `mcp_list`、`mcp_connect`、`mcp_disconnect`。
 
 支持的传输方式有 `stdio`（子进程 stdin/stdout）和 `http/SSE`。
 

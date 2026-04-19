@@ -4,7 +4,7 @@
 
 `examples/` 目录按类型整理了可运行的内容：独立 agent 配置、terrarium 配置、plugin 实现，以及把框架嵌进 Python 代码里的脚本。每个文件夹都对应一种常见写法，你可以直接照着抄，或者拿来继承。
 
-先补一个概念：[边界](../concepts/boundaries.md)。这些示例本来就故意覆盖了不少边角情况。
+先补一个概念：[边界](./concepts/boundaries.md)。这些示例本来就故意覆盖了不少边角情况。
 
 ## `examples/agent-apps/` —— 独立 creatures
 
@@ -88,4 +88,4 @@ kt terrarium run examples/terrariums/<name>
 
 - [快速开始](getting-started.md) — 环境准备。
 - [`kt-biome`](https://github.com/Kohaku-Lab/kt-biome) — 展示用包；很多示例都沿用了它的写法。
-- [教程](../tutorials/README.md) — 和这些示例配套的引导式文档。
+- [教程](./tutorials/README.md) — 和这些示例配套的引导式文档。

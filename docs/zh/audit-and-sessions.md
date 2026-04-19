@@ -12,7 +12,7 @@
 
 ## session 是什么
 
-KohakuTerrarium 每次运行都会保存一个 `.kohakutr` 文件。它不是简单的聊天记录，而是完整快照：
+KohakuTerrarium 每次运行都会保存一个 `.kohakutr` 文件。它不只是聊天记录，而是完整快照：
 
 | 内容 | 说明 |
 |------|------|

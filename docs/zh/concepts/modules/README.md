@@ -9,7 +9,7 @@
 5. **你能拿它做什么** —— 常规用法，也包括一些乍看不太像它该做的事。
 6. **别把它看得太死** —— 这是默认做法，不是唯一做法。
 
-在[什么是 agent](/concepts/foundations/what-is-an-agent.md)（英文）里，会一路讲到六个核心模块：
+在[什么是 agent](/concepts/foundations/what-is-an-agent.md)里，会一路讲到六个核心模块：
 
 - [Controller](/zh/concepts/modules/controller.md) —— 推理循环。
 - [Input](/zh/concepts/modules/input.md) —— 第一个触发点。

@@ -4,7 +4,7 @@
 
 Plugin 改的是 controller、tools、sub-agents 和 LLM 之间的连接方式，不是模块本身。它分两类：**prompt plugin** 往 system prompt 里塞内容；**lifecycle plugin** 挂在运行时事件上，比如 LLM 前后、tool 前后这些点。
 
-先补概念： [plugin](../concepts/modules/plugin.md)、[patterns](../concepts/patterns.md)。
+先补概念： [plugin](./concepts/modules/plugin.md)、[patterns](./concepts/patterns.md)。
 
 ## 什么时候该写 plugin，什么时候写 tool，什么时候写 module
 
@@ -131,7 +131,7 @@ class TokenAccountant(BasePlugin):
 
 ## 例子：无感 memory（plugin 里套一个 agent）
 
-可以写一个 `pre_llm_call` plugin，先把相关的历史事件捞出来，再塞到 messages 前面。要判断哪些历史相关，也可以在 plugin 里调一个小的嵌套 agent。Plugin 本质上就是普通 Python，所以里面用 agent 没问题。见 [concepts/python-native/agent-as-python-object](../concepts/python-native/agent-as-python-object.md)。
+可以写一个 `pre_llm_call` plugin，先把相关的历史事件捞出来，再塞到 messages 前面。要判断哪些历史相关，也可以在 plugin 里调一个小的嵌套 agent。Plugin 本质上就是普通 Python，所以里面用 agent 没问题。见 [concepts/python-native/agent-as-python-object](./concepts/python-native/agent-as-python-object.md)。
 
 ## 运行时管理 plugin
 
@@ -207,5 +207,5 @@ assert any("Blocked" in act[1] for act in env.output.activities)
 
 - [examples/plugins/](https://github.com/Kohaku-Lab/KohakuTerrarium/tree/main/examples/plugins) —— 每类 hook 都有一个示例。
 - [Custom Modules](custom-modules.md) —— plugin 挂着的那些模块怎么自己写。
-- [Reference / plugin hooks](../reference/plugin-hooks.md) —— 全部 hook 签名。
-- [Concepts / plugin](../concepts/modules/plugin.md) —— 设计思路。
+- [Reference / plugin hooks](./reference/plugin-hooks.md) —— 全部 hook 签名。
+- [Concepts / plugin](./concepts/modules/plugin.md) —— 设计思路。

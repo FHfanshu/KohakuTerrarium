@@ -102,5 +102,5 @@ asyncio.run(main())
 
 - [Agent as a Python object](agent-as-python-object.md) —— 这篇的基础。
 - [Patterns](../patterns.md) —— 组合代数和嵌入式 agent 混着用时的一些模式。
-- [组合](../../guides/composition.md) —— 面向任务的用法。
+- [组合](../../composition.md) —— 面向任务的用法。
 - [Python 参考：`kohakuterrarium.compose`](../../reference/python.md) —— 完整 API。

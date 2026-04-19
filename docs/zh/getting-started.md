@@ -4,7 +4,7 @@
 
 KohakuTerrarium 本体是核心框架，另外还支持安装可复用的 creature/plugin 包。官方包 `kt-biome` 里已经带了现成的 SWE agent、reviewer、researcher，还有几个 terrarium。想试用的话，不用先自己写东西。
 
-先补两个概念：[什么是 creature](../concepts/foundations/what-is-an-agent.md)、[为什么用这个框架](../concepts/foundations/why-kohakuterrarium.md)。
+先补两个概念：[什么是 creature](./concepts/foundations/what-is-an-agent.md)、[为什么用这个框架](./concepts/foundations/why-kohakuterrarium.md)。
 
 ## 1. 安装
 
@@ -145,4 +145,4 @@ kt serve stop
 - [Creatures](creatures.md)：怎么继承或定制开箱即用的 agents。
 - [Sessions](sessions.md)：resume 的语义和 compaction。
 - [Serving](serving.md)：`kt web`、`kt app`、`kt serve` 该怎么选。
-- [CLI 参考](../reference/cli.md)：所有命令和参数。
+- [CLI 参考](./reference/cli.md)：所有命令和参数。

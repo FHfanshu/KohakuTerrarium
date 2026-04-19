@@ -4,7 +4,7 @@
 
 **creature** 就是一个自带全套东西的 agent：有自己的 controller、tools、sub-agents、triggers、prompts，还有输入输出。它可以单独跑（`kt run path/to/creature`），可以继承别的 creature，也可以放进 package 里发出去。它自己并不知道自己是不是在 terrarium 里。
 
-先补概念： [what is an agent](../concepts/foundations/what-is-an-agent.md)、[composing an agent](../concepts/foundations/composing-an-agent.md)、[module index](../concepts/modules/README.md)。
+先补概念： [what is an agent](./concepts/foundations/what-is-an-agent.md)、[composing an agent](./concepts/foundations/composing-an-agent.md)、[module index](./concepts/modules/README.md)。
 
 ## 结构
 
@@ -36,7 +36,7 @@ tools:
   - bash
 ```
 
-每个字段都对应 `AgentConfig` 里的一个 dataclass 字段。按事情来查，看 [Configuration](configuration.md)；完整字段去 [reference/configuration](../reference/configuration.md)。
+每个字段都对应 `AgentConfig` 里的一个 dataclass 字段。按事情来查，看 [Configuration](configuration.md)；完整字段去 [reference/configuration](./reference/configuration.md)。
 
 ## 继承
 
@@ -166,7 +166,7 @@ prompt_context_files:
   <bash command="ls"></bash>
   ```
 - `native` —— provider 原生 function calling（OpenAI / Anthropic 的 tool use）。LLM 不会输出文本块，调用信息直接走 API 的结构化字段。
-- dict —— 自定义分隔符（见 [configuration reference — `tool_format`](../reference/configuration.md)）。
+- dict —— 自定义分隔符（见 [configuration reference — `tool_format`](./reference/configuration.md)）。
 
 这三种都能用，挑你的模型更稳的就行。大厂 provider 上 `native` 往往最稳；`bracket` 胜在到处都能跑，本地模型也行。
 
@@ -185,7 +185,7 @@ tools:
       max_results: 5
   # 把通用 trigger 暴露成 setup tool，LLM 运行时可以直接调这个名字来安装
   # framework 会用 `CallableTriggerTool` 包一层 trigger 类；简介前面还会加
-  # "**Trigger** — "，提醒 LLM 这不是立刻执行一个动作，而是在装一个会长期生效的东西。
+  # "**Trigger** — "，提醒 LLM 这并非立刻执行一个动作，而是在安装一个会长期生效的东西。
   - { name: add_timer, type: trigger }
   - { name: watch_channel, type: trigger }
   - { name: add_schedule, type: trigger }
@@ -203,7 +203,7 @@ subagents:
 
 能不能在运行时安装 trigger，是按 creature 单独开的。一个 creature 如果没有任何 `type: trigger` 条目，就没法在运行中装 trigger。每个通用 `BaseTrigger` 子类都会自己声明 `setup_tool_name`（比如 `add_timer`）、`setup_description` 和 `setup_param_schema`。你要自己写，去看 [Custom Modules — Triggers](custom-modules.md)。
 
-完整 tool 和 sub-agent 目录见 [reference/builtins](../reference/builtins.md)；自己写则看 [Custom Modules](custom-modules.md)。
+完整 tool 和 sub-agent 目录见 [reference/builtins](./reference/builtins.md)；自己写则看 [Custom Modules](custom-modules.md)。
 
 ## Triggers
 
@@ -219,7 +219,7 @@ triggers:
     class_name: WebhookTrigger
 ```
 
-内置类型有：`timer`、`idle`、`webhook`、`channel`、`custom`、`package`。见 [concepts/modules/trigger](../concepts/modules/trigger.md)。
+内置类型有：`timer`、`idle`、`webhook`、`channel`、`custom`、`package`。见 [concepts/modules/trigger](./concepts/modules/trigger.md)。
 
 ## Startup trigger
 
@@ -250,7 +250,7 @@ termination:
 session_key: shared_workspace
 ```
 
-默认值是 creature 的 `name`。如果在 terrarium 里，每个 creature 会拿到自己的私有 `Session`，同时共享一个 `Environment`。见 [concepts/modules/session-and-environment](../concepts/modules/session-and-environment.md)。
+默认值是 creature 的 `name`。如果在 terrarium 里，每个 creature 会拿到自己的私有 `Session`，同时共享一个 `Environment`。见 [concepts/modules/session-and-environment](./concepts/modules/session-and-environment.md)。
 
 ## Framework commands
 
@@ -302,7 +302,7 @@ output:
       options: { webhook_url: "${DISCORD_WEBHOOK}" }
 ```
 
-`named_outputs` 能让 tool 或 sub-agent 把内容发到指定出口，比如 Discord webhook、TTS、文件。见 [concepts/modules/output](../concepts/modules/output.md)。
+`named_outputs` 能让 tool 或 sub-agent 把内容发到指定出口，比如 Discord webhook、TTS、文件。见 [concepts/modules/output](./concepts/modules/output.md)。
 
 ## 每个 creature 自己的 MCP servers
 
@@ -330,7 +330,7 @@ compact:
   compact_model: gpt-4o-mini  # 总结这一步单独换便宜模型
 ```
 
-Compaction 在后台跑，不会卡住 controller。见 [Sessions](sessions.md) 和 [concepts/modules/memory-and-compaction](../concepts/modules/memory-and-compaction.md)。
+Compaction 在后台跑，不会卡住 controller。见 [Sessions](sessions.md) 和 [concepts/modules/memory-and-compaction](./concepts/modules/memory-and-compaction.md)。
 
 ## Plugins
 

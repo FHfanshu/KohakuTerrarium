@@ -2,7 +2,7 @@
 
 这里列的是 `kohakuterrarium` Python 包里所有公开的类、函数和 protocol。内容按模块分组，签名使用现代类型标注。
 
-如果你想看整体架构，先读[概念](../concepts/README.md)。如果你想看按任务走的示例，可以看[程序化使用](../guides/programmatic-usage.md)和[自定义模块](../guides/custom-modules.md)。
+如果你想看整体架构，先读[概念](../concepts/README.md)。如果你想看按任务走的示例，可以看[程序化使用](../programmatic-usage.md)和[自定义模块](../custom-modules.md)。
 
 ## 导入入口
 

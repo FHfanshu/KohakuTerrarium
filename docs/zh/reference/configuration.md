@@ -2,7 +2,7 @@
 
 这里汇总了 creature、terrarium、LLM profile、MCP server 和 package manifest 的全部配置字段。文件格式支持 YAML（推荐）、JSON、TOML。所有文件都支持 `${VAR}` / `${VAR:default}` 环境变量插值，加载时生效。
 
-想看 creature 和 terrarium 的关系模型，见 [concepts/boundaries](/concepts/boundaries.md)（英文）。想看实际示例，见 [guides/configuration](/guides/configuration.md)（英文）和 [guides/creatures](/guides/creatures.md)（英文）。
+想看 creature 和 terrarium 的关系模型，见 [concepts/boundaries](/concepts/boundaries.md)。想看实际示例，见 [guides/configuration](/zh/configuration.md)和 [guides/creatures](/zh/creatures.md)。
 
 ## 路径解析
 
@@ -406,7 +406,7 @@ presets:
 
 内建 provider 名称（不可覆盖）：`codex`、`openai`、`openrouter`、`anthropic`、`gemini`、`mimo`。
 
-全部内置 preset 见 [builtins.md — LLM presets](/reference/builtins.md#llm-presets)（英文）。
+全部内置 preset 见 [builtins.md — LLM presets](/reference/builtins.md#llm-presets)。
 
 ---
 
@@ -499,6 +499,6 @@ anthropic: sk-ant-...
 
 ## 另见
 
-- 概念：[boundaries](/concepts/boundaries.md)（英文）、[composing an agent](/concepts/foundations/composing-an-agent.md)（英文）、[multi-agent overview](/concepts/multi-agent/README.md)（英文）。
-- 指南：[configuration](/guides/configuration.md)（英文）、[creatures](/guides/creatures.md)（英文）、[terrariums](/guides/terrariums.md)（英文）。
-- 参考：[cli](/reference/cli.md)（英文）、[builtins](/reference/builtins.md)（英文）、[python](/reference/python.md)（英文）。
+- 概念：[boundaries](/concepts/boundaries.md)、[composing an agent](/concepts/foundations/composing-an-agent.md)、[multi-agent overview](/concepts/multi-agent/README.md)。
+- 指南：[configuration](/zh/configuration.md)、[creatures](/zh/creatures.md)、[terrariums](/zh/terrariums.md)。
+- 参考：[cli](/reference/cli.md)、[builtins](/reference/builtins.md)、[python](/reference/python.md)。

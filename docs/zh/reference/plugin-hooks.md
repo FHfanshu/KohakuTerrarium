@@ -2,8 +2,8 @@
 
 这里把插件能用的 hook 都列出来了：生命周期、LLM、工具、sub-agent，还有各种回调。hook 定义在 `kohakuterrarium.modules.plugin` 里的 `Plugin` 协议中；`BasePlugin` 给的是默认 no-op 实现。真正接到系统里的地方在 `bootstrap/plugins.py`。
 
-想先看整体模型，读 [concepts/modules/plugin（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/modules/plugin.md)。
-想看按任务展开的用法，读 [guides/plugins（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/guides/plugins.md) 和 [guides/custom-modules（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/guides/custom-modules.md)。
+想先看整体模型，读 [concepts/modules/plugin](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/modules/plugin.md)。
+想看按任务展开的用法，读 [guides/plugins](/zh/plugins.md) 和 [guides/custom-modules](/zh/custom-modules.md)。
 
 ## 返回值语义
 
@@ -89,7 +89,7 @@ async def get_content(self, context: PromptContext) -> str | None
 - `get_content(context) -> str | None`：返回要插入的文本块；返回 `None` 则表示不提供内容。
 - `priority`：排序键。内置插件的值是 50/45/40/30。
 
-内置 prompt 插件见 [builtins.md — Prompt plugins（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/reference/builtins.md#prompt-plugins)。
+内置 prompt 插件见 [builtins.md — Prompt plugins](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/reference/builtins.md#prompt-plugins)。
 
 自定义 prompt 插件通过 creature 配置里的 `plugins` 字段注册，和生命周期插件一样；框架会根据插件类是继承生命周期 `Plugin` 协议，还是 prompt `BasePlugin`，分发到不同路径。
 
@@ -119,19 +119,19 @@ plugins:
     class: GuardPlugin
 ```
 
-运行时可以通过 `/plugin toggle guard` 开关（见 [builtins.md — User commands（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/reference/builtins.md#user-commands)），也可以走 HTTP 的 plugin toggle endpoint。
+运行时可以通过 `/plugin toggle guard` 开关（见 [builtins.md — User commands](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/reference/builtins.md#user-commands)），也可以走 HTTP 的 plugin toggle endpoint。
 
 ---
 
 ## 另见
 
 - Concepts:
-  [plugin（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/modules/plugin.md)，
-  [patterns（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/patterns.md)。
+  [plugin](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/modules/plugin.md)，
+  [patterns](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/concepts/patterns.md)。
 - Guides:
-  [plugins（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/guides/plugins.md)，
-  [custom modules（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/guides/custom-modules.md)。
+  [plugins](/zh/plugins.md)，
+  [custom modules](/zh/custom-modules.md)。
 - Reference:
-  [python（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/reference/python.md)，
-  [configuration（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/reference/configuration.md)，
-  [builtins（英文）](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/reference/builtins.md)。
+  [python](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/reference/python.md)，
+  [configuration](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/reference/configuration.md)，
+  [builtins](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/docs/reference/builtins.md)。

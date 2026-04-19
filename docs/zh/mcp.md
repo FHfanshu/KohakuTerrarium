@@ -4,7 +4,7 @@
 
 MCP 是一种客户端—服务器协议，可以通过 stdio 或 HTTP 暴露工具，以及别的协议原语。KohakuTerrarium 在这里是客户端：你在配置里登记服务器，框架会拉起子进程，或者打开 HTTP 会话；接着，agent 就能通过几种很少的元工具去调用服务器提供的工具。
 
-先补一个概念：[tool](../concepts/modules/tool.md)。MCP 工具本质上还是 tool，只是它们是动态挂进来的。
+先补一个概念：[tool](./concepts/modules/tool.md)。MCP 工具本质上还是 tool，只是它们是动态挂进来的。
 
 ## 服务器可以写在哪
 
@@ -124,5 +124,5 @@ agent 运行时，底下用的也是这一套。
 ## 另见
 
 - [Configuration](configuration.md) — `mcp_servers:` 字段。
-- [Reference / CLI](../reference/cli.md) — `kt config mcp`、`kt mcp list`。
-- [Concepts / tool](../concepts/modules/tool.md) — 为什么 MCP 工具不会被特殊对待。
+- [Reference / CLI](./reference/cli.md) — `kt config mcp`、`kt mcp list`。
+- [Concepts / tool](./concepts/modules/tool.md) — 为什么 MCP 工具不会被特殊对待。

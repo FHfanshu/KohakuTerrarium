@@ -6,7 +6,7 @@
 
 前提是先看过 [第一个 Creature](first-creature.md)。另外，你得把包装到能 `import kohakuterrarium` 的环境里。
 
-这个框架里的 agent 不是一份 config，而是 Python 对象。config 只是描述它；`Agent.from_path(...)` 会把它建出来，而这个对象就在你手里。sub-agent、terrarium、session 也是这一路子。完整思路可以看 [Agent as a Python object](../concepts/python-native/agent-as-python-object.md)。
+在这个框架中，agent 本质上是一个 Python 对象，而非单纯的配置文件。config 只是描述它；`Agent.from_path(...)` 会把它建出来，而这个对象就在你手里。sub-agent、terrarium、session 也是这一路子。完整思路可以看 [Agent as a Python object](../concepts/python-native/agent-as-python-object.md)。
 
 ## 第 1 步：用 editable 方式安装
 
@@ -169,6 +169,6 @@ asyncio.run(main())
 ## 接下来可以看什么
 
 - [Agent as a Python object](../concepts/python-native/agent-as-python-object.md) —— 讲清楚这个概念，以及它能带来哪些写法。
-- [Programmatic usage guide](../guides/programmatic-usage.md) —— 按任务来查 Python 接口怎么用。
+- [Programmatic usage guide](../programmatic-usage.md) —— 按任务来查 Python 接口怎么用。
 - [Composition algebra](../concepts/python-native/composition-algebra.md) —— 怎么把 agent 接进 Python pipeline。
 - [Python API reference](../reference/python.md) —— 具体函数签名都在这里。

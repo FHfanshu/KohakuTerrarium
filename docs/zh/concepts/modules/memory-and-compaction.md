@@ -81,4 +81,4 @@ session 持久化可以关掉（`--no-session`）。embeddings 是可选的。co
 - [impl-notes/session-persistence](/zh/concepts/impl-notes/session-persistence.md) —— 双存储的细节。
 - [impl-notes/non-blocking-compaction](/zh/concepts/impl-notes/non-blocking-compaction.md) —— 原子拼接算法。
 - [reference/cli.md — kt embedding, kt search, kt resume](/zh/reference/cli.md) —— 命令入口。
-- [guides/memory.md](/zh/guides/memory.md) —— 实操说明。
+- [guides/memory.md](/zh/memory.md) —— 实操说明。

@@ -4,7 +4,7 @@
 
 KohakuTerrarium 的 package 是一个带有 `kohaku.yaml` 清单文件的目录。它可以包含 creatures、terrariums、自定义工具、插件和 LLM 预设。`kt install` 会把它安装到 `~/.kohakuterrarium/packages/<name>/`，然后用 `@<name>/path` 语法引用里面的内容。
 
-概念入门：[边界](../concepts/boundaries.md) —— package 是框架让"分享可复用组件"变得低成本的方式。
+概念入门：[边界](./concepts/boundaries.md) —— package 是框架让"分享可复用组件"变得低成本的方式。
 
 ## 官方包：`kt-biome`
 
@@ -164,8 +164,8 @@ tools:
 
 ## 参考
 
-- [英文 Packages 指南](../guides/packages.md)
+- [Packages 指南](./packages.md)
 - [Creatures](configuration.md) —— 打包一个 creature
 - [自定义模块](custom-modules.md) —— 编写要发布的工具/插件
-- [CLI 参考](../reference/cli.md) —— `kt install`、`kt list`、`kt extension`
+- [CLI 参考](./reference/cli.md) —— `kt install`、`kt list`、`kt extension`
 - [`kt-biome`](https://github.com/Kohaku-Lab/kt-biome) —— 参考包

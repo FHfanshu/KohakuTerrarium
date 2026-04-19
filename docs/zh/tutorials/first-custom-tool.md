@@ -6,7 +6,7 @@
 
 **前提：**先看[第一个 Creature](first-creature.md)。你手里得先有一个自己的 creature 目录。
 
-这里用一个很简单的 `wordcount` 当例子：输入一段字符串，数一数有几个词。重点不是这点逻辑，而是工具该怎么写、怎么接进去。想看工具还能做什么，去读[工具概念](../concepts/modules/tool.md)。
+这里用一个很简单的 `wordcount` 当例子：输入一段字符串，数一数有几个词。重点不在这点逻辑，而在工具该怎么写、怎么接进去。想看工具还能做什么，去读[工具概念](../concepts/modules/tool.md)。
 
 ## 第 1 步：选个目录
 
@@ -196,5 +196,5 @@ asyncio.run(test_wordcount())
 ## 接着看
 
 - [工具概念](../concepts/modules/tool.md)：工具不只是函数，也可以是消息总线、状态句柄、agent 包装层之类的东西。
-- [自定义模块指南](../guides/custom-modules.md)：把工具、子 agent、触发器和输出模块放在一起看。
-- [第一个 Plugin](first-plugin.md)：如果你想改的不是某个模块内部，而是模块之间怎么接，那篇更合适。
+- [自定义模块指南](../custom-modules.md)：把工具、子 agent、触发器和输出模块放在一起看。
+- [第一个 Plugin](first-plugin.md)：如果你想改的并非某个模块内部，而是模块之间怎么衔接，那篇更合适。

@@ -1,6 +1,6 @@
 # 琥珀生态瓶中文手册
 
-这个项目叫 KohakuTerrarium，中文名"琥珀生态瓶"——一个搭智能体的框架，不是拿来套 LLM API 的壳子。
+这个项目叫 KohakuTerrarium，中文名"琥珀生态瓶"—— 一个只需改配置项，不用写代码就能搞智能体 | 多智能体协作的强劲框架
 
 ## 先跑起来
 
@@ -17,7 +17,7 @@
 - [kt install 与 package 进阶](packages-and-install-advanced.md) — 包管理细节
 - [skills、info 与 skill_mode 进阶](skills-and-skill-mode-advanced.md) — skill 系统深挖
 
-## 指南（对照英文原文）
+## 原版指南 （LLM翻译版）
 
 - [快速上手](getting-started.md)
 - [智能体](creatures.md) — creature 结构、继承、打包
@@ -35,7 +35,7 @@
 - [前端布局](frontend-layout.md) — 面板和预设
 - [示例](examples.md) — examples/ 目录下每个文件夹干什么的
 
-## 教程（对照英文原文）
+## 原版教程 （LLM翻译版）
 
 - [第一个 Creature](tutorials/first-creature.md)
 - [第一个 Terrarium](tutorials/first-terrarium.md)

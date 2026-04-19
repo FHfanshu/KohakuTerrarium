@@ -2,7 +2,7 @@
 
 KohakuTerrarium 里的每个 creature module 都是 Python class。agent 是异步 Python object。terrarium 是 Python runtime。plugin 是 Python class。tool 也是 Python class。compose algebra 则是一套 Python API。
 
-这不是碰巧这样设计的，而是框架本身就故意这么做：既然所有东西都是 Python，agent 和它的各个部分就都能当成值，塞进*别的*部分里。plugin 里可以嵌 agent，trigger 里可以嵌 agent，tool 里也可以嵌 agent。很多有意思的模式——比如 smart guard、adaptive watcher、seamless memory——因此不用另起一套框架，写几十行组合代码就够了。
+这是框架本身的有意设计：既然所有东西都是 Python，agent 和它的各个部分就都能当成值，塞进*别的*部分里。plugin 里可以嵌 agent，trigger 里可以嵌 agent，tool 里也可以嵌 agent。很多有意思的模式——比如 smart guard、adaptive watcher、seamless memory——因此不用另起一套框架，写几十行组合代码就够了。
 
 这一节有两篇文档：
 

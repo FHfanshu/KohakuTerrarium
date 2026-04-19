@@ -4,7 +4,7 @@
 
 MCP 是一种客户端-服务器协议，通过 stdio 或 HTTP 暴露工具（以及其他能力）。KohakuTerrarium 作为客户端运行：你在配置中注册一个服务器，框架会启动子进程或打开 HTTP 会话，服务器的工具就可以通过一组元工具从智能体中调用了。
 
-概念入门：[工具](../concepts/modules/tool.md) —— MCP 工具"只是工具"，只是动态暴露出来的。
+概念入门：[工具](./concepts/modules/tool.md) —— MCP 工具"只是工具"，只是动态暴露出来的。
 
 ## 在哪里声明 MCP 服务器
 
@@ -199,7 +199,7 @@ await manager.disconnect("sqlite")
 
 ## 参考
 
-- [英文 MCP 指南](../guides/mcp.md)
+- [MCP 指南](./mcp.md)
 - [配置写法](configuration)
-- [CLI 参考](../reference/cli.md) —— `kt config mcp`、`kt mcp list`
-- [工具概念](../concepts/modules/tool.md) —— 为什么 MCP 工具没有被特殊对待
+- [CLI 参考](./reference/cli.md) —— `kt config mcp`、`kt mcp list`
+- [工具概念](./concepts/modules/tool.md) —— 为什么 MCP 工具没有被特殊对待

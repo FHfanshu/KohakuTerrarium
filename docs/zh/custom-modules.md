@@ -339,7 +339,7 @@ assert env.output.all_text == "..."
 ## 排错
 
 - **找不到模块。** `module:` 路径是相对 creature 目录解析的。如果这里容易搞混，就直接写绝对路径。
-- **Tool 没进 prompt。** 跑一下 `kt info path/to/creature`。很多时候不是没加载，而是被静默拒掉了；先确认 `class_name` 写对。
+- **Tool 没进 prompt。** 跑一下 `kt info path/to/creature`。很多时候并非没加载，只是被静默拒掉了；先确认 `class_name` 写对。
 - **测试里写了 `needs_context=True`，但 `context` 是 `None`。** `TestAgentBuilder` 本来会给 context。要是你还需要 channels 或 scratchpad，记得再补 `.with_session(...)`。
 - **Trigger 不能恢复。** 在类上设 `resumable = True`，再实现 `to_resume_dict()`。
 

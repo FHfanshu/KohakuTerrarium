@@ -4,7 +4,7 @@
 
 相关命令有三个：`kt web`（前台 Web 服务器）、`kt app`（用 pywebview 打开的桌面窗口）、`kt serve`（脱离终端运行的守护进程）。三者共用同一套 FastAPI 后端和 Vue 前端，区别主要在运行方式和连接方式。
 
-先补个概念：[agent as a Python object](../concepts/python-native/agent-as-python-object.md)。服务层说白了只是核心运行时的另一种使用方式。
+先补个概念：[agent as a Python object](./concepts/python-native/agent-as-python-object.md)。服务层说白了只是核心运行时的另一种使用方式。
 
 ## 我该用哪个？
 
@@ -99,7 +99,7 @@ npm run dev --prefix src/kohakuterrarium-frontend
 - REST endpoint：`/api/agents`、`/api/terrariums`、`/api/creatures`、`/api/channels`、`/api/configs`、`/api/sessions`
 - WebSocket endpoint：流式聊天、channel 观察、日志 tail
 
-完整列表见[参考 / HTTP API](../reference/http.md)。
+完整列表见[参考 / HTTP API](./reference/http.md)。
 
 ## 排错
 
@@ -113,6 +113,6 @@ npm run dev --prefix src/kohakuterrarium-frontend
 ## 另见
 
 - 前端布局 —— UI 里有哪些面板和预设。
-- [参考 / HTTP API](../reference/http.md) —— REST 和 WebSocket endpoint。
-- [参考 / CLI](../reference/cli.md) —— `kt web`、`kt app`、`kt serve` 的参数说明。
+- [参考 / HTTP API](./reference/http.md) —— REST 和 WebSocket endpoint。
+- [参考 / CLI](./reference/cli.md) —— `kt web`、`kt app`、`kt serve` 的参数说明。
 - [ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md) —— 之后计划做的守护进程工作流。

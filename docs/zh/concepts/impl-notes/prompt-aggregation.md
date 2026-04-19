@@ -2,7 +2,7 @@
 
 ## 这个问题是什么
 
-agent 的“system prompt”并不是一整块字符串，而是几部分拼起来的：
+agent 的“system prompt”并非一整块字符串，而是由几部分拼起来的：
 
 - creature 的人格 / 角色
 - 可用工具列表（名称 + 描述）

@@ -6,7 +6,7 @@
 
 先补概念可以看：[组合代数](/zh/concepts/python-native/composition-algebra.md)、[把 agent 当成 Python 对象](/zh/concepts/python-native/agent-as-python-object.md)。
 
-什么时候适合用这个？你想把循环写在 creature 外面时，比如 writer ↔ reviewer 一直跑到通过，或者并行跑一组 agent，再从便宜模型一路回退到贵模型。要做共享 channel 的横向多 agent 系统，就用 [Terrarium](/zh/guides/terrariums.md)。
+什么时候适合用这个？你想把循环写在 creature 外面时，比如 writer ↔ reviewer 一直跑到通过，或者并行跑一组 agent，再从便宜模型一路回退到贵模型。要做共享 channel 的横向多 agent 系统，就用 [Terrarium](/zh/terrariums.md)。
 
 ## 操作符
 
@@ -175,7 +175,7 @@ result = await logged("input")
 
 ## 另见
 
-- [编程式用法](/zh/guides/programmatic-usage.md) —— 底层的 `Agent` / `AgentSession` API。
+- [编程式用法](/zh/programmatic-usage.md) —— 底层的 `Agent` / `AgentSession` API。
 - [概念 / 组合代数](/zh/concepts/python-native/composition-algebra.md) —— 设计思路。
 - [参考 / Python API](/zh/reference/python.md) —— `compose.core`、`compose.agent`、操作符签名。
 - [examples/code/](https://github.com/Kohaku-Lab/KohakuTerrarium/tree/main/examples/code) —— `review_loop.py`、`ensemble_voting.py`、`debate_arena.py`、`smart_router.py`、`pipeline_transforms.py`。

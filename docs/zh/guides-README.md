@@ -2,9 +2,9 @@
 
 这一组文档，主要是写给真要上手用 KohakuTerrarium 的人看的：不管你是想把它跑起来、拿它做东西，还是想往里扩展功能，这里都算是比较实用的入口。
 
-如果你现在最需要的是先把整个东西的脑回路搞明白，建议去看 [Concepts](../concepts/README.md)。
-如果你要查特别具体的字段、参数、命令选项或者函数签名，那就直接去 [Reference](../reference/README.md)。
-如果你更想有人带着你先走一遍、边做边熟悉，那就去 [Tutorials](../tutorials/README.md)。
+如果你现在最需要的是先把整个东西的脑回路搞明白，建议去看 [Concepts](./concepts/README.md)。
+如果你要查特别具体的字段、参数、命令选项或者函数签名，那就直接去 [Reference](./reference/README.md)。
+如果你更想有人带着你先走一遍、边做边熟悉，那就去 [Tutorials](./tutorials/README.md)。
 
 ## 建议先从这里看
 
@@ -43,6 +43,6 @@
 
 ## 还有这些也值得看
 
-- [Concepts](../concepts/README.md) —— 想知道为什么它会设计成这样，就去这。
-- [Reference](../reference/README.md) —— 当字典查，最全。
-- [Development](../dev/README.md) —— 如果你是想参与这个框架本身的开发，就看这里。
+- [Concepts](./concepts/README.md) —— 想知道为什么它会设计成这样，就去这。
+- [Reference](./reference/README.md) —— 当字典查，最全。
+- [Development](./dev/README.md) —— 如果你是想参与这个框架本身的开发，就看这里。

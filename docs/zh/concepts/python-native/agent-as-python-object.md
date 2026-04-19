@@ -68,7 +68,7 @@ await runtime.stop()
 
 ### 把 agent 放进 trigger 里（adaptive watcher）
 
-不是写死 `timer: 60s`，而是做一个自定义 trigger，在每次 `fire()` 时先跑一个小 agent。这个 agent 先看看当前状态，再决定要不要唤醒外层 creature。这样做出来的是会看情况的 watcher，不是固定规则。
+与其写死 `timer: 60s`，不如做一个自定义 trigger，在每次 `fire()` 时先跑一个小 agent。这个 agent 先看看当前状态，再决定要不要唤醒外层 creature。这样做出来的是会看情况的 watcher，不是固定规则。
 
 ### 把 agent 放进 tool 里（context-isolated specialist）
 
@@ -90,5 +90,5 @@ tool 被调用时，内部起一个全新的 agent 来干活。对 LLM 来说，
 
 - [Composition algebra](composition-algebra.md) —— 在 Python 侧拼 pipeline 的那套操作符。
 - [Patterns](../patterns.md) —— 这套能力能解锁的一些用法。
-- [guides/programmatic-usage.md](../../guides/programmatic-usage.md) —— 这页内容的任务导向版。
+- [guides/programmatic-usage.md](../../programmatic-usage.md) —— 这页内容的任务导向版。
 - [reference/python.md](../../reference/python.md) —— 函数签名和 API 索引。

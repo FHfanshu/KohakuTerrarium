@@ -3,8 +3,8 @@
 这里是包里 FastAPI 服务器对外开的所有 REST endpoint 和 WebSocket 通道（`kt web`、`kt serve`、`python -m kohakuterrarium.api.main`）。
 API 一方面给 Vue SPA 用，另一方面也适合那些想从进程外控制 agent 和 terrarium 的客户端。
 
-服务层和 session 存储的结构，见[会话持久化](/concepts/impl-notes/session-persistence.md)（英文）。
-如果你更关心面向任务的用法，见[程序化使用](/guides/programmatic-usage.md)（英文）和[前端布局](/guides/frontend-layout.md)（英文）。
+服务层和 session 存储的结构，见[会话持久化](/concepts/impl-notes/session-persistence.md)。
+如果你更关心面向任务的用法，见[程序化使用](/zh/programmatic-usage.md)和[前端布局](/zh/frontend-layout.md)。
 
 ## 服务器配置
 
@@ -579,7 +579,7 @@ API 一方面给 Vue SPA 用，另一方面也适合那些想从进程外控制 
 
 出站 frames：
 
-- `{"type": "activity", "activity_type": ..., "source", "ts", ...}` — `activity_type` 包括 `session_info`、`tool_call`、`tool_result`、`token_usage`、`job_update`、`job_completed` 等（见[Event types](/reference/http.md#event-types)（英文））。
+- `{"type": "activity", "activity_type": ..., "source", "ts", ...}` — `activity_type` 包括 `session_info`、`tool_call`、`tool_result`、`token_usage`、`job_update`、`job_completed` 等（见[Event types](/reference/http.md#event-types)）。
 - `{"type": "text", "content", "source", "ts"}` — 流式文本分片。
 - `{"type": "processing_start", "source", "ts"}`。
 - `{"type": "processing_end", "source", "ts"}`。

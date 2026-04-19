@@ -4,7 +4,7 @@
 
 一次 session 会把这次运行里的状态打成一个 `.kohakutr` 文件：对话、事件、子 agent 对话、channel 历史、scratchpad、jobs、可恢复的 triggers，还有配置元数据都在里面。你随时都可以停掉一个 creature，之后再从原地接着跑。
 
-先补概念： [memory and compaction](../concepts/modules/memory-and-compaction.md)、[session and environment](../concepts/modules/session-and-environment.md)。
+先补概念： [memory and compaction](./concepts/modules/memory-and-compaction.md)、[session and environment](./concepts/modules/session-and-environment.md)。
 
 ## `.kohakutr` 文件是什么
 
@@ -114,7 +114,7 @@ compact:
   compact_model: gpt-4o-mini  # 总结这一步用便宜模型
 ```
 
-Compaction 在后台跑（见 [concepts/modules/memory-and-compaction](../concepts/modules/memory-and-compaction.md)）。controller 不会停着等；新的摘要准备好之后，对话会切换过去。每次 compaction 也都会记成一条 event。
+Compaction 在后台跑（见 [concepts/modules/memory-and-compaction](./concepts/modules/memory-and-compaction.md)）。controller 不会停着等；新的摘要准备好之后，对话会切换过去。每次 compaction 也都会记成一条 event。
 
 手动 compact：
 
@@ -158,4 +158,4 @@ kt run @kt-biome/creatures/swe --no-session
 - [Memory](memory.md) —— 在 session 历史上做 FTS、语义搜索和混合搜索。
 - [Configuration](configuration.md) —— compaction 配法和 session 参数。
 - [Programmatic Usage](programmatic-usage.md) —— 自定义查看时用的 `SessionStore` API。
-- [Concepts / memory and compaction](../concepts/modules/memory-and-compaction.md) —— compaction 是怎么工作的。
+- [Concepts / memory and compaction](./concepts/modules/memory-and-compaction.md) —— compaction 是怎么工作的。

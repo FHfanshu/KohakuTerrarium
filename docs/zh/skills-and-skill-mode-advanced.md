@@ -1,6 +1,6 @@
 # skills、info 和 skill_mode 进阶说明
 
-这一页主要讲一件事：在 KT 里，**skill 不是工具本体，而是给模型看的“使用说明”**。
+这一页主要讲一件事：在 KT 里，**skill 并非工具本体，而是给模型看的“使用说明”**。
 
 很多人第一次看到 `skills`、`info`、`skill_mode` 这几个词，会很容易把它们和“工具开关”“插件系统”“MCP 连接”“安装包”混在一起。其实不是一回事。这篇就用大白话掰开说。
 
@@ -82,7 +82,7 @@ KT 里的 skill，和很多别的框架说的 skill，不是一个路子。
 
 > 在 dynamic 模式下，`info` 是模型“先翻说明书再动手”的入口。
 
-也就是说，它不是可有可无的小配角，而是工作流里很重要的一环。
+也就是说，它是工作流中至关重要的一环，绝非可有可无的小配角。
 
 ## skill_mode 是什么
 
@@ -308,8 +308,8 @@ skills 解决的是：**怎么把这些能力的说明交给模型**。
 
 ## 参考
 
-- [英文 Configuration](../guides/configuration.md)
-- [英文 Creatures](../guides/creatures.md)
-- [内建工具参考](../reference/builtins.md)
+- [Configuration](./configuration.md)
+- [Creatures](./creatures.md)
+- [内建工具参考](./reference/builtins.md)
 - [MCP 进阶](mcp-advanced)
 - [packages 进阶](packages-and-install-advanced)

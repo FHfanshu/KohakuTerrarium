@@ -158,5 +158,5 @@ terrarium:
 
 - [Terrarium 概念](../concepts/multi-agent/terrarium.md) —— terrarium 的约定边界。
 - [Root agent 概念](../concepts/multi-agent/root-agent.md) —— 面向用户的那个 creature。
-- [Terrariums 指南](../guides/terrariums.md) —— 更偏实操的参考文档。
+- [Terrariums 指南](../terrariums.md) —— 更偏实操的参考文档。
 - [Channel 概念](../concepts/modules/channel.md) —— `queue` 和 `broadcast` 的区别、observers，以及 channel 怎么跨模块。
