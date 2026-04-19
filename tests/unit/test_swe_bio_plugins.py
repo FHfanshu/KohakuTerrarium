@@ -11,6 +11,8 @@ PLUGIN_DIR = (
     / "examples"
     / "agent-apps"
     / "swe_bio_agent"
+    / "creatures"
+    / "swe_bio_agent"
     / "custom"
 )
 
@@ -158,7 +160,7 @@ async def test_audit_logger_writes_jsonl(tmp_path: Path):
 
 
 def test_swe_bio_agent_config_includes_humanizer_docs():
-    config = load_agent_config("examples/agent-apps/swe_bio_agent")
+    config = load_agent_config("examples/agent-apps/swe_bio_agent/creatures/swe_bio_agent")
     names = [s.name for s in config.subagents]
     assert "humanizer_docs" in names
     humanizer = next(s for s in config.subagents if s.name == "humanizer_docs")
