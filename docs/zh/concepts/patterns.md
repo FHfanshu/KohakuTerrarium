@@ -11,7 +11,7 @@
 
 **为什么能行。** channel 本质上就是一个具名队列。tool 往里写，trigger 从里读。两边互相不用感知对方。
 
-**适用场景。** 你想做横向多智能体协作，但不想把 `terrarium.yaml` 那一套搬进来。
+**适用场景。** 你想做横向多智能体协作，但不想把 `terrarium.yaml` 那一套搬进来；或者消息到底发不发、本轮发去哪儿，本来就是条件式决定的（比如批准还是打回、保留还是丢弃）。
 
 **最小配置。**
 
@@ -26,6 +26,27 @@ triggers:
     options:
       channel: chat
 ```
+
+## 1b. 用输出路由接确定性的流水线边
+
+**结构。** 某个 creature 在自己的配置里声明 `output_wiring:`，列出一个或多个目标 creature。这样每次它一轮结束，框架都会往每个目标的事件队列里塞一个 `creature_output` `TriggerEvent` —— 里面带的是它本轮最后的 assistant 文本；如果配了 `with_content: false`，那就只发一个生命周期 ping，不带正文。
+
+**为什么能行。** 这条线是在框架层接的：发送方不用调 tool，接收方也不用专门注册 trigger，中间也没有 channel。目标 creature 看到这个事件时，走的还是自己本来就在走的 `agent._process_event` 路径，和用户输入、timer 触发、channel 消息没什么本质不同。
+
+**适用场景。** 这条边本来就是确定性的——“A 每做完一轮，B 都该拿到它的结果”。如果是 reviewer / navigator 这种会看内容再决定走哪条边的角色，还是更适合上一种模式（channel），因为输出路由自己不会分支。
+
+**最小配置。**
+
+```yaml
+# terrarium.yaml 里的 creature 条目
+- name: coder
+  base_config: "@kt-biome/creatures/swe"
+  output_wiring:
+    - runner                              # 简写
+    - { to: root, with_content: false }   # 生命周期 ping
+```
+
+**和 channel 的区别。** channel 要靠 LLM 记得主动发；输出路由不管 LLM 记不记得，回合结束都会自动触发。两种机制可以在同一个 terrarium 里随便混用——kt-biome 的 `auto_research` 就是用输出路由串起那些棘轮式边（ideator → coder → runner → analyzer），再用 channel 处理 analyzer 的保留/丢弃分支和团队状态广播。
 
 ## 2. 用 plugin 里的 agent 做智能守门
 

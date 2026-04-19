@@ -40,7 +40,7 @@ terrarium:
         can_send:  [review]
 
     - name: reviewer
-      base_config: "@kt-biome/creatures/reviewer"
+      base_config: "@kt-biome/creatures/general"
       system_prompt: |
         You critique drafts. When you receive a message on `review`,
         reply with one or two concrete improvement suggestions on
@@ -81,37 +81,78 @@ TUI 打开后，每个 creature 一页，每个 channel 也有一页。`--seed` 
 
 你可以看 channel 标签页里的原始消息流，也可以看 creature 标签页里各自的推理过程。
 
-## 第 5 步：先认清它现在的限制
+## 第 5 步：把交接改成更稳的输出路由
 
-横向多 agent 现在有个很实际的失败点：**每个 creature 得真的把输出发到对的 channel，流程才能往下走。** 如果模型忘了调用 `send_message`，那个 channel 就是空的，整组协作会卡住。
+channel 很适合做条件式 / 可选式 / 广播式消息流——比如 reviewer 到底是“通过”还是“打回重写”，这确实是一个应该留在 channel 里的分支判断。但 writer → reviewer 这条边，其实是**确定性的**：writer 每次一轮结束，reviewer 都应该看到它刚写出来的内容。继续依赖 writer 的 LLM 记得调用 `send_message("review", ...)`，就是这类拓扑最常见的故障点。
 
-现在能用的办法主要有两个：
+框架现在提供了一个更直接的办法：**输出路由**。你在 creature 配置里把这条边声明出来，runtime 就会在回合结束时，直接往目标 creature 的事件队列里塞一个 `creature_output` 事件——两边都不需要自己调 `send_message`。
 
-1. **把提示词写得更硬一点。** 直接告诉 creature 该往哪个 channel 发、什么时候发。上面那段内联 prompt 就是在干这个。
-2. **加一个 root agent。** root creature 在 terrarium 外面，手里有管理 terrarium 的工具。它接收用户输入，给团队播种子，观察各个 channel，哪个 creature 卡住了就推一把。可以看 `@kt-biome/creatures/root` 和 `swe_team` 这个 terrarium。具体模式见 [Root agent 概念](../concepts/multi-agent/root-agent.md)。
+把 `terrariums/writer-team.yaml` 改成这样：
 
-例子：加一个 root
+```yaml
+terrarium:
+  name: writer_team
+  creatures:
+    - name: writer
+      base_config: "@kt-biome/creatures/general"
+      system_prompt: |
+        You write short product copy. You receive a brief on `tasks`
+        and a critique on `feedback`. When you receive feedback, revise
+        your draft based on it.
+      output_wiring:
+        - reviewer                # 每次 writer 回合结束 -> reviewer
+      channels:
+        listen: [tasks, feedback]
+        can_send: []              # 不再需要自己往 `review` 发
+    - name: reviewer
+      base_config: "@kt-biome/creatures/general"
+      system_prompt: |
+        You are a strict reviewer. The writer's draft will arrive as a
+        creature_output event. If the draft is good, send "APPROVED:
+        <draft>" on `feedback`. If not, send specific revision requests
+        on `feedback`.
+      channels:
+        listen: []                # writer 的输出通过 wiring 收到
+        can_send: [feedback]      # reviewer 的决定是条件式的，继续放 channel
+  channels:
+    tasks:    { type: queue }
+    feedback: { type: queue }
+```
+
+这次改动里最关键的点：
+
+- writer 的 `output_wiring: [reviewer]`，取代了原来 writer 主动往 `review` channel 发消息这件事。
+- `review` channel 整条边都删掉了，因为这段交接现在由框架自动接线。
+- reviewer 依然用 `feedback` 这个 channel 回给 writer，因为“通过还是修改”本来就是条件分支，输出路由自己不会分支。
+
+现在再跑一次，这个来回会稳很多：即使 writer 没有记得调用 `send_message`，输出路由也照样会在每轮结束时自动触发。
+
+## 第 6 步：需要交互入口的话，再加 root（可选）
+
+有了 channel + 输出路由，你已经有一个能自己协作的无头小团队了。如果你还想要一个统一的对话入口——用户只跟一个 agent 说话，由它去驱动整个团队——那就再加一个 **root**：
 
 ```yaml
 terrarium:
   name: writer_team
   root:
-    base_config: "@kt-biome/creatures/root"
-  # ... creatures and channels as before
+    base_config: "@kt-biome/creatures/general"
+    system_prompt_file: prompts/root.md   # 这个团队专用的委派 prompt
+  creatures:
+    - ...
 ```
 
-这样一来，TUI 主标签页挂的就是 root agent。你直接和它说话，它再通过 terrarium 工具去调度 writer 和 reviewer。
+在 terrarium yaml 旁边新建一份 `prompts/root.md`。它主要写委派风格和团队口吻就够了；框架会自动补上一段团队拓扑说明，把有哪些 creatures、有哪些 channels 写进去，同时还会强制注入 terrarium 管理工具（`terrarium_send`、`creature_status`、`terrarium_history` 等）。
 
-## 第 6 步：terrarium 接下来会补什么
-
-自动路由（可配置成“creature 的最后一条消息总是发到 channel X”）、root 的生命周期观察、动态 creature 管理，这些都在路线图里。现在它们还没落地，所以只要事情重要，最好还是用明确 prompt，或者直接上 root creature。完整说明见 [ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md) 里的 terrarium 部分。
+这样一来，TUI 主标签页挂的就是 root。你直接跟 root 说话，root 再去驱动 writer 和 reviewer。更完整的模式说明见 [Root agent 概念](../concepts/multi-agent/root-agent.md)。
 
 ## 你学到了什么
 
 - terrarium 只负责接线，不负责思考。
-- creatures 还是各自独立；terrarium 只是规定谁能听见什么、谁能往哪发消息。
-- 横向多 agent 现在能用，但不自动；路由主要靠 prompt，常见故障就是卡住不动。
-- 如果你想要一个面向用户的总控，实用做法还是加一个 root creature。
+- creatures 还是各自独立；terrarium 只是规定谁能听见什么、谁能往哪发消息，以及谁的回合结束输出要自动流向谁。
+- 横向协作现在有两种机制，而且可以混着用：
+  - **channel** —— 适合条件分支、可选消息、广播。
+  - **输出路由** —— 适合确定性的流水线边；每轮结束自动触发，不依赖 creature 自己记得发。
+- root 是可选的。做无头工作流可以不要；想给用户一个统一入口，就加上它。
 
 ## 接下来可以看什么
 

@@ -19,9 +19,9 @@
 ```yaml
 terrarium:
   root:
-    base_config: "@kt-biome/creatures/root"
+    base_config: "@kt-biome/creatures/general"
+    system_prompt_file: prompts/root.md     # 和这个团队放在一起的委派 prompt
     controller:
-      llm: gpt-5.4
       reasoning_effort: high
   creatures:
     - ...
@@ -29,11 +29,18 @@ terrarium:
     - ...
 ```
 
-agent 配置里合法的内容，都可以放进 `root:`。继承（`base_config`）的行为也一样。运行时只有这几点不同：
+agent 配置里合法的内容，都可以放进 `root:`。继承（`base_config`）的行为也一样。
 
-- terrarium runtime 会把管理工具集注入它的 registry。
-- 它会自动监听每个 creature channel，所以能看到全部活动。
+补一句写法上的约定：kt-biome **没有**提供一个通用的 `root` creature。每个 terrarium 自己带自己的 `root:` 配置块，以及旁边那份 `prompts/root.md`。这样 prompt 就可以直接写团队内部的真名字，比如“写代码就发给 `driver`”，读起来会比“发给那个 SWE creature”自然很多。剩下的通用能力都由框架补上。
+
+无论你在配置里怎么写，运行时 root 都会被框架额外做这几件事：
+
+- terrarium runtime 会把管理工具集（`terrarium_create`、`terrarium_send`、`creature_start`、`creature_stop`、`creature_status`、`terrarium_status` 等）注入它的 registry。
+- 它会自动监听每个 creature channel，所以能看到全部团队活动。
+- 框架会自动生成一段“terrarium 感知”prompt，列出这个 terrarium 里绑定了哪些 creatures 和 channels，并追加到 root 的 system prompt 后面。
 - 用户直接和它交互（TUI / CLI / web）。
+
+所以你的 `prompts/root.md` 主要只需要写委派风格、团队口吻这些内容；团队拓扑认知由框架自动提供。
 
 ## 我们怎么实现它
 

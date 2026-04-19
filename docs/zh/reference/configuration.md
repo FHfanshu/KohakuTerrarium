@@ -50,6 +50,7 @@
 | `plugins` | list | `[]` | 否 | 生命周期插件。见 [Plugins](#plugins)。 |
 | `no_inherit` | list[str] | `[]` | 否 | 这些键会直接替换 base 值，而不是合并。例如 `[tools, subagents]`。 |
 | `memory` | dict | `{}` | 否 | `memory.embedding.{provider,model}`。见 [Memory](#memory)。 |
+| `output_wiring` | list | `[]` | 否 | 每个 creature 的自动回合输出路由。见 [输出路由](#输出路由)。 |
 
 ### Controller 块
 
@@ -165,6 +166,40 @@ tools:
 | `target` | float | `0.5` | 压缩后的目标比例。 |
 | `keep_recent_turns` | int | `5` | 原样保留的最近轮数。 |
 | `compact_model` | str | controller's model | 用于总结压缩的 LLM；可覆盖默认值。 |
+
+### 输出路由
+
+这是一个框架层的路由列表。每当 creature 一轮结束，框架都会构造一个 `creature_output` `TriggerEvent`，直接推到每个目标 creature 的事件队列里，完全绕过 channel。关于用法上的讨论，见 [Terrariums 指南里的输出路由](/zh/terrariums.md#输出路由) 和 [patterns.md 里的模式 1b](/zh/concepts/patterns.md)；这里主要讲配置本身。
+
+每个条目的字段：
+
+| 字段 | 类型 | 默认值 | 说明 |
+|---|---|---|---|
+| `to` | str | — | 目标 creature 名，或者特殊字符串 `"root"`。 |
+| `with_content` | bool | `true` | 如果是 `false`，事件里的 `content` 会是空字符串，只发元数据 ping。 |
+| `prompt` | str \| null | `null` | 接收侧 prompt override 的模板。不填时，会根据 `with_content` 套默认模板。 |
+| `prompt_format` | `simple` \| `jinja` | `"simple"` | `simple` 用 `str.format_map`；`jinja` 用 `prompt.template` 的渲染器，适合条件和过滤。 |
+
+两个格式都能用的模板变量有：`source`、`target`、`content`、`turn_index`、`source_event_type`、`with_content`。
+
+简写规则：如果直接写字符串，就等价于 `{to: <str>, with_content: true}`：
+
+```yaml
+output_wiring:
+  - runner                                   # 简写
+  - { to: root, with_content: false }        # 生命周期 ping
+  - to: analyzer
+    prompt: "[From coder] {content}"         # simple（默认）
+  - to: critic
+    prompt: "{{ source | upper }}: {{ content }}"
+    prompt_format: jinja
+```
+
+几点说明：
+
+- 只有 creature 运行在 terrarium 里时，这个配置才真的有意义。单独运行的 creature 就算配了 `output_wiring`，也不会真的发出去（resolver 是 terrarium runtime 挂上的；独立 agent 只会拿到一个 no-op resolver，并记录一次日志）。
+- 目标不存在，或者目标已经停了，只会记日志并跳过，不会把异常往源 creature 的回合收尾流程里抛。
+- 源 creature 的 `_finalize_processing` 会直接收尾完成；每个目标的 `_process_event` 都在自己的 `asyncio.Task` 里跑，所以接收方慢，不会反过来卡住发送方。
 
 ### Termination
 
@@ -313,7 +348,7 @@ Terrarium 字段汇总：
 | `creatures` | list | `[]` | 在 terrarium 内运行的 creatures。 |
 | `channels` | dict | `{}` | 共享 channel 声明。 |
 
-Creature 条目字段：
+Creature 条目字段（这里也可以直接内联任何 AgentConfig 字段，比如 `system_prompt_file`、`controller`、`output_wiring` 等）：
 
 | 字段 | 类型 | 默认值 | 说明 |
 |---|---|---|---|
@@ -323,6 +358,7 @@ Creature 条目字段：
 | `channels.can_send` | list[str] | `[]` | 这个 creature 可以发布到的 channels。 |
 | `output_log` | bool | `false` | 按 creature 捕获 stdout。 |
 | `output_log_size` | int | `100` | 每个 creature 日志缓冲区的最大行数。 |
+| `output_wiring` | list | `[]` | 框架级自动投递：把这个 creature 的回合结束输出自动送给别的 creatures。条目格式见 [输出路由](#输出路由)。 |
 
 Channel 条目字段：
 

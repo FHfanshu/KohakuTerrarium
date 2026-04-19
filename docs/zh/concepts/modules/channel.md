@@ -42,6 +42,17 @@ channel 都放在 `ChannelRegistry` 里。creature 的私有 session 有一个 r
 - **不打断的调试。** 用 `ChannelObserver` 旁听一个队列，真正的消费者照常消费。
 - **跨 creature 会合。** 两个 creature 同时监听一个共享 channel，就可以轮流处理里面的条目。
 
+## Channels 和输出路由怎么选
+
+Channels 并不是 creatures 之间通信的唯一方式。现在还有一个并行机制：**输出路由**。它会在每轮结束时，直接往目标 creature 的事件队列里塞一个 `creature_output` `TriggerEvent`，两边都不用自己调 `send_message`。
+
+怎么选：
+
+- **Channels** —— 适合条件分支（批准还是打回）、群聊、广播状态、晚点发也行/可选的消息流，以及旁听观察。是否发送、发去哪里，由 creature 自己决定。
+- **输出路由** —— 适合确定性的流水线边，比如“runner 的输出永远都要交给 analyzer”。它是声明式配置，回合结束自动触发。
+
+一个 terrarium 里完全可以两种一起用。详见 [terrarium](/zh/concepts/multi-agent/terrarium.md) 和 [terrariums 指南里的输出路由](/zh/terrariums.md#输出路由)。
+
 ## 别把它看得太死
 
 单独跑的 creature 完全可以没有 channel。它的 tool 不发 `send_message`，trigger 也不用监听。channel 不是那条主线里的一级模块，只是框架给你准备好的一种约定。很多 multi-agent 场景转一圈，最后还是会用到它。

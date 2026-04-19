@@ -36,6 +36,8 @@ trigger manager 会给每个已注册 trigger 起一个后台 task。每个 task
 - **`webhook` / `http`** —— 接收 POST 请求。
 - **`monitor`** —— 当某个针对 scratchpad / context 的谓词变成 true 时触发。
 
+接收侧常见的 `TriggerEvent` 类型还包括：`user_input`（来自 input 模块）、`timer`、`channel_message`（来自 channel trigger）、`tool_complete`、`subagent_output`、`creature_output`（另一个 creature 通过 `output_wiring` 在回合结束自动送来的输出——这是框架发的，不是某个模块自己触发的），以及 `error`。
+
 `TriggerManager`（`core/trigger_manager.py`）负责这些运行中的 task，把完成事件接回 agent 的事件回调里，并把 trigger 状态持久化到 session store，这样 `kt resume` 才能把它们重新建起来。
 
 配置期 trigger 写在 `config.triggers[]` 里。运行时 trigger 也可以由 agent 自己安装——每个通用 trigger 类（`universal = True` 并带 `setup_*` 元数据）都会被包成自己的 tool，比如 `add_timer`、`watch_channel`、`add_schedule`。只要 creature 在 `tools: [{ name: add_timer, type: trigger }]` 里列出来，LLM 就能自己装。程序里也可以直接 `agent.add_trigger(...)`。
@@ -43,7 +45,7 @@ trigger manager 会给每个已注册 trigger 起一个后台 task。每个 task
 ## 你能拿它做什么
 
 - **周期性 agent。** 配一个每小时触发的 `timer`，让 creature 定时刷新文件系统视图或一组指标。
-- **跨 creature 连线。** `channel` trigger 是 [terrarium](/zh/concepts/multi-agent/terrarium.md) 真正能跑起来的关键机制。
+- **跨 creature 连线。** `channel` trigger 是基于 channel 的 terrarium 通信关键机制。对于那种确定性的流水线边，框架还会在 creature 声明了 `output_wiring` 时，于回合结束自动发出 `creature_output` 事件；见 [terrarium](/zh/concepts/multi-agent/terrarium.md)。
 - **空闲后总结。** 配一个两分钟静默后触发的 `idle`，让它去调 `summarize` sub-agent，再把结果发到日志 channel。
 - **接外部信号。** `webhook` trigger 能把 creature 变成 CI hook、部署事件或上游产品流量的接收端。
 - **自适应 watcher。** 你可以写一个自定义 trigger，让它的 `fire()` 里再跑一个小 nested agent，由判断来决定**什么时候**唤醒外层 creature，而不是硬编码规则。见 [patterns](/zh/concepts/patterns.md)。

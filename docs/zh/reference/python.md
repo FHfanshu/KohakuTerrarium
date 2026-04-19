@@ -881,7 +881,7 @@ Protocol / `BaseTool` 基类。
 from kohakuterrarium.compose import agent, pure
 
 async with await agent("@kt-biome/creatures/swe") as swe:
-    async with await agent("@kt-biome/creatures/reviewer") as reviewer:
+    async with await agent("@kt-biome/creatures/researcher") as reviewer:
         pipeline = swe >> pure(extract_code) >> reviewer
         result = await pipeline("Implement feature")
 ```

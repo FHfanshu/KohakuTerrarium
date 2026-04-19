@@ -40,9 +40,13 @@ CrewAI、AutoGen 和 MetaGPT 做的是这一类。
 
 真要上 terrarium，通常得满足两个条件：你确实要让*不同的 creatures* 协作；流程也已经稳定到能写成一张拓扑图。
 
-## 老实说
+## 现在的定位，实话实说
 
-Terrarium 这一层还比较粗糙。现在最明显的问题是，流程能不能继续，取决于 creatures 能不能把自己的输出送到对的地方。模型一旦没按指令来，terrarium 就可能卡住。[ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md) 里写了接下来要补的东西，比如可配置的轮次路由、root 生命周期观察和动态管理。这块还在实验阶段。能用 sub-agent，就先用 sub-agent。
+我们现在把 terrarium 看成一种**横向多智能体的候选架构**。今天已经能拼起来跑的东西包括：用 channel 处理可选/条件式消息流，用**输出路由**处理确定性的流水线边（也就是 creature 一轮结束后的文本由框架自动送进目标 creature 的事件队列，不用自己 `send_message`），再加上热插拔、观察能力，以及给 root 的生命周期信号。kt-biome 里的 `auto_research`、`deep_research`、`swe_team`、`pair_programming` 这些 terrarium，都已经在完整走这套。
+
+我们还在继续摸索的，是“到底该怎么用起来最顺手”：什么时候该优先用输出路由、什么时候该继续用 channel；条件分支怎么表达才不用手搓一堆 channel plumbing；UI 里怎么把输出路由的活动显示得跟 channel 流量一样直观。这些开放问题都记在 [ROADMAP](https://github.com/Kohaku-Lab/KohakuTerrarium/blob/main/ROADMAP.md) 里。
+
+真的需要*不同 creatures* 协作时，就用 terrarium。任务如果本质上只是一个 creature 内部自然拆阶段，那还是 sub-agent 更简单。框架不会替你二选一。
 
 ## 这一节包含什么
 
