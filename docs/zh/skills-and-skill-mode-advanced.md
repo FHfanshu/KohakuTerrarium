@@ -9,9 +9,49 @@
 你可以先这样记：
 
 - **工具 / 子智能体**：真正能干活的东西
-- **skill**：告诉模型“这个东西怎么用”的文档
+- **skill**：告诉模型“遇到某类任务该怎么做”的 SOP（标准操作程序）或使用说明
 - **info**：按名字去把这份文档读出来
 - **skill_mode**：决定这份文档是“一开始就塞进 prompt”，还是“需要时再读”
+
+## "skills" 到底是什么？
+
+在像 Claude Code、OpenCode、OpenClaw 以及本框架（KT）里，**skills 本质上都可以理解成：“给 AI agent 用的、可复用的任务模块/说明书包”**。它不是模型权重，不是新微调模型，也不只是单条 prompt。
+
+更准确一点说，skill 通常是一个**文件夹**或**文件**（比如 `SKILL.md` 或框架内置文档），用来告诉 agent：
+- 这个 skill 叫什么
+- 什么时候该用它
+- 用它时要按什么步骤做
+- 需要时还能带哪些参考资料、模板文件
+
+你可以把它和下面几样区分开：
+
+**1. skill ≠ 普通 prompt**
+普通 prompt 是一次性说一句话。
+skill 是“结构化、可复用的工作指南”，带有元信息供 agent 按需检索。
+
+**2. skill ≠ rules / AGENTS.md / CLAUDE.md**
+rules 更像“长期人格和通用行为约束”（比如“不要用 Markdown 加粗”）。
+skill 更像“专门针对某类特定任务的流程”（比如“发布 PR 时的标准检查单”）。
+当一段通用 rule 内容已经变成“长篇操作流程”而不是“事实说明”时，就该拆成 skill。
+
+**3. skill ≠ MCP server / tool**
+MCP / tools 是“能力接口”，比如读文件、调浏览器、查数据库。
+skill 是“怎么用这些工具去完成某类任务的方法论”。
+简单说：**tool/MCP = 手和脚；skill = 工作 SOP / 作战手册。**
+
+**4. skill ≠ agent**
+agent 是一个完整助手角色，可以有自己的 prompt、模型、权限。
+skill 更像 agent 可挂载的“技能包”，agent 根据当前任务按需调取对应的 skill。
+
+一句话抓重点：
+> **skills 就是把“某类任务该怎么做”封装成一个懒加载的模块，让 agent 在合适的时候自动或手动调用。**
+
+直观例子：
+- `write-docx` skill：教 agent 按某公司的格式写 Word 文档。
+- `debug` skill：教 agent 排查 bug 时先收集什么、再验证什么。
+- `github` skill：教 agent 如何安全地操作 GitHub 流程。
+
+了解了它在业界的本质含义后，下面讲讲它在 KohakuTerrarium 里是怎么落地的。
 
 如果你先把这四个东西分开，后面基本就不容易绕晕。
 
